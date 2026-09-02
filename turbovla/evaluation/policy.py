@@ -248,14 +248,16 @@ def get_libero_dummy_action() -> list[float]:
 
 
 def _checkpoint_state_dict(checkpoint: Any) -> dict[str, torch.Tensor]:
-    if isinstance(checkpoint, dict):
-        for key in ("model_state_dict", "model", "state_dict"):
-            value = checkpoint.get(key)
-            if isinstance(value, dict):
-                return value
-    if isinstance(checkpoint, dict):
-        return checkpoint
-    raise TypeError(f"Unsupported checkpoint type: {type(checkpoint)}")
+    if not isinstance(checkpoint, dict):
+        raise TypeError(f"Unsupported checkpoint type: {type(checkpoint)}")
+
+    ema_state = checkpoint.get("ema_model_state_dict")
+    if not isinstance(ema_state, dict):
+        raise KeyError(
+            "LIBERO evaluation requires `ema_model_state_dict` in the checkpoint; "
+            "the raw `model_state_dict` is not used"
+        )
+    return ema_state
 
 
 def _strip_module_prefix(state_dict: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
