@@ -1,0 +1,111 @@
+{
+  "contract_version": "0.1.0",
+  "platform": "kr260-k26",
+  "inference_location": "fpga_pl",
+  "batch_size": 1,
+  "views": 1,
+  "image": {
+    "shape": [1, 1, 3, 128, 128],
+    "layout": "N V C H W",
+    "input_dtype": "uint8",
+    "input_range": [0, 255],
+    "preprocess": {
+      "output_dtype": "int8",
+      "channel_order": "RGB",
+      "mean": [0.485, 0.456, 0.406],
+      "std": [0.229, 0.224, 0.225],
+      "quantization": "symmetric_per_tensor"
+    }
+  },
+  "language": {
+    "input": {
+      "name": "instruction_id",
+      "dtype": "uint16",
+      "shape": [1],
+      "valid_range": [0, 65534],
+      "invalid_value": 65535
+    },
+    "embedding": {
+      "shape": [1, 128],
+      "dtype": "int8",
+      "layout": "N D",
+      "source": "offline_bert_teacher_embedding_table",
+      "quantization": "symmetric_per_tensor"
+    }
+  },
+  "state": {
+    "shape": [1, 8],
+    "layout": "N D",
+    "input_dtype": "int16",
+    "quantization": "symmetric_per_tensor",
+    "normalization": "libero_state_v1"
+  },
+  "visual_tokens": {
+    "shape": [1, 32, 128],
+    "layout": "N T D",
+    "dtype": "int8",
+    "quantization": "symmetric_per_tensor"
+  },
+  "fusion": {
+    "layers": 2,
+    "mode": "gated_fusion",
+    "hidden_dim": 128,
+    "language_tokens": 1,
+    "visual_tokens": 32,
+    "dtype": "int8",
+    "accumulator_dtype": "int32"
+  },
+  "action": {
+    "shape": [1, 12, 7],
+    "layout": "N H A",
+    "model_dtype": "int8",
+    "accumulator_dtype": "int32",
+    "output_dtype": "float32",
+    "normalization": "libero_action_v1",
+    "range": [-1.0, 1.0]
+  },
+  "quantization": {
+    "weights": "int8_symmetric_per_tensor",
+    "activations": "int8_symmetric_per_tensor",
+    "accumulator": "int32",
+    "scale_storage": "float32",
+    "zero_point": 0
+  },
+  "buffers": {
+    "image": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
+    "state": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
+    "instruction_id": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
+    "action": {"direction": "pl_to_ps", "alignment_bytes": 64, "cache": "invalidate_after_dma"}
+  },
+  "registers": {
+    "control": {"offset": "0x00", "width_bits": 32, "write": ["start", "soft_reset"]},
+    "status": {"offset": "0x04", "width_bits": 32, "read": ["idle", "busy", "done", "error"]},
+    "error_code": {"offset": "0x08", "width_bits": 32, "read": true},
+    "contract_version": {
+      "offset": "0x0C",
+      "width_bits": 32,
+      "read": true,
+      "encoding": "major_minor_patch_8_8_16",
+      "value": "0x00010000"
+    },
+    "image_addr_lo": {"offset": "0x10", "width_bits": 32, "write": true},
+    "image_addr_hi": {"offset": "0x14", "width_bits": 32, "write": true},
+    "state_addr_lo": {"offset": "0x18", "width_bits": 32, "write": true},
+    "state_addr_hi": {"offset": "0x1C", "width_bits": 32, "write": true},
+    "instruction_addr_lo": {"offset": "0x20", "width_bits": 32, "write": true},
+    "instruction_addr_hi": {"offset": "0x24", "width_bits": 32, "write": true},
+    "action_addr_lo": {"offset": "0x28", "width_bits": 32, "write": true},
+    "action_addr_hi": {"offset": "0x2C", "width_bits": 32, "write": true},
+    "instruction_id": {"offset": "0x30", "width_bits": 32, "write": true},
+    "frame_sequence": {"offset": "0x34", "width_bits": 32, "write": true},
+    "error_clear": {"offset": "0x38", "width_bits": 32, "write": true}
+  },
+  "errors": {
+    "none": 0,
+    "invalid_instruction_id": 1,
+    "invalid_buffer": 2,
+    "dma_timeout": 3,
+    "kernel_fault": 4,
+    "contract_mismatch": 5
+  }
+}
