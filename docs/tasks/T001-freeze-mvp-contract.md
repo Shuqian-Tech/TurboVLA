@@ -13,7 +13,7 @@
 - 当前分支：`task/T001-freeze-mvp-contract`
 - KR260 SSH：`ubuntu@192.168.68.123`，待执行只读连通性验证
 - Hardware Manager：用户已确认已连接，待硬件任务开始前验证 active target/device
-- PR：尚未创建
+- PR：blocked，当前 GitHub 身份无权 push `H-EmbodVis/TurboVLA`
 
 ## 验证记录
 
@@ -33,6 +33,7 @@
 - 类型/边界检查：固定 dtype、shape、stride、buffer ownership、错误码和 contract version encoding 已明确
 - 阻塞项：Vivado 本地安装路径无效；不影响 T001 contract 验证，但阻塞后续硬件综合任务
 - 结论：T001 可进入 `in_review`，待独立 PR 创建并由 reviewer 确认后才能 `accepted/done`
+- PR 阻塞证据：`git push -u origin task/T001-freeze-mvp-contract` 返回 `Permission to H-EmbodVis/TurboVLA.git denied to frankdede`
 
 ## 任务要求
 

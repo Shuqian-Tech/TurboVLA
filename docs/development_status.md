@@ -36,6 +36,7 @@
 - 尚未确认 Vivado 版本和可用的 PetaLinux/Ubuntu runtime；KR260 SSH 地址已记录，Hardware Manager 连接由用户确认但尚未本地验证。
 - 尚未拥有 TurboVLA-Lite 的训练 checkpoint 和 instruction embedding table。
 - 尚未建立第一个 Vivado KR260 工程和 post-route baseline。
+- T001 独立 PR 被 GitHub 权限阻塞：当前身份 `frankdede` 无法 push 到 `H-EmbodVis/TurboVLA`。
 
 ## 状态规则
 
