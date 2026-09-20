@@ -1,6 +1,5 @@
 #include "gemm.h"
 
-#include <array>
 #include <cstdint>
 #include <iostream>
 
@@ -20,34 +19,32 @@ bool check_equal(const std::int8_t* actual, const std::int8_t* expected, int cou
 }  // namespace
 
 int main() {
-  constexpr std::array<std::int8_t, 6> a{1, -2, 3, 4, 5, -6};
-  constexpr std::array<std::int8_t, 6> b{2, 1, -1, 3, 4, -2};
-  constexpr std::array<std::int32_t, 2> bias{1, -3};
-  std::array<std::int8_t, 4> output{};
-  constexpr std::array<std::int8_t, 4> expected{17, -14, -20, 28};
-  if (turbovla::hls::gemm_int8(a.data(), b.data(), bias.data(), output.data(), 2, 2, 3, 1.0f, false) !=
-      turbovla::hls::GemmStatus::kOk) {
+  const std::int8_t a[6] = {1, -2, 3, 4, 5, -6};
+  const std::int8_t b[6] = {2, 1, -1, 3, 4, -2};
+  const std::int32_t bias[2] = {1, -3};
+  std::int8_t output[4] = {};
+  const std::int8_t expected[4] = {17, -14, -20, 28};
+  if (turbovla_gemm_int8(a, b, bias, output, 2, 2, 3, 1.0f, false) != 0) {
     return 1;
   }
-  if (!check_equal(output.data(), expected.data(), 4, "gemm")) {
+  if (!check_equal(output, expected, 4, "gemm")) {
     return 2;
   }
 
-  std::array<std::int8_t, 2> conv_output{};
-  constexpr std::array<std::int8_t, 2> conv_expected{5, 11};
-  constexpr std::array<std::int8_t, 4> conv_input{1, 2, 3, 4};
-  constexpr std::array<std::int8_t, 2> conv_weights{1, 2};
-  constexpr std::array<std::int32_t, 1> conv_bias{0};
-  if (turbovla::hls::conv1x1_int8(conv_input.data(), conv_weights.data(), conv_bias.data(), conv_output.data(), 2,
-                                  2, 1, 1.0f, false) != turbovla::hls::GemmStatus::kOk) {
+  std::int8_t conv_output[2] = {};
+  const std::int8_t conv_expected[2] = {5, 11};
+  const std::int8_t conv_input[4] = {1, 2, 3, 4};
+  const std::int8_t conv_weights[2] = {1, 2};
+  const std::int32_t conv_bias[1] = {0};
+  if (turbovla_conv1x1_int8(conv_input, conv_weights, conv_bias, conv_output, 2,
+                            2, 1, 1.0f, false) != 0) {
     return 3;
   }
-  if (!check_equal(conv_output.data(), conv_expected.data(), 2, "conv1x1")) {
+  if (!check_equal(conv_output, conv_expected, 2, "conv1x1")) {
     return 4;
   }
 
-  if (turbovla::hls::gemm_int8(a.data(), b.data(), bias.data(), output.data(), 0, 2, 3, 1.0f, false) !=
-      turbovla::hls::GemmStatus::kInvalidShape) {
+  if (turbovla_gemm_int8(a, b, bias, output, 0, 2, 3, 1.0f, false) != 1) {
     return 5;
   }
   std::cout << "gemm/conv C simulation passed\n";

@@ -16,7 +16,7 @@
 
 当前执行任务：[T012：最终 thermo-nuclear 审查与发布归档](../tasks/T012-final-acceptance.md)
 
-执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（发布 manifest 和审查报告已生成）。Sprint 2 Vivado post-route 门仍待工具恢复。
+执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（发布 manifest 和审查报告已生成）。Sprint 2 旧 Vivado baseline 已通过；当前 `tanh_q15` 修正后的全量重建待另一台机器执行。
 
 ## 进入条件
 

@@ -14,26 +14,28 @@
 - report template：`hardware/vivado_kr260/report_manifest.template.json`
 - report archive：`hardware/vivado_kr260/reports/`
 - validator：`tools/validate_vivado_baseline.py`
-- 当前状态：模板通过 `--allow-not-run` 静态校验；真实 synthesis/implementation/post-route 尚未执行
+- 当前状态：真实 KR260/K26 baseline 已归档；它早于 `tanh_q15` 负数插值修正，结果 manifest 已标记 `rebuild_required`
 - 硬件 bring-up：`not_run`
 
 ## 验证记录
 
-- `python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.template.json --allow-not-run`：通过
+- `python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.json`：通过
 - 默认校验会拒绝模板的 `not_run` timing/utilization/power/CDC 状态：符合 T008 门禁
 - `ruff check tools/validate_vivado_baseline.py`：通过
-- `vivado -version`：失败，wrapper 指向不存在的 `/home/frank/AMDDesignTools/2026.1/Vivado/bin/vivado`
-- bitstream、XSA、post-route timing、utilization、power、CDC：`not_run`
+- `vivado -version`：通过，wrapper 已指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado/bin/vivado`（v2025.1）
+- `vivado -mode batch -source hardware/vivado_kr260/build.tcl -nolog -nojournal -notrace`：通过；完整日志：`/tmp/turbovla-vivado-build-final.log`
+- bitstream、XSA、post-route timing、utilization、power、CDC：通过；WNS `3.512 ns`、TNS `0`、WHS `0.010 ns`、THS `0`、power `2.742 W`、CDC critical `0`
+- 当前源码全量 Vivado 重建：本机在 block-design generation 后按用户要求停止，以释放内存；待另一台机器执行
 
 ## Thermo-Nuclear Review（中间审查）
 
 - review 时间：2026-09-19
 - reviewer：Codex
-- review 结果：`PASS_WITH_TOOLCHAIN_GATE`
+- review 结果：`PASS_WITH_PR_GATE`
 - 结构检查：报告模板、归档说明和 validator 分离；无巨型 Tcl 或临时条件分支
 - code-judo 检查：同一 manifest 同时承载平台、artifact、timing、资源和 power 门禁，避免多个互相漂移的阈值文件
-- blocking findings：无代码 blocking finding；Vivado 工具不可用，无法生成真实报告
-- disposition：保留 `in_progress`，恢复工具后运行 `build.tcl` 并替换模板值
+- blocking findings：无代码 blocking finding；当前源码的 post-route/bitstream/XSA 重建以及板端 bring-up 尚未运行
+- disposition：回到 `in_progress`，等待另一台机器完成全量 Vivado 重建
 
 ## 任务要求
 

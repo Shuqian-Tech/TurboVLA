@@ -1,0 +1,31 @@
+{
+  "platform": "kr260-k26",
+  "part": "xck26-sfvc784-2LV-c",
+  "verification_mode": "software_only",
+  "hardware_bringup": "not_run",
+  "source_consistency": {
+    "status": "rebuild_required",
+    "reason": "Archived Vivado outputs predate the tanh_q15 negative-interpolation fix"
+  },
+  "git_commit": "working-tree-build",
+  "vivado_version": "Vivado v2025.1 (Build 6140274)",
+  "artifacts": {
+    "bitstream": {"status": "passed", "path": "build/turbovla_kr260.bit"},
+    "xsa": {"status": "passed", "path": "build/turbovla_kr260.xsa"},
+    "utilization": {"status": "passed", "path": "build/utilization.rpt"},
+    "timing": {"status": "passed", "path": "build/timing_summary.rpt"},
+    "power": {"status": "passed", "path": "build/power.rpt"},
+    "cdc": {"status": "passed", "path": "build/cdc.rpt"}
+  },
+  "timing": {"status": "passed", "wns_ns": 3.512, "tns_ns": 0.0, "violations": 0},
+  "utilization": {
+    "status": "passed",
+    "lut_percent": 19.85,
+    "ff_percent": 13.25,
+    "dsp_percent": 2.0,
+    "bram_percent": 5.21,
+    "uram_percent": 0.0
+  },
+  "power": {"status": "passed", "total_watts": 2.742},
+  "cdc": {"status": "passed", "critical_violations": 0}
+}

@@ -46,3 +46,9 @@ tmp/
 # Browser QA artifacts.
 .playwright-cli/
 **/.playwright-cli/
+
+# Vivado per-session state; reproducible reports and artifacts are recorded
+# through the project manifests instead.
+.Xil/
+vivado.jou
+vivado_pid*.str

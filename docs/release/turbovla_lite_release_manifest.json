@@ -1,5 +1,49 @@
 {
   "artifacts": {
+    "build/hls/fusion_action/ip/action_mlp.zip": {
+      "bytes": 514140,
+      "sha256": "6a13d6bd0af226cfd0511e354a05401c9dca1741234a6ceb1c217744e92df68a"
+    },
+    "build/hls/fusion_action/ip/gated_fusion.zip": {
+      "bytes": 445975,
+      "sha256": "823aa84666e490680c988c18626e8625039bb110db29f6487cc7d4517f4b0b42"
+    },
+    "build/hls/gemm/ip/conv1x1.zip": {
+      "bytes": 247279,
+      "sha256": "713798648274b7f118f6c00d117195470c4a4831054c96aabb7564d91a76c3f7"
+    },
+    "build/hls/gemm/ip/gemm.zip": {
+      "bytes": 246281,
+      "sha256": "a4bd91180ad5b31b217732ef73311914a4e01f4a375a48065fd99ef991906d7b"
+    },
+    "hardware/vivado_kr260/build/cdc.rpt": {
+      "bytes": 949,
+      "sha256": "23e583e7f8f44e7e4c13963138b3ee21fda890046e5b5f6cf710a99688890c75"
+    },
+    "hardware/vivado_kr260/build/power.rpt": {
+      "bytes": 11950,
+      "sha256": "cda3748b745240bf880477145b9516d3b9aa9e18dac25e0e70a97f0ed3a30739"
+    },
+    "hardware/vivado_kr260/build/timing_summary.rpt": {
+      "bytes": 19564,
+      "sha256": "37b7309be92243b1a257dc947bc627454a9b3d87655b161fe7585a67bccd12b6"
+    },
+    "hardware/vivado_kr260/build/turbovla_kr260.bit": {
+      "bytes": 7797870,
+      "sha256": "bbd3cee859cf369cdfafcbeb3e31cb7180da61a66edf036e3486a057fb000a28"
+    },
+    "hardware/vivado_kr260/build/turbovla_kr260.xsa": {
+      "bytes": 1811082,
+      "sha256": "9dd8a92ef3cc721312e58eb6eace9612cb8f2cfe8eff8ab114cb9d4d36642519"
+    },
+    "hardware/vivado_kr260/build/utilization.rpt": {
+      "bytes": 13026,
+      "sha256": "ea905f23b3cb16616835cd7f6ebd529cef57c75c7df196d79f39269739f5caf1"
+    },
+    "hardware/vivado_kr260/report_manifest.json": {
+      "bytes": 1180,
+      "sha256": "ed4acf5b6c82b9f2c0965e8390919f412dc376081dec41b9e2dcf1575292c753"
+    },
     "tests/data/lite_golden/golden_tensors.npz": {
       "bytes": 47503,
       "sha256": "307600ad7f29001fee8335921e9d3eaa3bceca8e6383c65252688f2f58390f28"
@@ -13,22 +57,23 @@
       "sha256": "2c6f6081e92ddcf5ffcc22b706f8c0eb7b5c293eae3579d5c78afd9d6acb3242"
     },
     "tests/data/lite_replay_report.json": {
-      "bytes": 2295,
-      "sha256": "4e927e085b354e1a8b8060ead29df70bcbb604ed1d3f7106ae376d57e32dc3c8"
+      "bytes": 2075,
+      "sha256": "42f3d2a46323af3fa2f67d130a4b86b72aa2d087b48a9c1167d75dede1f04136"
     },
     "tests/data/lite_stability_report.json": {
-      "bytes": 404,
-      "sha256": "ceb06e8d3cc79e66030dd07d9cef3f4034f482617188631e0bd14b401bdda57f"
+      "bytes": 403,
+      "sha256": "d06bc4f01777a717b350850ac23f64c556312973c31494fcadbc7734283bbc3a"
     }
   },
   "blocking_gates": [
-    "independent PRs cannot be pushed by the current GitHub identity",
-    "Vivado wrapper points to a missing installation",
+    "independent task PRs are not yet created",
+    "the archived Vivado reports, bitstream, and XSA predate the tanh_q15 negative-interpolation fix; a full rebuild is pending on another machine",
+    "gated-fusion RTL co-simulation remains deferred because the XSIM wrapper grows beyond the available simulation resource budget; C simulation, synthesis, and IP export pass",
     "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-    "KR260 Hardware Manager/JTAG bring-up is not_run"
+    "KR260 bitstream load, Hardware Manager/JTAG, and hardware inference are not_run"
   ],
   "hardware_bringup": "not_run",
-  "head_commit": "7d9510904cc81cd2873f8490258f288601f11a81",
+  "head_commit": "f8697bf49d7254a44a6a329edd68e192ca8fa17d",
   "platform": "kr260-k26",
   "release_status": "blocked_by_acceptance_gates",
   "tasks": [
@@ -64,14 +109,14 @@
       "branch": "task/T005-gemm-conv-ip",
       "file": "docs/tasks/T005-gemm-conv-ip.md",
       "pr": "\u5f85\u521b\u5efa",
-      "status": "in_progress",
+      "status": "in_review",
       "task": "T005"
     },
     {
       "branch": "task/T006-fusion-action-ip",
       "file": "docs/tasks/T006-fusion-action-ip.md",
       "pr": "\u5f85\u521b\u5efa",
-      "status": "in_progress",
+      "status": "in_review",
       "task": "T006"
     },
     {

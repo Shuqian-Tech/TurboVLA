@@ -22,18 +22,19 @@
 - `python3 tools/validate_kr260_block_manifest.py`：通过，15 registers
 - register offset 与 T001 contract：一致且 4-byte 对齐
 - DMA buffer alignment：全部 64-byte
-- `vivado -version`：未通过，wrapper 指向不存在的 `/home/frank/AMDDesignTools/2026.1/Vivado/bin/vivado`
-- block design validation、synthesis、XSA/bitstream：`not_run`，不能把静态 manifest 当作 Vivado 结果
+- `vivado -version`：通过，wrapper 已指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado/bin/vivado`（v2025.1）
+- `vivado -mode batch -source hardware/vivado_kr260/build.tcl -nolog -nojournal -notrace`：归档 run 通过，Vivado v2025.1，part `xck26-sfvc784-2LV-c`；当前源码 run 在启动 synthesis 前停止并交接
+- block design validation、synthesis、implementation、XSA/bitstream：此前通过；归档产物早于 `tanh_q15` 负数插值修正，当前源码的全量重建待另一台机器执行
 
 ## Thermo-Nuclear Review（中间审查）
 
 - review 时间：2026-09-19
 - reviewer：Codex
-- review 结果：`PASS_WITH_TOOLCHAIN_GATE`
+- review 结果：`PASS_WITH_PR_GATE`
 - 结构检查：project Tcl、block design Tcl、约束和 register manifest 分层；无 board-specific if/else 分支
 - code-judo 检查：register map 只维护一份静态映射，validator 对照 T001 contract，不复制 runtime offsets
-- blocking findings：无代码 blocking finding；缺少 Vivado/IP repository 工具验证
-- disposition：保留 `in_progress`，工具恢复并完成 IP packaging 后补齐 validation/report
+- blocking findings：无代码 blocking finding；Hardware Manager/JTAG/bitstream load 尚未运行，保持 `not_run`
+- disposition：回到 `in_progress`，等待当前源码的 Vivado 全量重建、独立 PR 和 reviewer 确认
 
 ## 任务要求
 

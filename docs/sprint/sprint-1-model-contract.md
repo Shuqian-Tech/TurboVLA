@@ -16,7 +16,7 @@
 
 当前执行任务：[T004：生成 FPGA 参数包](../tasks/T004-export-fpga-parameters.md)
 
-执行进度：T001 `in_review`（独立 PR 受 GitHub 权限阻塞）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）；T004 `in_progress`（参数包导出和 round-trip 已验证）。
+执行进度：T001 `in_review`（新 upstream 已配置，独立 PR 待创建）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）；T004 `in_progress`（参数包导出和 round-trip 已验证）。
 
 ## 进入条件
 

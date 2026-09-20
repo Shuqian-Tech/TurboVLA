@@ -14,7 +14,7 @@
 - 发布 manifest：`docs/release/turbovla_lite_release_manifest.json`
 - 审查报告：`docs/release/turbovla_lite_acceptance.md`
 - 当前结果：`blocked_by_acceptance_gates`
-- 硬件 bring-up：`not_run`
+- 硬件 bring-up：SSH reachability check passed；bitstream load、Hardware Manager/JTAG、hardware inference：`not_run`
 
 ## 验证记录
 
@@ -25,18 +25,20 @@
 - T010 deterministic replay：通过
 - T011 1000-cycle safety replay：通过
 - `ruff`：新增 Python 文件通过
-- Vivado/HLS、bitstream/XSA、Hardware Manager/JTAG：`not_run`
-- 独立 PR：当前 GitHub 身份无 push 权限，全部待创建
+- Vitis HLS C simulation（T005/T006）：通过；GEMM/Conv/action RTL co-sim：通过；gated-fusion RTL co-sim：deferred；归档 Vivado baseline 通过但早于 `tanh_q15` 修正，当前源码全量重建待另一台机器执行；Hardware Manager/JTAG/hardware inference：`not_run`
+- 独立 PR：新 upstream 已配置，任务 PR 仍待创建
 
 ## Thermo-Nuclear Review
 
-- review 时间：2026-09-19
+- review 时间：2026-09-20
 - reviewer：Codex
 - review 结果：`BLOCKED_BY_ACCEPTANCE_GATES`
 - 结构/文件大小/抽象/分支/边界检查：无新增代码 blocking finding；GEMM、fusion/action、runtime、replay、safety 和 manifest 边界清晰
 - code-judo 检查：T005 GEMM 被 T006 复用；contract/register map/manifest 避免重复 shape、offset 和 checksum 定义
-- blocking findings：PR 权限、Vivado/HLS 缺失、正式 teacher/LIBERO 数据缺失、KR260 bring-up 未运行
-- disposition：保留 `in_progress`，不把阻塞条件伪装成 `accepted/done`
+- 本次增量检查（当前 `task/T012-final-acceptance` 分支与工作树 diff）：HLS launcher 61 行，两个 kernel Tcl 分别覆盖 GEMM/1x1 Conv 与 gated fusion/action MLP solution；无源码文件超过 1k 行，无新增 fallback 或散落的板卡分支
+- 审查 finding：`tanh_q15` 的负小数区间最初受 C++ 向零整除影响；已改为显式 floor 区间并增加 `-1.5/+1.5` 回归用例，`python3 tools/run_fusion_action_csim.py` 通过
+- blocking findings：独立任务 PR、正式 teacher/LIBERO 数据、gated-fusion RTL co-sim、当前源码 Vivado 全量重建和 KR260 hardware inference bring-up 未完成
+- disposition：保留 `in_progress`；低内存软件/HLS gate 已通过，重型 Vivado gate 交接到另一台机器，不把旧 baseline 写成当前源码通过
 
 ## 任务要求
 

@@ -17,6 +17,17 @@ ARTIFACTS = [
     ROOT / "tests" / "data" / "lite_parameter_pack_smoke" / "manifest.json",
     ROOT / "tests" / "data" / "lite_replay_report.json",
     ROOT / "tests" / "data" / "lite_stability_report.json",
+    ROOT / "hardware" / "vivado_kr260" / "build" / "turbovla_kr260.bit",
+    ROOT / "hardware" / "vivado_kr260" / "build" / "turbovla_kr260.xsa",
+    ROOT / "hardware" / "vivado_kr260" / "build" / "timing_summary.rpt",
+    ROOT / "hardware" / "vivado_kr260" / "build" / "utilization.rpt",
+    ROOT / "hardware" / "vivado_kr260" / "build" / "power.rpt",
+    ROOT / "hardware" / "vivado_kr260" / "build" / "cdc.rpt",
+    ROOT / "hardware" / "vivado_kr260" / "report_manifest.json",
+    ROOT / "build" / "hls" / "gemm" / "ip" / "gemm.zip",
+    ROOT / "build" / "hls" / "gemm" / "ip" / "conv1x1.zip",
+    ROOT / "build" / "hls" / "fusion_action" / "ip" / "gated_fusion.zip",
+    ROOT / "build" / "hls" / "fusion_action" / "ip" / "action_mlp.zip",
 ]
 
 
@@ -60,10 +71,14 @@ def main() -> int:
         "tasks": tasks,
         "artifacts": artifacts,
         "blocking_gates": [
-            "independent PRs cannot be pushed by the current GitHub identity",
-            "Vivado wrapper points to a missing installation",
+            "independent task PRs are not yet created",
+            "the archived Vivado reports, bitstream, and XSA predate the tanh_q15 "
+            "negative-interpolation fix; a full rebuild is pending on another machine",
+            "gated-fusion RTL co-simulation remains deferred because the XSIM wrapper "
+            "grows beyond the available simulation resource budget; C simulation, "
+            "synthesis, and IP export pass",
             "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-            "KR260 Hardware Manager/JTAG bring-up is not_run",
+            "KR260 bitstream load, Hardware Manager/JTAG, and hardware inference are not_run",
         ],
     }
     output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")

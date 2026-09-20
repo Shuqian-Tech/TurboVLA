@@ -31,18 +31,6 @@ GemmStatus gemm_int8(const std::int8_t* a,
                      int k,
                      float output_scale,
                      bool relu) {
-#ifdef __SYNTHESIS__
-#pragma HLS INTERFACE m_axi port = a offset = slave bundle = gmem0
-#pragma HLS INTERFACE m_axi port = b offset = slave bundle = gmem1
-#pragma HLS INTERFACE m_axi port = bias_acc offset = slave bundle = gmem2
-#pragma HLS INTERFACE m_axi port = output offset = slave bundle = gmem3
-#pragma HLS INTERFACE s_axilite port = m bundle = control
-#pragma HLS INTERFACE s_axilite port = n bundle = control
-#pragma HLS INTERFACE s_axilite port = k bundle = control
-#pragma HLS INTERFACE s_axilite port = output_scale bundle = control
-#pragma HLS INTERFACE s_axilite port = relu bundle = control
-#pragma HLS INTERFACE s_axilite port = return bundle = control
-#endif
   if (a == nullptr || b == nullptr || bias_acc == nullptr || output == nullptr || output_scale <= 0.0f ||
       m < 1 || m > kMaxM || n < 1 || n > kMaxN || k < 1 || k > kMaxK) {
     return output_scale <= 0.0f ? GemmStatus::kInvalidScale : GemmStatus::kInvalidShape;
@@ -78,3 +66,55 @@ GemmStatus conv1x1_int8(const std::int8_t* input,
 
 }  // namespace turbovla::hls
 
+// Vitis HLS 2025.1 does not resolve namespace-qualified set_top names. Keep
+// the public C++ API namespaced and expose flat entry points for packaging.
+int turbovla_gemm_int8(
+    const std::int8_t* a,
+    const std::int8_t* b,
+    const std::int32_t* bias_acc,
+    std::int8_t* output,
+    int m,
+    int n,
+    int k,
+    float output_scale,
+    bool relu) {
+#ifdef __SYNTHESIS__
+#pragma HLS INTERFACE m_axi port = a offset = slave depth = 16384 bundle = gmem0
+#pragma HLS INTERFACE m_axi port = b offset = slave depth = 16384 bundle = gmem1
+#pragma HLS INTERFACE m_axi port = bias_acc offset = slave depth = 128 bundle = gmem2
+#pragma HLS INTERFACE m_axi port = output offset = slave depth = 16384 bundle = gmem3
+#pragma HLS INTERFACE s_axilite port = m bundle = control
+#pragma HLS INTERFACE s_axilite port = n bundle = control
+#pragma HLS INTERFACE s_axilite port = k bundle = control
+#pragma HLS INTERFACE s_axilite port = output_scale bundle = control
+#pragma HLS INTERFACE s_axilite port = relu bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
+#endif
+  return static_cast<int>(turbovla::hls::gemm_int8(a, b, bias_acc, output, m, n, k, output_scale, relu));
+}
+
+int turbovla_conv1x1_int8(
+    const std::int8_t* input,
+    const std::int8_t* weights,
+    const std::int32_t* bias_acc,
+    std::int8_t* output,
+    int pixels,
+    int input_channels,
+    int output_channels,
+    float output_scale,
+    bool relu) {
+#ifdef __SYNTHESIS__
+#pragma HLS INTERFACE m_axi port = input offset = slave depth = 16384 bundle = gmem0
+#pragma HLS INTERFACE m_axi port = weights offset = slave depth = 16384 bundle = gmem1
+#pragma HLS INTERFACE m_axi port = bias_acc offset = slave depth = 128 bundle = gmem2
+#pragma HLS INTERFACE m_axi port = output offset = slave depth = 16384 bundle = gmem3
+#pragma HLS INTERFACE s_axilite port = pixels bundle = control
+#pragma HLS INTERFACE s_axilite port = input_channels bundle = control
+#pragma HLS INTERFACE s_axilite port = output_channels bundle = control
+#pragma HLS INTERFACE s_axilite port = output_scale bundle = control
+#pragma HLS INTERFACE s_axilite port = relu bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
+#endif
+  return static_cast<int>(turbovla::hls::conv1x1_int8(input, weights, bias_acc, output, pixels, input_channels,
+                                                      output_channels, output_scale, relu));
+}

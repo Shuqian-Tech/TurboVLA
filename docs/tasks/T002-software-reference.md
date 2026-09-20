@@ -25,17 +25,17 @@
 - INT8 action 与 FP32 action：`max_abs_error=0.0007072217`，`mean_abs_error=0.0001537027`
 - golden tensor SHA256：`307600ad7f29001fee8335921e9d3eaa3bceca8e6383c65252688f2f58390f28`
 - `ruff check ...`：未执行，环境未安装 `ruff`
-- Vivado synthesis/implementation/post-route：`not_run`；当前本地 Vivado wrapper 路径无效，T002 不宣称硬件报告通过
+- Vivado system synthesis/implementation/post-route：由 T007/T008 完成并记录于 `hardware/vivado_kr260/report_manifest.json`；T002 本身仍以 software reference 为验收边界
 
 ## Thermo-Nuclear Review
 
 - review 时间：2026-09-19
 - reviewer：Codex
-- review 结果：`PASS_WITH_ENVIRONMENT_BLOCKER`
+- review 结果：`PASS_WITH_PR_GATE`
 - 结构检查：reference、工具入口、测试和 golden 数据分层；核心实现 359 行，未超过 1k 行边界
 - code-judo 检查：契约继续作为外部 shape/dtype/error source of truth，Lite 内部维度集中在 `LiteArchitecture`，FP32/INT8 共享输入校验和 trace 名称
 - 类型/边界检查：输入 dtype/shape、instruction 越界、state 归一化、动作 shape 和 INT8 累加路径均有显式边界
-- blocking findings：无代码阻塞项；`ruff` 未安装、Vivado wrapper 无效、PR 权限不足是环境/交付阻塞
+- blocking findings：无代码阻塞项；正式训练数据和独立 PR 尚未完成
 - disposition：环境阻塞记录于本任务和开发状态，不通过隐式 fallback 绕过
 
 ## 任务要求

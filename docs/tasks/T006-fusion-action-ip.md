@@ -1,6 +1,6 @@
 # T006：实现 Fusion 与 Action MLP IP
 
-- 状态：`in_progress`
+- 状态：`in_review`
 - Sprint：Sprint 2
 - 分支：`task/T006-fusion-action-ip`
 - PR：待创建
@@ -22,18 +22,21 @@
 - `python3 tools/run_fusion_action_csim.py`：通过，输出 `fusion/action C simulation passed`
 - 编译参数：`g++ -std=c++17 -O2 -Wall -Wextra -Werror`
 - `ruff check hardware/hls/fusion_action tools/run_fusion_action_csim.py`：通过
-- HLS co-simulation、synthesis、resource/latency report：`not_run`，Vivado/HLS 工具路径无效
+- `TURBOVLA_LOCALE_ROOT=/tmp/turbovla-repo-locale tools/run_vitis_hls.sh hardware/hls/fusion_action/vitis_hls.tcl`：通过，Vitis HLS C simulation 输出 `fusion/action C simulation passed`
+- `TURBOVLA_HLS_SYNTH=1 tools/run_vitis_hls.sh hardware/hls/fusion_action/vitis_hls.tcl`：fusion/action synthesis、IP export 通过
+- action MLP RTL co-simulation：`COSIM 212-1000 PASS`；gated-fusion RTL co-sim deferred because the XSIM wrapper grows without bounded completion, not claimed as pass
+- Vivado system synthesis/implementation/post-route：归档 baseline 通过；`tanh_q15` 修正后的系统重建待另一台机器执行
 - action output shape：固定 `12x7`
 
 ## Thermo-Nuclear Review（中间审查）
 
 - review 时间：2026-09-19
 - reviewer：Codex
-- review 结果：`PASS_WITH_TOOLCHAIN_GATE`
+- review 结果：`PASS_WITH_COSIM_GATE`
 - 结构检查：fusion 负责 gated mixing，action MLP 只负责 state/pool/projection；GEMM 由 T005 统一复用
 - code-judo 检查：没有引入 attention/softmax 模式开关；固定 shape 和 hard nonlinearity 保持单一路径
-- blocking findings：无代码 blocking finding；缺少 HLS/Vivado 报告和 T002 数值逐层对齐
-- disposition：保留 `in_progress`，待工具链恢复后补齐综合和误差报告
+- blocking findings：无代码 blocking finding；gated-fusion RTL co-sim deferred，独立 PR 尚未创建
+- disposition：进入 `in_review`；不得把 deferred co-sim 写成通过
 
 ## 任务要求
 

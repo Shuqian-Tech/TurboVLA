@@ -16,7 +16,7 @@
 
 当前执行任务：[T008：完成综合、布局布线和报告基线](../tasks/T008-vivado-baseline.md)
 
-执行进度：T005 `in_progress`（portable C simulation 已通过）；T006 `in_progress`（fusion/action C simulation 已通过）；T007 `in_progress`（KR260 Tcl 和静态 manifest 已验证）；T008 `in_progress`（baseline validator 已验证）；Sprint 1 T001-T004 的 PR/正式训练门仍未闭合，当前为软件工程并行推进。
+执行进度：T005 `in_review`（GEMM/Conv HLS synthesis、IP export、RTL co-sim 通过）；T006 `in_review`（fusion/action C simulation 与 synthesis/IP export 通过，action RTL co-sim 通过，gated-fusion RTL co-sim deferred）；T007/T008 `in_progress`（旧 Vivado baseline 通过，但当前 `tanh_q15` 修正后的全量重建待另一台机器执行）；Sprint 1 T001-T004 的 PR/正式训练门仍未闭合。
 
 ## 进入条件
 

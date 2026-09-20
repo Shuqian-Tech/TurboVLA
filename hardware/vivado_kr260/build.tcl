@@ -6,6 +6,10 @@ set part xck26-sfvc784-2LV-c
 
 create_project -force $project_name $project_dir -part $part
 set_property target_language Verilog [current_project]
+set_property ip_repo_paths [list \
+  [file normalize [file join $script_dir ../../build/hls/gemm/gemm_solution/impl/ip]] \
+  [file normalize [file join $script_dir ../../build/hls/fusion_action/fusion_solution/impl/ip]]] [current_project]
+update_ip_catalog
 add_files -fileset constrs_1 [file join $script_dir constraints.xdc]
 source [file join $script_dir create_block_design.tcl]
 generate_target all [get_files */turbovla_kr260.bd]

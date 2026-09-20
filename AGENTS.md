@@ -26,13 +26,13 @@ The agent must use the latest development status, Sprint status, task status, de
 
 ## KR260 Access
 
-- SSH endpoint for the target board: `ubuntu@192.168.68.123`.
+- SSH endpoint for the target board: `amd-edf@192.168.68.123` (passwordless key access).
 - Do not store passwords, private keys, or other credentials in the repository.
-- The development board is currently unreliable/unavailable. Do not make SSH or JTAG access a prerequisite for software verification.
+- The development board is currently available for non-destructive bring-up checks; SSH/JTAG access is not a prerequisite for software-only verification.
 - During the current phase, verify the KR260/K26 target with software Vivado using HLS C simulation, co-simulation, synthesis, implementation, post-route timing, resource, power, CDC, and bitstream-generation reports.
-- SSH and Vivado Hardware Manager are reserved for a later hardware bring-up phase. If used, verify the active target/device and record the result, but their absence must not block T001-T008 software acceptance.
-- Do not silently claim an on-board test from a software report. Mark hardware bring-up as `not_run` when the board or Hardware Manager is unavailable.
-- The board SSH endpoint and Hardware Manager connection are environment facts, not permission to perform destructive board operations.
+- SSH and Vivado Hardware Manager may be used for the current hardware bring-up phase. If used, verify the active target/device and record the exact result; their absence must not block T001-T008 software acceptance.
+- Do not silently claim an on-board test from a software report. Mark hardware bring-up as `not_run` only when the board or Hardware Manager is unavailable; keep board evidence separate from software-only reports.
+- The board SSH endpoint and Hardware Manager connection are environment facts, not permission to perform destructive board operations. Bring-up commands must remain non-destructive unless explicitly authorized.
 
 ## Task, Branch, and PR Policy
 
