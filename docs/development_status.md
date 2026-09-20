@@ -5,8 +5,8 @@
 - 更新时间：2026-09-19
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
-- 当前 Sprint：[Sprint 1：模型与硬件契约](sprint/sprint-1-model-contract.md)
-- 当前任务：[T004：生成 FPGA 参数包](tasks/T004-export-fpga-parameters.md)（`in_progress`）
+- 当前 Sprint：[Sprint 2：PL Kernel 与 Vivado Block Design](sprint/sprint-2-pl-kernels.md)
+- 当前任务：[T005：实现 INT8 GEMM/Conv IP](tasks/T005-gemm-conv-ip.md)（`in_progress`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
@@ -29,11 +29,11 @@
 - [ ] T002：建立 FP32/INT8 软件 reference（`in_review`）
 - [ ] T003：训练 TurboVLA-Lite student（`in_progress`）
 - [ ] T004：生成 FPGA 参数包（`in_progress`）
+- [ ] T005：实现 INT8 GEMM/Conv IP（`in_progress`）
 
 ## 未开始
 
-- [ ] T003-T004：蒸馏和 FPGA 参数包
-- [ ] T005-T008：HLS/RTL kernel 和 Vivado block design
+- [ ] T006-T008：Fusion/Action kernel 和 Vivado block design
 - [ ] T009-T012：runtime、回放、闭环和发布验收
 
 ## 当前阻塞
@@ -43,6 +43,7 @@
 - 尚未拥有训练 checkpoint；T002 当前使用确定性占位 instruction table，正式表待 T003/T004 生成。
 - T003 当前只有确定性 smoke checkpoint；真实 teacher checkpoint、LIBERO 蒸馏数据和正式成功率尚未生成。
 - T004 当前参数包来自 smoke checkpoint；正式 student checkpoint 替换前不宣称发布参数包。
+- Vivado wrapper 可执行文件存在但目标路径无效；T005 当前仅有 portable C simulation，未宣称 HLS/Vivado 结果。
 - 尚未建立第一个 Vivado KR260 工程和 post-route baseline。
 - T001 独立 PR 被 GitHub 权限阻塞：当前身份 `frankdede` 无法 push 到 `H-EmbodVis/TurboVLA`。
 - 本地环境未安装 `ruff`，T002 lint 证据暂缺；当前 Vivado wrapper 仍指向不存在的 `/home/frank/AMDDesignTools/2026.1/Vivado/bin/vivado`。
@@ -70,3 +71,9 @@
 ## 状态规则
 
 任何任务完成后必须同步更新任务文件、所属 Sprint 文件和本文件。任务只有在独立 PR 合并、Vivado/功能证据齐全、并通过 `thermo-nuclear-code-quality-review` 后才能进入 `done`。
+
+## T005 kernel 证据
+
+- `hardware/hls/gemm/gemm.cpp` 提供固定上界 INT8 GEMM 和 1x1 Conv，累加器为 INT32，支持 HLS AXI interface directives。
+- `python3 tools/run_gemm_csim.py`：通过；`g++ -std=c++17 -O2 -Wall -Wextra -Werror`。
+- Vivado/HLS co-simulation、synthesis、post-route：`not_run`，工具路径无效；硬件 bring-up：`not_run`。

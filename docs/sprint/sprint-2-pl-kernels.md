@@ -1,10 +1,10 @@
 # Sprint 2：PL Kernel 与 Vivado Block Design
 
-- 状态：`planned`
+- 状态：`in_progress`
 - 目标：完成可综合的 kernel、KR260 block design 和第一次 software-only post-route timing baseline
 - 平台：KR260/K26，Vivado flow
-- Sprint owner：待指定
-- 开始时间：待指定
+- Sprint owner：Codex
+- 开始时间：2026-09-19
 - 结束时间：待指定
 
 ## 任务
@@ -13,6 +13,10 @@
 - [T006：实现 Fusion 与 Action MLP IP](../tasks/T006-fusion-action-ip.md)
 - [T007：搭建 KR260 Vivado Block Design](../tasks/T007-kr260-block-design.md)
 - [T008：完成综合、布局布线和报告基线](../tasks/T008-vivado-baseline.md)
+
+当前执行任务：[T005：实现 INT8 GEMM/Conv IP](../tasks/T005-gemm-conv-ip.md)
+
+执行进度：T005 `in_progress`（portable C simulation 已通过）；Sprint 1 T001-T004 的 PR/正式训练门仍未闭合，当前为软件工程并行推进。
 
 ## 进入条件
 
