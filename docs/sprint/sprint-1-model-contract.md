@@ -14,9 +14,9 @@
 - [T003：训练 TurboVLA-Lite student](../tasks/T003-train-lite-student.md)
 - [T004：生成 FPGA 参数包](../tasks/T004-export-fpga-parameters.md)
 
-当前执行任务：[T002：建立 FP32/INT8 软件 reference](../tasks/T002-software-reference.md)
+当前执行任务：[T003：训练 TurboVLA-Lite student](../tasks/T003-train-lite-student.md)
 
-执行进度：T001 `in_review`（独立 PR 受 GitHub 权限阻塞）；T002 `in_review`（reference、golden 和误差报告已生成）。
+执行进度：T001 `in_review`（独立 PR 受 GitHub 权限阻塞）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）。
 
 ## 进入条件
 
