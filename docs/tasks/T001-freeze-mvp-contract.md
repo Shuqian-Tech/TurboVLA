@@ -1,6 +1,6 @@
 # T001：冻结 MVP 模型与接口契约
 
-- 状态：`in_progress`
+- 状态：`in_review`
 - Sprint：Sprint 1
 - 分支：`task/T001-freeze-mvp-contract`
 - PR：待创建

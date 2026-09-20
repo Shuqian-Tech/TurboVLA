@@ -8,14 +8,13 @@ sizes live in :class:`LiteArchitecture` in one place.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
 
 import numpy as np
-
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "hardware" / "contracts" / "turbovla_lite_contract.json"
@@ -105,11 +104,7 @@ class LiteParameters:
         )
 
     def arrays(self) -> dict[str, np.ndarray]:
-        return {
-            name: value
-            for name, value in vars(self).items()
-            if isinstance(value, np.ndarray)
-        }
+        return {name: value for name, value in vars(self).items() if isinstance(value, np.ndarray)}
 
 
 @dataclass(frozen=True)
@@ -262,13 +257,22 @@ class TurboVLALiteReference:
         )
         return self.quantization
 
-    def _int8(self, image: np.ndarray, state: np.ndarray, instruction_id: np.ndarray, q: LiteQuantization) -> dict[str, np.ndarray]:
+    def _int8(
+        self, image: np.ndarray, state: np.ndarray, instruction_id: np.ndarray, q: LiteQuantization
+    ) -> dict[str, np.ndarray]:
         p = self.parameters
-        qa = lambda name, value: _quantize(value, q.activations[name])
-        qw = lambda name, value: _quantize(value, q.weights[name])
+
+        def qa(name, value):
+            return _quantize(value, q.activations[name])
+
+        def qw(name, value):
+            return _quantize(value, q.weights[name])
+
         normalized = self._preprocess(image)
         image_q = qa("image_normalized", normalized)
-        conv_acc = np.einsum("nvchw,oc->nvohw", image_q.astype(np.int32), qw("conv_weight", p.conv_weight).astype(np.int32))
+        conv_acc = np.einsum(
+            "nvchw,oc->nvohw", image_q.astype(np.int32), qw("conv_weight", p.conv_weight).astype(np.int32)
+        )
         conv = _relu(
             _dequantize(conv_acc, q.activations["image_normalized"] * q.weights["conv_weight"])
             + p.conv_bias[None, None, :, None, None]
@@ -279,25 +283,39 @@ class TurboVLALiteReference:
         pooled_q = conv_q.reshape(1, 1, channels, rows, height // rows, cols, width // cols).mean(axis=(4, 6))
         pooled_q = pooled_q.transpose(0, 1, 3, 4, 2).reshape(1, rows * cols, channels).astype(np.int8)
         visual_acc = np.matmul(pooled_q.astype(np.int32), qw("visual_projection", p.visual_projection).astype(np.int32))
-        visual = _relu(_dequantize(visual_acc, q.activations["visual_conv"] * q.weights["visual_projection"]) + p.visual_bias)
+        visual = _relu(
+            _dequantize(visual_acc, q.activations["visual_conv"] * q.weights["visual_projection"]) + p.visual_bias
+        )
         visual_q = qa("visual_tokens", visual)
-        language_q = _quantize(p.instruction_table[instruction_id.astype(np.int64)], q.activations["language_embedding"])
+        language_q = _quantize(
+            p.instruction_table[instruction_id.astype(np.int64)], q.activations["language_embedding"]
+        )
         fused_q = visual_q
         fusion_traces: list[np.ndarray] = []
         for layer in range(2):
             input_scale_name = "visual_tokens" if layer == 0 else "fusion_0"
             output_scale_name = "fusion_0" if layer == 0 else "fusion_1"
             input_scale = q.activations[input_scale_name]
-            visual_part = np.matmul(fused_q.astype(np.int32), qw("fusion_visual", p.fusion_visual[layer]).astype(np.int32))
-            language_part = np.matmul(language_q.astype(np.int32), qw("fusion_language", p.fusion_language[layer]).astype(np.int32))
+            visual_part = np.matmul(
+                fused_q.astype(np.int32), qw("fusion_visual", p.fusion_visual[layer]).astype(np.int32)
+            )
+            language_part = np.matmul(
+                language_q.astype(np.int32), qw("fusion_language", p.fusion_language[layer]).astype(np.int32)
+            )
             candidate = _dequantize(visual_part, input_scale * q.weights["fusion_visual"])
-            candidate += _dequantize(language_part, q.activations["language_embedding"] * q.weights["fusion_language"])[:, None, :]
+            candidate += _dequantize(language_part, q.activations["language_embedding"] * q.weights["fusion_language"])[
+                :, None, :
+            ]
             candidate += p.fusion_bias[layer]
             gate_part = np.matmul(fused_q.astype(np.int32), qw("fusion_gate", p.fusion_gate[layer]).astype(np.int32))
-            language_gate = np.matmul(language_q.astype(np.int32), qw("fusion_gate", p.fusion_gate[layer]).astype(np.int32))
+            language_gate = np.matmul(
+                language_q.astype(np.int32), qw("fusion_gate", p.fusion_gate[layer]).astype(np.int32)
+            )
             gate = _sigmoid(
                 _dequantize(gate_part, input_scale * q.weights["fusion_gate"])
-                + _dequantize(language_gate, q.activations["language_embedding"] * q.weights["fusion_gate"])[..., None, :]
+                + _dequantize(language_gate, q.activations["language_embedding"] * q.weights["fusion_gate"])[
+                    ..., None, :
+                ]
             )
             fused = ((1.0 - gate) * _dequantize(fused_q, input_scale) + gate * np.tanh(candidate)).astype(np.float32)
             fused_q = qa(output_scale_name, fused)
@@ -308,10 +326,14 @@ class TurboVLALiteReference:
         pooled = _relu(pooled + _dequantize(state_acc, q.state_input * q.weights["state_projection"]) + p.state_bias)
         pooled_q = qa("state_projection", pooled)
         hidden_acc = np.matmul(pooled_q.astype(np.int32), qw("action_input", p.action_input).astype(np.int32))
-        hidden = _relu(_dequantize(hidden_acc, q.activations["state_projection"] * q.weights["action_input"]) + p.action_input_bias)
+        hidden = _relu(
+            _dequantize(hidden_acc, q.activations["state_projection"] * q.weights["action_input"]) + p.action_input_bias
+        )
         hidden_q = qa("action_hidden", hidden)
         logits_acc = np.matmul(hidden_q.astype(np.int32), qw("action_output", p.action_output).astype(np.int32))
-        logits = _dequantize(logits_acc, q.activations["action_hidden"] * q.weights["action_output"]) + p.action_output_bias
+        logits = (
+            _dequantize(logits_acc, q.activations["action_hidden"] * q.weights["action_output"]) + p.action_output_bias
+        )
         action = np.tanh(logits.reshape(self.contract["action"]["shape"])).astype(np.float32)
         return {
             "image_normalized": _dequantize(image_q, q.activations["image_normalized"]),
@@ -325,12 +347,16 @@ class TurboVLALiteReference:
             "action": action,
         }
 
-    def run(self, image: np.ndarray, state: np.ndarray, instruction_id: np.ndarray, mode: str = "fp32") -> dict[str, np.ndarray]:
+    def run(
+        self, image: np.ndarray, state: np.ndarray, instruction_id: np.ndarray, mode: str = "fp32"
+    ) -> dict[str, np.ndarray]:
         _validate_inputs(self.contract, image, state, instruction_id)
         invalid = int(self.contract["language"]["input"]["invalid_value"])
         ids = instruction_id.astype(np.int64)
         if np.any(ids == invalid) or np.any(ids >= self.architecture.instruction_table_size):
-            raise ReferenceInputError(self.contract["errors"]["invalid_instruction_id"], "instruction_id is not in the embedding table")
+            raise ReferenceInputError(
+                self.contract["errors"]["invalid_instruction_id"], "instruction_id is not in the embedding table"
+            )
         fp32_traces = self._fp32(image, state, instruction_id)
         if mode == "fp32":
             return fp32_traces

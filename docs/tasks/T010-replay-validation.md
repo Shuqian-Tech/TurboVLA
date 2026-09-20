@@ -21,7 +21,7 @@
 - `PYTHONPATH=. .venv/bin/python tools/run_lite_replay.py --bundle tests/data/lite_golden/golden_tensors.npz --output tests/data/lite_replay_report.json --repeats 10`：通过
 - FP32/INT8 每层 shape 与 golden：通过
 - INT8 action replay：`max_abs_error=0.0`，`mean_abs_error=0.0`
-- software-only latency：FP32 p50/p99 `0.9769/2.4611 ms`；INT8 p50/p99 `5.7439/9.0162 ms`
+- software-only latency（本次报告）：FP32 p50/p99 `0.9591/1.8882 ms`；INT8 p50/p99 `5.3749/7.9713 ms`
 - `ruff check tools/run_lite_replay.py`：通过
 - HLS/RTL/Vivado target replay 和实机回放：`not_run`
 

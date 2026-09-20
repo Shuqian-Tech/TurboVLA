@@ -1,7 +1,7 @@
 {
   "accepted_cycles": 1000,
   "cycles": 1000,
-  "elapsed_seconds": 0.00816436500463169,
+  "elapsed_seconds": 0.011542755994014442,
   "fault_results": {
     "communication_disconnected": "communication_disconnected",
     "emergency_stop": "emergency_stop",

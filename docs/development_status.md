@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)
-- 当前任务：[T011：完成机器人闭环与稳定性测试](tasks/T011-closed-loop-stability.md)（`in_progress`）
+- 当前任务：[T012：最终 thermo-nuclear 审查与发布归档](tasks/T012-final-acceptance.md)（`in_progress`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
@@ -36,6 +36,7 @@
 - [ ] T009：实现 PS DMA/AXI-Lite Runtime（`in_progress`）
 - [ ] T010：实现数据回放与数值对齐测试（`in_progress`）
 - [ ] T011：完成机器人闭环与稳定性测试（`in_progress`）
+- [ ] T012：最终 thermo-nuclear 审查与发布归档（`in_progress`）
 
 ## 未开始
 
@@ -99,7 +100,7 @@
 ## T010 replay 证据
 
 - `tools/run_lite_replay.py` 从 T002 golden bundle 重放 FP32/INT8 reference，自动比较每层和 action，不允许手工跳过样本。
-- `tests/data/lite_replay_report.json`：INT8 action replay `max_abs_error=0.0`、`mean_abs_error=0.0`；software-only INT8 p50/p99 `5.7439/9.0162 ms`。
+- `tests/data/lite_replay_report.json`：INT8 action replay `max_abs_error=0.0`、`mean_abs_error=0.0`；本次 software-only INT8 p50/p99 `5.3749/7.9713 ms`。
 - HLS/RTL/Vivado target replay、DDR 带宽和实机回放：`not_run`。
 
 ## T011 stability 证据
@@ -107,6 +108,12 @@
 - `turbovla/safety.py` 集中实现 action limit、NaN 拒绝、timeout、emergency stop 和通信断开策略。
 - `tests/data/lite_stability_report.json`：1000/1000 software-only cycles accepted，max drift `0.0`，四类故障注入全部命中。
 - 真实机器人/开发板 30 分钟稳定性、温度、功耗和成功率：`not_run`。
+
+## T012 final acceptance 证据
+
+- `tools/generate_release_manifest.py` 生成 `docs/release/turbovla_lite_release_manifest.json`，收集 T001-T012 状态、当前 commit、artifact checksum 和阻塞 gate。
+- `docs/release/turbovla_lite_acceptance.md` 完成 thermo-nuclear 汇总，结果为 `BLOCKED_BY_ACCEPTANCE_GATES`。
+- 所有软件-only C/Python replay/safety 检查通过；独立 PR、Vivado/HLS、bitstream/XSA、KR260 bring-up 仍未通过。
 
 ## T007 block design 证据
 

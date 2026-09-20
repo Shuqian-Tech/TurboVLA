@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import numpy as np
 
@@ -43,9 +43,15 @@ def main() -> int:
         "contract_version": model.contract["contract_version"],
         "parameter_seed": 20260919,
         "tensor_names": sorted(fp32),
-        "input_shapes": {"image": list(image.shape), "state": list(state.shape), "instruction_id": list(instruction_id.shape)},
+        "input_shapes": {
+            "image": list(image.shape),
+            "state": list(state.shape),
+            "instruction_id": list(instruction_id.shape),
+        },
     }
-    (args.output_dir / "metadata.json").write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (args.output_dir / "metadata.json").write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     print(f"wrote {args.output_dir / 'golden_tensors.npz'}")
     return 0
 
