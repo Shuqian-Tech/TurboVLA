@@ -1,11 +1,39 @@
 # T006：实现 Fusion 与 Action MLP IP
 
-- 状态：`planned`
+- 状态：`in_progress`
 - Sprint：Sprint 2
 - 分支：`task/T006-fusion-action-ip`
 - PR：待创建
 - 依赖：T005
 - 验收 skill：`thermo-nuclear-code-quality-review`
+
+## 当前执行记录
+
+- 开始时间：2026-09-19
+- 当前分支：`task/T006-fusion-action-ip`
+- kernel：`hardware/hls/fusion_action/fusion_action.{h,cpp}`
+- 覆盖：32x128 visual tokens、128-dim language token、8-dim state、12x7 action
+- 非线性：hard-sigmoid + bounded tanh，避免 softmax 和动态分支
+- 构建入口：`tools/run_fusion_action_csim.py`
+- 硬件 bring-up：`not_run`
+
+## 验证记录
+
+- `python3 tools/run_fusion_action_csim.py`：通过，输出 `fusion/action C simulation passed`
+- 编译参数：`g++ -std=c++17 -O2 -Wall -Wextra -Werror`
+- `ruff check hardware/hls/fusion_action tools/run_fusion_action_csim.py`：通过
+- HLS co-simulation、synthesis、resource/latency report：`not_run`，Vivado/HLS 工具路径无效
+- action output shape：固定 `12x7`
+
+## Thermo-Nuclear Review（中间审查）
+
+- review 时间：2026-09-19
+- reviewer：Codex
+- review 结果：`PASS_WITH_TOOLCHAIN_GATE`
+- 结构检查：fusion 负责 gated mixing，action MLP 只负责 state/pool/projection；GEMM 由 T005 统一复用
+- code-judo 检查：没有引入 attention/softmax 模式开关；固定 shape 和 hard nonlinearity 保持单一路径
+- blocking findings：无代码 blocking finding；缺少 HLS/Vivado 报告和 T002 数值逐层对齐
+- disposition：保留 `in_progress`，待工具链恢复后补齐综合和误差报告
 
 ## 任务要求
 

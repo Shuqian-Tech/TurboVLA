@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 2：PL Kernel 与 Vivado Block Design](sprint/sprint-2-pl-kernels.md)
-- 当前任务：[T005：实现 INT8 GEMM/Conv IP](tasks/T005-gemm-conv-ip.md)（`in_progress`）
+- 当前任务：[T006：实现 Fusion 与 Action MLP IP](tasks/T006-fusion-action-ip.md)（`in_progress`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
@@ -30,6 +30,7 @@
 - [ ] T003：训练 TurboVLA-Lite student（`in_progress`）
 - [ ] T004：生成 FPGA 参数包（`in_progress`）
 - [ ] T005：实现 INT8 GEMM/Conv IP（`in_progress`）
+- [ ] T006：实现 Fusion 与 Action MLP IP（`in_progress`）
 
 ## 未开始
 
@@ -77,3 +78,9 @@
 - `hardware/hls/gemm/gemm.cpp` 提供固定上界 INT8 GEMM 和 1x1 Conv，累加器为 INT32，支持 HLS AXI interface directives。
 - `python3 tools/run_gemm_csim.py`：通过；`g++ -std=c++17 -O2 -Wall -Wextra -Werror`。
 - Vivado/HLS co-simulation、synthesis、post-route：`not_run`，工具路径无效；硬件 bring-up：`not_run`。
+
+## T006 fusion/action 证据
+
+- `hardware/hls/fusion_action/fusion_action.cpp` 复用 T005 GEMM，实现固定 shape gated fusion、state projection 和 12x7 action MLP。
+- `python3 tools/run_fusion_action_csim.py`：通过；hard-sigmoid/tanh 路径和零权重 action 输出均验证。
+- HLS/Vivado 报告和硬件 bring-up：`not_run`，不冒充软件 C simulation 结果。
