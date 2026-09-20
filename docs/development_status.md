@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 1：模型与硬件契约](sprint/sprint-1-model-contract.md)
-- 当前任务：[T001：冻结 MVP 模型与接口契约](tasks/T001-freeze-mvp-contract.md)（`in_review`）
+- 当前任务：[T002：建立 FP32/INT8 软件 reference](tasks/T002-software-reference.md)（`in_review`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
@@ -26,10 +26,11 @@
 ## 进行中
 
 - [ ] T001：冻结 MVP 模型与接口契约（`in_review`）
+- [ ] T002：建立 FP32/INT8 软件 reference（`in_review`）
 
 ## 未开始
 
-- [ ] T002-T004：软件 reference、蒸馏和 FPGA 参数包
+- [ ] T003-T004：蒸馏和 FPGA 参数包
 - [ ] T005-T008：HLS/RTL kernel 和 Vivado block design
 - [ ] T009-T012：runtime、回放、闭环和发布验收
 
@@ -37,9 +38,17 @@
 
 - Vivado 本地安装路径无效；需要修复软件 Vivado 环境后才能运行 synthesis/implementation/post-route 验证。
 - KR260 开发板当前不可作为验证前置条件；SSH/JTAG 实机状态记为 `not_run`，不阻塞软件阶段。
-- 尚未拥有 TurboVLA-Lite 的训练 checkpoint 和 instruction embedding table。
+- 尚未拥有训练 checkpoint；T002 当前使用确定性占位 instruction table，正式表待 T003/T004 生成。
 - 尚未建立第一个 Vivado KR260 工程和 post-route baseline。
 - T001 独立 PR 被 GitHub 权限阻塞：当前身份 `frankdede` 无法 push 到 `H-EmbodVis/TurboVLA`。
+- 本地环境未安装 `ruff`，T002 lint 证据暂缺；当前 Vivado wrapper 仍指向不存在的 `/home/frank/AMDDesignTools/2026.1/Vivado/bin/vivado`。
+
+## T002 软件 reference 证据
+
+- 固定 shape NumPy FP32/INT8 reference 已实现于 `turbovla/lite_reference.py`，包含 tiny CNN、instruction embedding lookup、两层 gated fusion、state projection 和 12x7 action MLP。
+- `python3 -m unittest discover -s tests -v`：4 tests 通过；契约校验、calibration、golden 生成和逐层自比较通过。
+- INT8 action 相对 FP32：`max_abs_error=0.0007072217`，`mean_abs_error=0.0001537027`；golden SHA256 为 `307600ad7f29001fee8335921e9d3eaa3bceca8e6383c65252688f2f58390f28`。
+- thermo-nuclear review：`PASS_WITH_ENVIRONMENT_BLOCKER`，无代码 blocking finding；ruff/Vivado/PR 权限阻塞已记录。
 
 ## 状态规则
 

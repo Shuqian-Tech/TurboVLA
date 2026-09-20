@@ -1,0 +1,56 @@
+{
+  "action": {
+    "fp32_sha256": "f577070c53a2c760578119c40dad50aca271704a10264ee6f6fe02a9d5288e99",
+    "int8_sha256": "d09f0716b25c0fb5fd38f7fda2d9499ac97d4f61b0bbc3aa4829eea011ae2df8",
+    "max_abs_error": 0.0007072216831147671,
+    "mean_abs_error": 0.0001537026691948995
+  },
+  "action_hidden": {
+    "fp32_sha256": "9c0c9892bf012a8f4703b90774f0ff4563d9dec1729840b6813207971f309ddd",
+    "int8_sha256": "6d81834111acb9b05faa9e1aafd6811de1c8299d7a8f5ea2e26e3cff2d637621",
+    "max_abs_error": 0.0013796496205031872,
+    "mean_abs_error": 0.0003096691507380456
+  },
+  "fusion_0": {
+    "fp32_sha256": "bbe2428e7b2e1c3a5d9a283a872cfce5d2c2272b1f993367ef411a62ff53445d",
+    "int8_sha256": "842274cf5219624f8efade022d348ac2d79263564d71816799b1aaee804e0374",
+    "max_abs_error": 0.0008103679865598679,
+    "mean_abs_error": 0.00018117055878974497
+  },
+  "fusion_1": {
+    "fp32_sha256": "8753de3d364bcf4a9ba7933e365bb62c54dd6525baad83585e0b7b5c4d94f53b",
+    "int8_sha256": "e6b65d44f589ba93ffc8630c73f4833a6e8418f9044f3ca202b7a9a7b230a285",
+    "max_abs_error": 0.000735042616724968,
+    "mean_abs_error": 0.00020283189951442182
+  },
+  "image_normalized": {
+    "fp32_sha256": "30f1457dfff8ca3182e27f274ac00cad2cf8e9c617afb0c2a45ad57c5e6dd9fc",
+    "int8_sha256": "e9fadcda7fd8e3c4cd1feaa8e9db11e5966c6a5abfe2253b04dade32d34e656d",
+    "max_abs_error": 0.010392338037490845,
+    "mean_abs_error": 0.005178447347134352
+  },
+  "language_embedding": {
+    "fp32_sha256": "552e552888286a6e55b342628fb57e6073e1908da5fd92fc1c0db71074d0c89f",
+    "int8_sha256": "5636626e910221d9e19dae36a6f04a4deafd8577f90ee7fa0c7a10f8eb753e23",
+    "max_abs_error": 0.0005750842392444611,
+    "mean_abs_error": 0.0002821611415129155
+  },
+  "state_projection": {
+    "fp32_sha256": "c70a6d79ab1935e8b82885d3290280a0c97d381528fa7d83811176851cbfd114",
+    "int8_sha256": "5efa55fefd5b75d55cba788bbd76c20221d2b75053b7afd7f3f351ab82c9551b",
+    "max_abs_error": 0.0024410709738731384,
+    "mean_abs_error": 0.00042267609387636185
+  },
+  "visual_conv": {
+    "fp32_sha256": "0c08d36d5854acbb1439a68f1454fcfcb41325e8817924e9fceda9c1f9797bcc",
+    "int8_sha256": "01078ebbb06fbbeaf9e98943c779d812f79df08d467f1cef80fa223643556a6d",
+    "max_abs_error": 0.004523754119873047,
+    "mean_abs_error": 0.0004918518825434148
+  },
+  "visual_tokens": {
+    "fp32_sha256": "bd2eb5a2304c86aaadfb7998c87a3ad0341b94aae0166f41181d88dc72f3d5cf",
+    "int8_sha256": "d52a16020d9ba824b78d9076e3bcaa51ef12c5fe7e26523c062bae5596fafa5c",
+    "max_abs_error": 0.0012161210179328918,
+    "mean_abs_error": 0.00015341577818617225
+  }
+}

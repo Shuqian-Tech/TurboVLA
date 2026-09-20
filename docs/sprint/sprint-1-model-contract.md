@@ -3,8 +3,8 @@
 - 状态：`in_progress`
 - 目标：冻结 TurboVLA-Lite 的张量 shape、量化格式、instruction ID 接口和软件 reference
 - 平台：KR260/K26，Vivado flow
-- Sprint owner：待指定
-- 开始时间：待指定
+- Sprint owner：Codex
+- 开始时间：2026-09-19
 - 结束时间：待指定
 
 ## 任务
@@ -14,7 +14,9 @@
 - [T003：训练 TurboVLA-Lite student](../tasks/T003-train-lite-student.md)
 - [T004：生成 FPGA 参数包](../tasks/T004-export-fpga-parameters.md)
 
-当前执行任务：[T001：冻结 MVP 模型与接口契约](../tasks/T001-freeze-mvp-contract.md)
+当前执行任务：[T002：建立 FP32/INT8 软件 reference](../tasks/T002-software-reference.md)
+
+执行进度：T001 `in_review`（独立 PR 受 GitHub 权限阻塞）；T002 `in_review`（reference、golden 和误差报告已生成）。
 
 ## 进入条件
 
