@@ -16,7 +16,7 @@
 
 当前执行任务：[T012：最终 thermo-nuclear 审查与发布归档](../tasks/T012-final-acceptance.md)
 
-执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（Draft PR #1、发布 manifest 和审查报告已生成）。当前源码 Vivado 2025.1 全量重建、post-route 报告、bitstream 和 XSA 已通过；gated-fusion case 0/1 已分阶段完成 RTL co-sim，action MLP 也已完成完整 co-sim，硬件 bring-up 仍为 `not_run`。
+执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（Draft PR #1、发布 manifest、分阶段 gated-fusion co-sim 和 board probe 记录已生成）。当前源码 Vivado 2025.1 全量重建由另一台机器声明完成，但本 checkout 的二进制/日志不可复核；板端仍为 starter-kit overlay，硬件 bring-up 仍为 `not_run`。
 
 ## 进入条件
 

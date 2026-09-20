@@ -45,8 +45,8 @@
 
 ## 当前阻塞
 
-- Vivado v2025.1 已识别 `xck26-sfvc784-2LV-c`；当前源码的 block design validation、synthesis、implementation、post-route timing、bitstream 和 XSA 均已完成。
-- KR260 板端已完成非破坏性 SSH 可达性检查；不把该检查写成 bitstream load 或硬件 inference 证据。
+- Vivado v2025.1 已识别 `xck26-sfvc784-2LV-c`；另一台机器声明完成当前源码的 block design validation、synthesis、implementation、post-route timing、bitstream 和 XSA，但当前 checkout 不含该次构建日志或非忽略产物，不能独立复核。
+- KR260 板端已完成非破坏性 SSH/设备树探测；活动 PL 是 `k26-starter-kits.bin`，未发现 TurboVLA 节点；本机 Hardware Manager/JTAG 返回 0 targets；不把该检查写成 bitstream load 或硬件 inference 证据。详见 `hardware/vivado_kr260/reports/kr260_bringup_probe.md`。
 - 尚未拥有训练 checkpoint；T002 当前使用确定性占位 instruction table，正式表待 T003/T004 生成。
 - T003 当前只有确定性 smoke checkpoint；真实 teacher checkpoint、LIBERO 蒸馏数据和正式成功率尚未生成。
 - T004 当前参数包来自 smoke checkpoint；正式 student checkpoint 替换前不宣称发布参数包。
@@ -89,7 +89,7 @@
 
 - `hardware/vivado_kr260/report_manifest.template.json` 固定 KR260/K26、software-only 和 hardware `not_run` 语义；真实结果记录于 `hardware/vivado_kr260/report_manifest.json`。
 - `python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.json`：通过；当前源码 timing/utilization/power/CDC 均为 `passed`，hardware bring-up 仍单独保持 `not_run`。
-- 当前源码 bitstream/XSA、post-route timing、utilization、power、CDC：通过；WNS `3.476 ns`、TNS `0`、WHS `0.010 ns`、THS `0`、功耗 `2.741 W`、CDC critical violations `0`；LUT `19.88%`、FF `13.25%`、DSP `2.00%`、BRAM `5.21%`、URAM `0%`。
+- 本地归档的 bitstream/XSA、post-route timing、utilization、power、CDC 报告通过 software-only manifest 校验；它们不是当前 checkout 可独立复核的另一台机器构建证据。归档指标为 WNS `3.512 ns`、TNS `0`、功耗 `2.742 W`、CDC critical violations `0`；LUT `19.85%`、FF `13.25%`、DSP `2.00%`、BRAM `5.21%`、URAM `0%`。
 
 ## T009 runtime 证据
 
@@ -113,14 +113,14 @@
 
 - `tools/generate_release_manifest.py` 生成 `docs/release/turbovla_lite_release_manifest.json`，收集 T001-T012 状态、当前 commit、artifact checksum 和阻塞 gate。
 - `docs/release/turbovla_lite_acceptance.md` 完成 thermo-nuclear 汇总，结果为 `BLOCKED_BY_ACCEPTANCE_GATES`。
-- 所有已运行的 software-only C/replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 仍未闭合。gated-fusion RTL co-sim 已通过，当前系统 bitstream/XSA 已准备好进入非破坏性板端测试流程。
-- 本机 system Python 回归复核因缺少 `torch` 有 1 个测试导入失败；此前带 PyTorch 的环境证据仍保留，但当前工作树未提供 `.venv`，因此不把本次复核写成全绿。
+- 所有已运行的 software-only C/replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 仍未闭合。gated-fusion RTL co-sim 已通过；板端当前仍是 starter-kit overlay，当前 checkout 没有可验证的 TurboVLA live bitstream。
+- system Python 因缺少 `torch` 不能作为完整回归环境；仓库 `.venv` 已存在并提供 PyTorch/NumPy，使用 `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v` 的本次回归为 9 tests 通过。
 
 ## T007 block design 证据
 
 - `hardware/vivado_kr260/` 已建立 KR260-only project/build Tcl、block design Tcl、200 MHz XDC 和 register map。
 - `python3 tools/validate_kr260_block_manifest.py`：通过，15 registers 与 T001 contract 一致。
-- Tcl 对缺少 T005/T006 packaged IP 直接 fail-fast；当前源码 KR260 block design/bitstream/XSA 已成功，Hardware Manager/JTAG 和板端推理仍 `not_run`。
+- Tcl 对缺少 T005/T006 packaged IP 直接 fail-fast；KR260 block design/bitstream/XSA 的本地归档可通过 manifest 校验，Hardware Manager/JTAG 和板端推理仍 `not_run`。
 
 ## T006 fusion/action 证据
 

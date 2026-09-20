@@ -11,12 +11,12 @@ Verification mode: `software_only`
 
 The software path has deterministic reference, student smoke training,
 parameter-pack export, portable and Vitis HLS C kernel simulations, runtime
-model, replay, and safety replay evidence. A KR260/K26 Vivado post-route
-baseline, bitstream, and XSA are archived, but they predate the `tanh_q15`
-negative-interpolation fix. A full rebuild is pending on another machine. The
-project is not marked `accepted` or `done` because independent task PRs are not
-yet created, formal teacher/LIBERO training data is absent, gated-fusion RTL
-co-simulation is deferred, and hardware bring-up is `not_run`.
+model, replay, and safety replay evidence. GEMM/Conv, action MLP, and staged
+gated-fusion RTL co-simulation have passed. The project is not marked
+`accepted` or `done` because independent task PRs are not yet created, formal
+teacher/LIBERO training data is absent, the current checkout cannot independently
+verify the other machine's current-source Vivado bitstream/XSA and build log,
+and KR260 hardware bring-up is `not_run`.
 
 ## Thermo-Nuclear Review
 
@@ -32,8 +32,10 @@ The machine-readable artifact and task status index is
 `docs/release/turbovla_lite_release_manifest.json`. The recorded software
 checks include Python unit tests, `g++ -Werror` C simulations, Vitis HLS C
 simulation, ruff checks, contract/register-map validation, deterministic replay,
-and 1000-cycle safety replay. The archived Vivado synthesis, implementation,
-post-route timing, bitstream/XSA, utilization, power, and CDC run passed in
-software-only mode; it must be repeated for the current source before those
-artifacts are release evidence. Hardware Manager, bitstream load, hardware
-inference, and KR260 30-minute stability remain `not_run`.
+and 1000-cycle safety replay. The local Vivado report manifest and archived
+bitstream/XSA remain software-only artifacts; because the current-source build
+log and non-ignored outputs from the other machine are not present here, they
+are not treated as independently reproducible release evidence. The board
+probe found the `k26-starter-kits` overlay, no TurboVLA device-tree nodes, and
+zero local JTAG targets. Hardware Manager, TurboVLA bitstream load, PL DMA,
+hardware inference, and KR260 30-minute stability remain `not_run`.

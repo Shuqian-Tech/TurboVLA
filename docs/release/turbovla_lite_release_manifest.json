@@ -57,23 +57,22 @@
       "sha256": "2c6f6081e92ddcf5ffcc22b706f8c0eb7b5c293eae3579d5c78afd9d6acb3242"
     },
     "tests/data/lite_replay_report.json": {
-      "bytes": 2075,
-      "sha256": "42f3d2a46323af3fa2f67d130a4b86b72aa2d087b48a9c1167d75dede1f04136"
+      "bytes": 2296,
+      "sha256": "cc16c71529a0d07b4a36f48a5d2be1d36b054c9b63c1af028cdd5acba0a31aa5"
     },
     "tests/data/lite_stability_report.json": {
-      "bytes": 403,
-      "sha256": "d06bc4f01777a717b350850ac23f64c556312973c31494fcadbc7734283bbc3a"
+      "bytes": 404,
+      "sha256": "cf090a39daa8c3a6493f81e83edef364a03718a01c20e2beccefda11cf86ea1f"
     }
   },
   "blocking_gates": [
     "independent task PRs are not yet created",
-    "the archived Vivado reports, bitstream, and XSA predate the tanh_q15 negative-interpolation fix; a full rebuild is pending on another machine",
-    "gated-fusion RTL co-simulation remains deferred because the XSIM wrapper grows beyond the available simulation resource budget; C simulation, synthesis, and IP export pass",
+    "the current checkout does not contain the other machine's Vivado build log or non-ignored bitstream/XSA; local archived hashes are not independently reproducible as current-source evidence",
     "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-    "KR260 bitstream load, Hardware Manager/JTAG, and hardware inference are not_run"
+    "KR260 currently exposes the k26-starter-kits overlay; Hardware Manager has zero JTAG targets and board root access is unavailable, so bitstream load, PL DMA, and hardware inference are not_run"
   ],
   "hardware_bringup": "not_run",
-  "head_commit": "a4a765070ce78e12ffcd80cf3f10df0c9e4c2ad5",
+  "head_commit": "3aa57ff14c33de8d26fafcb5351531b3c89cd0ec",
   "platform": "kr260-k26",
   "release_status": "blocked_by_acceptance_gates",
   "tasks": [

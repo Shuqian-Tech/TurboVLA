@@ -72,13 +72,13 @@ def main() -> int:
         "artifacts": artifacts,
         "blocking_gates": [
             "independent task PRs are not yet created",
-            "the archived Vivado reports, bitstream, and XSA predate the tanh_q15 "
-            "negative-interpolation fix; a full rebuild is pending on another machine",
-            "gated-fusion RTL co-simulation remains deferred because the XSIM wrapper "
-            "grows beyond the available simulation resource budget; C simulation, "
-            "synthesis, and IP export pass",
+            "the current checkout does not contain the other machine's Vivado "
+            "build log or non-ignored bitstream/XSA; local archived hashes are not "
+            "independently reproducible as current-source evidence",
             "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-            "KR260 bitstream load, Hardware Manager/JTAG, and hardware inference are not_run",
+            "KR260 currently exposes the k26-starter-kits overlay; Hardware Manager "
+            "has zero JTAG targets and board root access is unavailable, so bitstream "
+            "load, PL DMA, and hardware inference are not_run",
         ],
     }
     output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
