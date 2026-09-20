@@ -1,0 +1,232 @@
+{
+  "alignment_bytes": 64,
+  "contract_version": "0.1.0",
+  "endianness": "little",
+  "pack_version": "0.1.0",
+  "platform": "kr260-k26",
+  "tensors": [
+    {
+      "checksum": "d0ea109405df6e011010c5698ddfe1ad2c7c4da742800e1d93dd173f0ccd16e0",
+      "dtype": "int8",
+      "name": "conv_weight",
+      "nbytes": 48,
+      "offset": 0,
+      "scale": 0.004520461784573052,
+      "shape": [
+        16,
+        3
+      ]
+    },
+    {
+      "checksum": "0c10ed41435bfa1d086f299bab281404f4aa1c6ce192cabd4732713d80b651c9",
+      "dtype": "float32",
+      "name": "conv_bias",
+      "nbytes": 64,
+      "offset": 64,
+      "scale": null,
+      "shape": [
+        16
+      ]
+    },
+    {
+      "checksum": "e1c9014c2bd28ce0d6b58bf6419215a0247956128273c8fb6b52e614f0703dfc",
+      "dtype": "int8",
+      "name": "visual_projection",
+      "nbytes": 2048,
+      "offset": 128,
+      "scale": 0.001994923343808632,
+      "shape": [
+        16,
+        128
+      ]
+    },
+    {
+      "checksum": "5ffd2582ba86f7503d0d39aa7a8ed8dcc08615fa18b69e44a07f3be0dec33744",
+      "dtype": "float32",
+      "name": "visual_bias",
+      "nbytes": 512,
+      "offset": 2176,
+      "scale": null,
+      "shape": [
+        128
+      ]
+    },
+    {
+      "checksum": "ef800be26431c8a5109c3376d2bec1603ea7438852455d616b59184c04bcc893",
+      "dtype": "int8",
+      "name": "instruction_table",
+      "nbytes": 32768,
+      "offset": 2688,
+      "scale": 0.03478731696061262,
+      "shape": [
+        256,
+        128
+      ]
+    },
+    {
+      "checksum": "2421b265f6e79726365a90ed15015001619379fca7c6c5ec534a465ec44b8c00",
+      "dtype": "int8",
+      "name": "state_projection",
+      "nbytes": 1024,
+      "offset": 35456,
+      "scale": 0.0028217620267642764,
+      "shape": [
+        8,
+        128
+      ]
+    },
+    {
+      "checksum": "c19b847416c8e59a5d28ee959fc3f71741090b8ecfdf0cf2269d7a133876ddd9",
+      "dtype": "float32",
+      "name": "state_bias",
+      "nbytes": 512,
+      "offset": 36480,
+      "scale": null,
+      "shape": [
+        128
+      ]
+    },
+    {
+      "checksum": "fc7b29b95b89d57ec19085c06a5075f86159536288c0215a5809e567cba024ff",
+      "dtype": "int8",
+      "name": "action_input",
+      "nbytes": 8192,
+      "offset": 36992,
+      "scale": 0.0007395353021584157,
+      "shape": [
+        128,
+        64
+      ]
+    },
+    {
+      "checksum": "bc87a4960a94deec00e3211e30af9485c977cbea5d1112a3933c6ae3d2771c13",
+      "dtype": "float32",
+      "name": "action_input_bias",
+      "nbytes": 256,
+      "offset": 45184,
+      "scale": null,
+      "shape": [
+        64
+      ]
+    },
+    {
+      "checksum": "6402eace9523ee8c3c67a78ffe7018f4d3e1502c11ed741b80414d7bafd1e4ac",
+      "dtype": "int8",
+      "name": "action_output",
+      "nbytes": 5376,
+      "offset": 45440,
+      "scale": 0.0010281736691167035,
+      "shape": [
+        64,
+        84
+      ]
+    },
+    {
+      "checksum": "6da010e7078f98a2e9e95052cd5248c8a1e86a2aeea27b7d19e77caa3218c4fb",
+      "dtype": "float32",
+      "name": "action_output_bias",
+      "nbytes": 336,
+      "offset": 50816,
+      "scale": null,
+      "shape": [
+        84
+      ]
+    },
+    {
+      "checksum": "3d78a29143931a902135176fba3b39c9c050e46986aa68531e62d51960b8a00f",
+      "dtype": "int8",
+      "name": "fusion_visual_0",
+      "nbytes": 16384,
+      "offset": 51200,
+      "scale": 0.0007421638317934171,
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "checksum": "046b2487a4149be1d41a891f9936bcb1b6077028c4d909b48b2b86ab3eba9790",
+      "dtype": "int8",
+      "name": "fusion_language_0",
+      "nbytes": 16384,
+      "offset": 67584,
+      "scale": 0.0007424599190396587,
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "checksum": "c07960fa387274dd9fbb114fe9175118f3c2b65d847e02f614fd773392888ac9",
+      "dtype": "int8",
+      "name": "fusion_gate_0",
+      "nbytes": 16384,
+      "offset": 83968,
+      "scale": 0.0007417840868469298,
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "checksum": "9bb3a1810b819e7f5601be91748c17713681fb3c11399ea68d1a60b080e0dd5b",
+      "dtype": "float32",
+      "name": "fusion_bias_0",
+      "nbytes": 512,
+      "offset": 100352,
+      "scale": null,
+      "shape": [
+        128
+      ]
+    },
+    {
+      "checksum": "988bfced7f2c68ebb3ec24cb1de08c1437d70a513dfce9b5836900c0c1ed0166",
+      "dtype": "int8",
+      "name": "fusion_visual_1",
+      "nbytes": 16384,
+      "offset": 100864,
+      "scale": 0.0007398220615124139,
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "checksum": "5de9e5ace1730dbc2f010dbe6a8529582b7da91f3975de24bdeddb16d827ba54",
+      "dtype": "int8",
+      "name": "fusion_language_1",
+      "nbytes": 16384,
+      "offset": 117248,
+      "scale": 0.0007420833420565747,
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "checksum": "95d980effe99d956c0397c5027be00fd811efc1b78b0bc98c78f11bddd012265",
+      "dtype": "int8",
+      "name": "fusion_gate_1",
+      "nbytes": 16384,
+      "offset": 133632,
+      "scale": 0.0007415391563430545,
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "checksum": "03ecdc538600fe62116e5ec377f87c7a64b6ba92c722579b2b76b6bad7d8ed39",
+      "dtype": "float32",
+      "name": "fusion_bias_1",
+      "nbytes": 512,
+      "offset": 150016,
+      "scale": null,
+      "shape": [
+        128
+      ]
+    }
+  ],
+  "weights_file": "weights.bin",
+  "weights_sha256": "2c6f6081e92ddcf5ffcc22b706f8c0eb7b5c293eae3579d5c78afd9d6acb3242"
+}

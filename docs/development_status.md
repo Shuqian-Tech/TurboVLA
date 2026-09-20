@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 1：模型与硬件契约](sprint/sprint-1-model-contract.md)
-- 当前任务：[T003：训练 TurboVLA-Lite student](tasks/T003-train-lite-student.md)（`in_progress`）
+- 当前任务：[T004：生成 FPGA 参数包](tasks/T004-export-fpga-parameters.md)（`in_progress`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
@@ -28,6 +28,7 @@
 - [ ] T001：冻结 MVP 模型与接口契约（`in_review`）
 - [ ] T002：建立 FP32/INT8 软件 reference（`in_review`）
 - [ ] T003：训练 TurboVLA-Lite student（`in_progress`）
+- [ ] T004：生成 FPGA 参数包（`in_progress`）
 
 ## 未开始
 
@@ -41,6 +42,7 @@
 - KR260 开发板当前不可作为验证前置条件；SSH/JTAG 实机状态记为 `not_run`，不阻塞软件阶段。
 - 尚未拥有训练 checkpoint；T002 当前使用确定性占位 instruction table，正式表待 T003/T004 生成。
 - T003 当前只有确定性 smoke checkpoint；真实 teacher checkpoint、LIBERO 蒸馏数据和正式成功率尚未生成。
+- T004 当前参数包来自 smoke checkpoint；正式 student checkpoint 替换前不宣称发布参数包。
 - 尚未建立第一个 Vivado KR260 工程和 post-route baseline。
 - T001 独立 PR 被 GitHub 权限阻塞：当前身份 `frankdede` 无法 push 到 `H-EmbodVis/TurboVLA`。
 - 本地环境未安装 `ruff`，T002 lint 证据暂缺；当前 Vivado wrapper 仍指向不存在的 `/home/frank/AMDDesignTools/2026.1/Vivado/bin/vivado`。
@@ -58,6 +60,12 @@
 - `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`：6 tests 通过。
 - 3-step smoke training 参数量 `148948`，action L1 从 `0.0628083` 降至 `0.0491720`；teacher-action L1 从 `0.0631098` 降至 `0.0490225`。
 - smoke 报告：`tests/data/lite_student_smoke_report.json`；正式 LIBERO 成功率尚未宣称。
+
+## T004 参数包证据
+
+- `turbovla/lite_parameter_pack.py` 实现 little-endian、64-byte alignment、INT8 weight/FP32 bias、scale 和 checksum manifest。
+- smoke 导出 19 个 tensor、150528 bytes；loader checksum、reference reconstruction 和 round-trip 单测通过。
+- weights SHA256：`2c6f6081e92ddcf5ffcc22b706f8c0eb7b5c293eae357d5c78afd9d6acb3242`；manifest SHA256：`67c1ce537ed6cad7427e8ebdac55d72da27bacb7db66d1776a53df92504d99993`。
 
 ## 状态规则
 
