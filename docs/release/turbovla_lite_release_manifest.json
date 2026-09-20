@@ -73,7 +73,7 @@
     "KR260 bitstream load, Hardware Manager/JTAG, and hardware inference are not_run"
   ],
   "hardware_bringup": "not_run",
-  "head_commit": "f8697bf49d7254a44a6a329edd68e192ca8fa17d",
+  "head_commit": "a4a765070ce78e12ffcd80cf3f10df0c9e4c2ad5",
   "platform": "kr260-k26",
   "release_status": "blocked_by_acceptance_gates",
   "tasks": [
@@ -157,7 +157,7 @@
     {
       "branch": "task/T012-final-acceptance",
       "file": "docs/tasks/T012-final-acceptance.md",
-      "pr": "\u5f85\u521b\u5efa",
+      "pr": "[Shuqian-Tech/TurboVLA#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1)\uff08Draft\uff09",
       "status": "in_progress",
       "task": "T012"
     }

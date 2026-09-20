@@ -52,7 +52,7 @@
 - T004 当前参数包来自 smoke checkpoint；正式 student checkpoint 替换前不宣称发布参数包。
 - Vivado wrapper 已指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado/bin/vivado`；GEMM/Conv/action RTL co-sim 通过，gated-fusion C simulation、synthesis、IP export 通过，RTL co-sim deferred。
 - 已建立 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，并已标记当前源码 `rebuild_required`。
-- upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；独立任务 PR 尚未创建。
+- upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 Draft PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已创建，T001-T011 的独立任务 PR 尚未创建。
 - Kria device package 的非交互 Add 已尝试，安装器因过期 AMD authentication token 拒绝下载；认证信息不写入仓库。
 
 ## T002 软件 reference 证据

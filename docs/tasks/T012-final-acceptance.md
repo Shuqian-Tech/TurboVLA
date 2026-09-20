@@ -3,7 +3,7 @@
 - 状态：`in_progress`
 - Sprint：Sprint 3
 - 分支：`task/T012-final-acceptance`
-- PR：待创建
+- PR：[Shuqian-Tech/TurboVLA#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1)（Draft）
 - 依赖：T008、T009、T010、T011
 - 验收 skill：`thermo-nuclear-code-quality-review`
 
@@ -26,7 +26,7 @@
 - T011 1000-cycle safety replay：通过
 - `ruff`：新增 Python 文件通过
 - Vitis HLS C simulation（T005/T006）：通过；GEMM/Conv/action RTL co-sim：通过；gated-fusion RTL co-sim：deferred；归档 Vivado baseline 通过但早于 `tanh_q15` 修正，当前源码全量重建待另一台机器执行；Hardware Manager/JTAG/hardware inference：`not_run`
-- 独立 PR：新 upstream 已配置，任务 PR 仍待创建
+- 独立 PR：T012 Draft PR #1 已创建；T001-T011 的独立任务 PR 仍待创建
 
 ## Thermo-Nuclear Review
 
