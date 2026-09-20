@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 2：PL Kernel 与 Vivado Block Design](sprint/sprint-2-pl-kernels.md)
-- 当前任务：[T007：搭建 KR260 Vivado Block Design](tasks/T007-kr260-block-design.md)（`in_progress`）
+- 当前任务：[T008：完成综合、布局布线和报告基线](tasks/T008-vivado-baseline.md)（`in_progress`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
@@ -32,6 +32,7 @@
 - [ ] T005：实现 INT8 GEMM/Conv IP（`in_progress`）
 - [ ] T006：实现 Fusion 与 Action MLP IP（`in_progress`）
 - [ ] T007：搭建 KR260 Vivado Block Design（`in_progress`）
+- [ ] T008：完成综合、布局布线和报告基线（`in_progress`）
 
 ## 未开始
 
@@ -79,6 +80,12 @@
 - `hardware/hls/gemm/gemm.cpp` 提供固定上界 INT8 GEMM 和 1x1 Conv，累加器为 INT32，支持 HLS AXI interface directives。
 - `python3 tools/run_gemm_csim.py`：通过；`g++ -std=c++17 -O2 -Wall -Wextra -Werror`。
 - Vivado/HLS co-simulation、synthesis、post-route：`not_run`，工具路径无效；硬件 bring-up：`not_run`。
+
+## T008 baseline 证据
+
+- `hardware/vivado_kr260/report_manifest.template.json` 固定 KR260/K26、software-only 和 hardware `not_run` 语义。
+- `python3 tools/validate_vivado_baseline.py ... --allow-not-run`：通过；默认模式拒绝未完成的报告状态。
+- 真实 bitstream/XSA、post-route timing、utilization、power、CDC：`not_run`，不使用模板冒充结果。
 
 ## T007 block design 证据
 

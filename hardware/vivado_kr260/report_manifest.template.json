@@ -1,0 +1,27 @@
+{
+  "platform": "kr260-k26",
+  "part": "xck26-sfvc784-2LV-c",
+  "verification_mode": "software_only",
+  "hardware_bringup": "not_run",
+  "git_commit": "REPLACE_WITH_BUILD_COMMIT",
+  "vivado_version": "REPLACE_WITH_VIVADO_VERSION",
+  "artifacts": {
+    "bitstream": {"status": "not_run", "path": "turbovla_kr260.bit"},
+    "xsa": {"status": "not_run", "path": "turbovla_kr260.xsa"},
+    "utilization": {"status": "not_run", "path": "utilization.rpt"},
+    "timing": {"status": "not_run", "path": "timing_summary.rpt"},
+    "power": {"status": "not_run", "path": "power.rpt"},
+    "cdc": {"status": "not_run", "path": "cdc.rpt"}
+  },
+  "timing": {"status": "not_run", "wns_ns": null, "tns_ns": null, "violations": null},
+  "utilization": {
+    "status": "not_run",
+    "lut_percent": null,
+    "ff_percent": null,
+    "dsp_percent": null,
+    "bram_percent": null,
+    "uram_percent": null
+  },
+  "power": {"status": "not_run", "total_watts": null},
+  "cdc": {"status": "not_run", "critical_violations": null}
+}
