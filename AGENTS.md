@@ -20,7 +20,7 @@ The agent must use the latest development status, Sprint status, task status, de
 - Do not add or validate alternative FPGA boards, GPUs, DPUs, Versal targets, Alveo targets, or generic device presets in the MVP workflow.
 - The neural inference path must execute in FPGA PL. DPU, Vitis AI, and silent CPU inference fallback are prohibited.
 - PS software is limited to I/O, ROS2, DMA, AXI-Lite control, scheduling, safety checks, and robot communication.
-- Vivado post-route timing, resource reports, and bitstream generation are required gates.
+- Vivado post-route timing, resource reports, and bitstream generation are required software gates for the current development phase.
 - HLS is optional for kernel generation; Vivado remains the system integration, synthesis, implementation, and bitstream tool.
 - When the `fpl26` MCP is available and direct Vivado invocation is inconvenient, it may be used for KR260 operations. The MCP must not change the target platform or bypass recorded Vivado reports. If it is unavailable, use repository-local Vivado Tcl/HLS scripts.
 
@@ -28,9 +28,10 @@ The agent must use the latest development status, Sprint status, task status, de
 
 - SSH endpoint for the target board: `ubuntu@192.168.68.123`.
 - Do not store passwords, private keys, or other credentials in the repository.
-- Before any hardware task, verify SSH reachability with a short, non-mutating command and record the result in the task evidence.
-- Vivado Hardware Manager is expected to be connected to the KR260 target. Hardware tasks must verify the active target/device and JTAG connection before programming or capturing reports.
-- If Hardware Manager is disconnected, stop the hardware step and record the blocker; do not silently switch to another board or a software-only substitute.
+- The development board is currently unreliable/unavailable. Do not make SSH or JTAG access a prerequisite for software verification.
+- During the current phase, verify the KR260/K26 target with software Vivado using HLS C simulation, co-simulation, synthesis, implementation, post-route timing, resource, power, CDC, and bitstream-generation reports.
+- SSH and Vivado Hardware Manager are reserved for a later hardware bring-up phase. If used, verify the active target/device and record the result, but their absence must not block T001-T008 software acceptance.
+- Do not silently claim an on-board test from a software report. Mark hardware bring-up as `not_run` when the board or Hardware Manager is unavailable.
 - The board SSH endpoint and Hardware Manager connection are environment facts, not permission to perform destructive board operations.
 
 ## Task, Branch, and PR Policy
@@ -38,7 +39,7 @@ The agent must use the latest development status, Sprint status, task status, de
 - Every task is represented by its own file under `docs/tasks/`.
 - Every task must be implemented on its own branch. Use the branch form `task/<task-id>-<short-slug>`, for example `task/T005-gemm-ip`.
 - Every task requires its own pull request. Do not combine unrelated tasks into one PR.
-- The task file must record branch name, PR link/number, status, changed files, validation commands, and acceptance evidence.
+- The task file must record branch name, PR link/number, status, changed files, validation commands, software Vivado evidence, and hardware bring-up status (`not_run` until the board is usable).
 - A task cannot be marked `done` without a linked PR and recorded acceptance evidence.
 - Do not edit a task's acceptance criteria to make an implementation pass. Update the task contract first and record the reason.
 
@@ -55,7 +56,7 @@ The acceptance record must include:
 - disposition of every finding;
 - links to Vivado/HLS reports and functional test logs.
 
-No task is complete while a blocking thermo-nuclear finding remains unresolved or explicitly waived by the project owner.
+No task is complete while a blocking thermo-nuclear finding remains unresolved or explicitly waived by the project owner. Software acceptance must not be blocked solely by unavailable board/JTAG access; hardware claims remain prohibited until a later bring-up gate passes.
 
 ## Status Update Protocol
 

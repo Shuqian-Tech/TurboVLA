@@ -19,11 +19,11 @@
 - timeout/error code；
 - kernel/bitstream version check。
 
-## 详细验收
+## 详细验收（software_only；实机 bring-up deferred）
 
-- 能提交图像、state、instruction ID 并读回 12x7 action；
+- host/replay runtime 能按 contract 提交图像、state、instruction ID 并读回 12x7 action；
 - cache/coherency 测试通过；
 - DMA timeout、错误 interrupt 和 reset 可恢复；
 - 检查到错误 bitstream/version 时拒绝运行；
 - thermo-nuclear review 确认 runtime 没有隐藏的 CPU inference fallback 或状态机 spaghetti；
-- PR 附带实机日志和命令。
+- PR 附带软件日志和命令；实机日志状态为 `not_run`，直到 board-ready。

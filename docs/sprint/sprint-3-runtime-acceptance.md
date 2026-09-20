@@ -1,7 +1,7 @@
 # Sprint 3：Runtime、闭环与发布验收
 
 - 状态：`planned`
-- 目标：在 KR260 实机上完成无 CPU inference fallback 的 action 输出、回放和闭环验收
+- 目标：先完成无 CPU inference fallback 的软件 runtime、回放和 Vivado 证据归档；实机闭环作为 board-ready 后的追加 gate
 - 平台：KR260/K26，Vivado bitstream + PS runtime
 - Sprint owner：待指定
 - 开始时间：待指定
@@ -18,18 +18,18 @@
 
 - Sprint 2 bitstream 已通过 post-route timing；
 - XSA、kernel 参数包、寄存器表和版本号已冻结；
-- KR260 实机和 PS runtime 环境可用。
+- PS runtime 可以在 host/replay 环境构建；KR260 实机不可用时，硬件 bring-up 状态为 `not_run`。
 
 ## 退出条件
 
-- DMA 输入和 `12x7` action 输出稳定；
+- 软件 DMA/register model、replay 和 `12x7` action 输出稳定；
 - replay、数值、延迟、DDR 带宽和功耗报告齐全；
-- 连续 30 分钟无 DMA、NaN、超时或动作漂移；
+- 软件 replay 连续运行无 DMA model、NaN 或超时错误；实机 30 分钟稳定性推迟到 board-ready 后；
 - 所有任务独立 PR 合并；
 - T012 通过 thermo-nuclear skill 并更新最终开发状态。
 
 ## Sprint 风险
 
 - PS cache/coherency 导致数据不一致；
-- 实机时序和仿真不一致；
+- 实机时序和仿真不一致（board-ready 后处理）；
 - robot safety layer 未覆盖超时、限幅和急停路径。

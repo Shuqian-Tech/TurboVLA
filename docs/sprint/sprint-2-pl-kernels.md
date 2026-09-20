@@ -1,7 +1,7 @@
 # Sprint 2：PL Kernel 与 Vivado Block Design
 
 - 状态：`planned`
-- 目标：完成可综合的 kernel、KR260 block design 和第一次 post-route timing baseline
+- 目标：完成可综合的 kernel、KR260 block design 和第一次 software-only post-route timing baseline
 - 平台：KR260/K26，Vivado flow
 - Sprint owner：待指定
 - 开始时间：待指定
@@ -24,7 +24,8 @@
 
 - C simulation、HLS co-simulation 和 RTL/FPGA 输出可对齐；
 - PS、DDR、AXI DMA、AXI-Lite scheduler 和 PL kernel 已连通；
-- post-route timing 无 violation，资源和功耗报告已保存；
+- software Vivado post-route timing 无 violation，资源和功耗报告已保存；
+- 硬件板/JTAG 状态记录为 `not_run`，不影响 Sprint 2 软件退出；
 - 每个任务独立 PR 通过 thermo-nuclear acceptance。
 
 ## Sprint 风险

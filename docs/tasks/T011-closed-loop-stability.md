@@ -19,11 +19,11 @@
 - latency、功耗和温度记录；
 - 任务成功率报告。
 
-## 详细验收
+## 详细验收（software_only；实机闭环 deferred）
 
-- 连续运行 30 分钟无 DMA 错误、NaN、超时或动作漂移；
+- 软件 replay 连续运行 30 分钟无 DMA model 错误、NaN、超时或动作漂移；
 - action limit、timeout 和 emergency stop 都有可触发测试；
 - 机器人通信断开时 PL 不会继续输出未确认动作；
-- 目标 LIBERO 子集成功率达到批准阈值；
+- 目标 LIBERO 子集软件回放成功率达到批准阈值；
 - thermo-nuclear review 确认安全逻辑位于正确边界，没有散落在多个 callback 中；
-- PR 附带原始日志和故障注入结果。
+- PR 附带原始软件日志和故障注入结果；真实机器人/开发板闭环标记为 `not_run`。

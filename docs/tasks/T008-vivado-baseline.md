@@ -9,7 +9,7 @@
 
 ## 任务要求
 
-在 KR260 上完成 Vivado synthesis、implementation、post-route timing 和 bitstream/XSA 生成，建立第一个资源、时序、功耗和带宽 baseline。
+使用 KR260/K26 目标器件的 Vivado 软件工程完成 synthesis、implementation、post-route timing 和 bitstream/XSA 生成，建立第一个资源、时序、功耗和带宽 baseline；不要求开发板在线。
 
 ## 交付物
 
@@ -18,11 +18,12 @@
 - utilization、timing、power、CDC 和 congestion reports；
 - 构建日志和 git commit manifest。
 
-## 详细验收
+## 详细验收（software_only）
 
 - post-route timing 无 violation；
 - clock/reset/CDC 报告无未解释错误；
 - 资源使用率和 DDR 带宽在项目阈值内；
 - 构建可由 Tcl 从干净目录重现；
+- 报告明确标记 `software_only`，Hardware Manager/JTAG 为 `not_run`；
 - thermo-nuclear review 确认报告归档和工程目录没有巨型脚本或临时条件分支；
 - PR 链接所有报告并记录风险。

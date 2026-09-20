@@ -100,6 +100,8 @@ Zynq UltraScale+ MPSoC PS
 
 ## 5. Vivado 编译和优化顺序
 
+当前阶段采用软件验证模式。KR260 开发板、SSH 和 Vivado Hardware Manager 不参与 T001-T008 的通过条件；Vivado 仍然以 KR260/K26 目标器件完成完整的离线工程验证。任何报告必须标明 `software_only`，不能写成实机测量。
+
 建议使用非交互 Tcl flow，保证每次构建可复现：
 
 ```text
@@ -116,6 +118,8 @@ Zynq UltraScale+ MPSoC PS
 11. 导出 hardware handoff / XSA
 12. 在目标系统加载 bitstream 并运行 runtime driver
 ```
+
+第 12 步属于后续 hardware bring-up，不是当前软件 MVP 的必要步骤。当前软件验收到第 10/11 步即可，但必须保存 bitstream/XSA 生成日志，并把硬件 bring-up 状态记录为 `not_run`。
 
 优化顺序应是：
 
@@ -158,4 +162,4 @@ build/
 - 不要依赖 CPU fallback 来掩盖未实现的算子；
 - 不要在没有 post-route timing 的情况下宣称达到目标频率或帧率。
 
-第一版应以“单个 GEMM/attention/LayerNorm IP 可综合、可布局布线、可从 PS 读写并与软件 reference 对齐”为完成标准。
+第一版软件验证应以“单个 GEMM/attention/LayerNorm IP 可综合、可布局布线、post-route timing 通过、资源/功耗/CDC 报告齐全并与软件 reference 对齐”为完成标准。PS 实机读写属于后续 hardware bring-up，不得用软件仿真结果冒充。

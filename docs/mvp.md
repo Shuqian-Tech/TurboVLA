@@ -78,6 +78,8 @@ dequantize / clamp -> AXI DMA -> PS safety layer
 
 ## 5. MVP 的 Vivado 实现
 
+当前 MVP 先走 `software_only` 验证：所有 kernel 和系统检查使用 KR260/K26 目标器件的 Vivado/HLS 工程完成。开发板、SSH 和 Hardware Manager 暂不作为 MVP 通过条件；实机加载 bitstream 和 DMA 闭环属于后续 bring-up。
+
 ```text
 Zynq UltraScale+ PS
   ├── DDR
@@ -102,7 +104,8 @@ PyTorch teacher/student reference
   -> Vivado block design
   -> synthesis / implementation / post-route timing
   -> bitstream + XSA
-  -> KR260 runtime test
+  -> software-only KR260 timing/resource validation
+  -> later hardware bring-up on KR260
 ```
 
 MVP 不允许未实现的算子回退到 PS。任何 PL kernel 缺失都应使测试失败，而不是静默调用 CPU。
@@ -124,11 +127,12 @@ MVP 不允许未实现的算子回退到 PS。任何 PL kernel 缺失都应使�
 
 ### 功能
 
-- KR260 实机能加载 bitstream；
-- PS 能通过 DMA 提交图像、state 和 instruction ID；
-- PL 输出完整的 12x7 action chunk；
-- 连续运行时没有 CPU inference fallback；
-- 能接入一个真实或回放的机器人控制循环。
+- 软件 Vivado 能生成 KR260 目标 bitstream/XSA；
+- HLS/RTL simulation 能提交图像、state 和 instruction ID 并产生完整的 12x7 action chunk；
+- post-route timing、资源、功耗和 CDC 报告通过；
+- 软件 reference 与 RTL/HLS 输出对齐；
+- 没有 CPU inference fallback；
+- 实机 SSH/JTAG/DMA 闭环在当前阶段标记为 `not_run`，不冒充软件验证结果。
 
 ### 数值
 

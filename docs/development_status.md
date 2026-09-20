@@ -10,7 +10,9 @@
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
-- Vivado Hardware Manager：用户已确认已连接 KR260；硬件任务开始前仍需验证 active target/device
+- 开发板状态：当前不稳定/不可作为验证前置条件
+- 当前验证模式：纯软件 Vivado，目标器件仍固定为 KR260/K26
+- Vivado Hardware Manager：暂不作为 T001-T008 验证门；实机 bring-up 阶段再验证 active target/device
 - `fpl26` MCP：当前环境未发现资源或模板，后续可用时接入
 
 ## 已完成
@@ -33,7 +35,8 @@
 
 ## 当前阻塞
 
-- 尚未确认 Vivado 版本和可用的 PetaLinux/Ubuntu runtime；KR260 SSH 地址已记录，Hardware Manager 连接由用户确认但尚未本地验证。
+- Vivado 本地安装路径无效；需要修复软件 Vivado 环境后才能运行 synthesis/implementation/post-route 验证。
+- KR260 开发板当前不可作为验证前置条件；SSH/JTAG 实机状态记为 `not_run`，不阻塞软件阶段。
 - 尚未拥有 TurboVLA-Lite 的训练 checkpoint 和 instruction embedding table。
 - 尚未建立第一个 Vivado KR260 工程和 post-route baseline。
 - T001 独立 PR 被 GitHub 权限阻塞：当前身份 `frankdede` 无法 push 到 `H-EmbodVis/TurboVLA`。

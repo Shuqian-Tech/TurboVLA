@@ -9,7 +9,7 @@
 
 ## 任务要求
 
-建立从 Python golden tensors 到 KR260 实机的 deterministic replay，比较每层或每个 kernel 的输出、最终 action、延迟和 DDR 带宽。
+建立从 Python golden tensors 到 KR260 目标软件工程的 deterministic replay，比较每层或每个 kernel 的输出、最终 action、延迟和 DDR 带宽；实机回放延后到 board-ready。
 
 ## 交付物
 
@@ -20,9 +20,10 @@
 
 ## 详细验收
 
-- 同一个输入 bundle 在软件和 FPGA 上可重复运行；
+- 同一个输入 bundle 在软件 reference、HLS/RTL co-simulation 和 Vivado 生成的目标工程中可重复运行；
 - 每个 kernel 的误差定位到 tensor/layer；
 - action MAE、最大误差和 latency p50/p99 自动生成；
 - 不允许手工修改输出或跳过失败样本；
 - thermo-nuclear review 确认测试编排没有重复解析器和隐式状态；
 - PR 附带失败样本处理规则和报告。
+- 实机回放状态明确记录为 `not_run`，不将 software-only 输出写成 KR260 实机结果。

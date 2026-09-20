@@ -19,11 +19,13 @@
 - register map；
 - XSA 和 block design validation log。
 
-## 详细验收
+## 详细验收（software_only）
 
 - 只引用 KR260/K26 平台；
 - block design validation 通过；
 - DMA buffer、cache policy、stride、interrupt 和 reset 行为有文档；
 - synthesis 可以非交互执行；
+- 软件 Vivado 使用 KR260/K26 目标器件完成 block design validation，不要求开发板或 Hardware Manager；
+- Hardware Manager/JTAG 状态记录为 `not_run`，不得用仿真日志冒充实机连接；
 - thermo-nuclear review 确认平台选择和控制逻辑没有散落的 board-specific if/else；
-- PR 附带 project version、Vivado version 和构建命令。
+- PR 附带 project version、Vivado version 和构建命令；若 Vivado 不可执行，记录工具环境 blocker。
