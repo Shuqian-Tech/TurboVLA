@@ -72,7 +72,7 @@
     "KR260 currently exposes the k26-starter-kits overlay; Hardware Manager has zero JTAG targets and board root access is unavailable, so bitstream load, PL DMA, and hardware inference are not_run"
   ],
   "hardware_bringup": "not_run",
-  "head_commit": "3aa57ff14c33de8d26fafcb5351531b3c89cd0ec",
+  "head_commit": "120c5f2446c3c605097f43b1cf521592ccc72325",
   "platform": "kr260-k26",
   "release_status": "blocked_by_acceptance_gates",
   "tasks": [
