@@ -4,10 +4,10 @@
   "verification_mode": "software_only",
   "hardware_bringup": "not_run",
   "source_consistency": {
-    "status": "rebuild_required",
-    "reason": "Archived Vivado outputs predate the tanh_q15 negative-interpolation fix"
+    "status": "current_source_verified",
+    "reason": "Local Vivado rebuild from f52534c; working-tree HLS Tcl change only skips local action co-simulation without changing kernel sources"
   },
-  "git_commit": "working-tree-build",
+  "git_commit": "f52534cc670b773f8a50aa83ff178df100e16db1",
   "vivado_version": "Vivado v2025.1 (Build 6140274)",
   "artifacts": {
     "bitstream": {"status": "passed", "path": "build/turbovla_kr260.bit"},
@@ -17,15 +17,15 @@
     "power": {"status": "passed", "path": "build/power.rpt"},
     "cdc": {"status": "passed", "path": "build/cdc.rpt"}
   },
-  "timing": {"status": "passed", "wns_ns": 3.512, "tns_ns": 0.0, "violations": 0},
+  "timing": {"status": "passed", "wns_ns": 3.476, "tns_ns": 0.0, "violations": 0, "clk_pl_0_mhz": 96.974},
   "utilization": {
     "status": "passed",
-    "lut_percent": 19.85,
+    "lut_percent": 19.88,
     "ff_percent": 13.25,
     "dsp_percent": 2.0,
     "bram_percent": 5.21,
     "uram_percent": 0.0
   },
-  "power": {"status": "passed", "total_watts": 2.742},
-  "cdc": {"status": "passed", "critical_violations": 0}
+  "power": {"status": "passed", "total_watts": 2.741, "note": "Medium-confidence vectorless estimate; high-fanout reset activity warning"},
+  "cdc": {"status": "passed", "critical_violations": 0, "note": "No crossing violations reported; input ports without delay constraints are skipped"}
 }

@@ -72,13 +72,15 @@ def main() -> int:
         "artifacts": artifacts,
         "blocking_gates": [
             "independent task PRs are not yet created",
-            "the current checkout does not contain the other machine's Vivado "
-            "build log or non-ignored bitstream/XSA; local archived hashes are not "
-            "independently reproducible as current-source evidence",
+            "the local current-source Vivado build passed, but no TurboVLA bit.bin/DTBO "
+            "or restricted load service is available; the block design has no action MLP "
+            "instance or DMA S2MM return path for full PL inference",
+            "post-route timing passes at the generated 96.974 MHz PL clock, not "
+            "the documented 200 MHz timing target",
             "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
             "KR260 currently exposes the k26-starter-kits overlay; Hardware Manager "
-            "has zero JTAG targets and board root access is unavailable, so bitstream "
-            "load, PL DMA, and hardware inference are not_run",
+            "has zero JTAG targets and noninteractive root access is unavailable, so "
+            "TurboVLA bitstream load, PL DMA, and hardware inference are not_run",
         ],
     }
     output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")

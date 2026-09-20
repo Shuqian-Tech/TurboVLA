@@ -45,12 +45,12 @@
 
 ## 当前阻塞
 
-- Vivado v2025.1 已识别 `xck26-sfvc784-2LV-c`；另一台机器声明完成当前源码的 block design validation、synthesis、implementation、post-route timing、bitstream 和 XSA，但当前 checkout 不含该次构建日志或非忽略产物，不能独立复核。
+- Vivado v2025.1 已识别 `xck26-sfvc784-2LV-c`；当前机器已从本地 HLS IP 完成 block design validation、synthesis、implementation、post-route timing、bitstream 和 XSA，日志 `/tmp/turbovla-current-build.3zY7TN/vivado-current.log`，本地 `build/` 产物可复核。
 - KR260 板端已完成非破坏性 SSH/设备树探测；活动 PL 是 `k26-starter-kits.bin`，未发现 TurboVLA 节点；本机 Hardware Manager/JTAG 返回 0 targets；不把该检查写成 bitstream load 或硬件 inference 证据。详见 `hardware/vivado_kr260/reports/kr260_bringup_probe.md`。
 - 尚未拥有训练 checkpoint；T002 当前使用确定性占位 instruction table，正式表待 T003/T004 生成。
 - T003 当前只有确定性 smoke checkpoint；真实 teacher checkpoint、LIBERO 蒸馏数据和正式成功率尚未生成。
 - T004 当前参数包来自 smoke checkpoint；正式 student checkpoint 替换前不宣称发布参数包。
-- Vivado v2025.1 安装根目录为 `/home/frank/AMD/vivado/2025.01/2025.1`；GEMM/Conv/action RTL co-sim 通过。2026-09-20 原始双事务诊断运行完成第 1/2 事务后，XSIM 匿名 RSS 超过用户指定的 96 GiB 阈值并终止；随后加入 case 0/1 事务拆分和 `-wdb /dev/null` footprint 修复，并在扩容主机上完成完整流程：日志 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0/1 和 action MLP 均 `RTL Simulation : 1 / 1` 且 C post-check 通过。
+- Vivado v2025.1 当前 wrapper 指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado`；本机 GEMM/Conv RTL co-sim 通过。2026-09-20 原始双事务诊断运行完成第 1/2 事务后，XSIM 匿名 RSS 超过用户指定的 96 GiB 阈值并终止；随后加入 case 0/1 事务拆分和 `-wdb /dev/null` footprint 修复，并在扩容主机上完成完整流程：日志 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0/1 和 action MLP 均 `RTL Simulation : 1 / 1` 且 C post-check 通过。本机 31 GiB RAM 的这次构建只重复这两个 kernel 的 synthesis/IP export，不重跑其高内存 co-sim。
 - 已建立当前源码对应的 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，状态为 `current_source_verified`。
 - upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 Draft PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已创建，T001-T011 的独立任务 PR 尚未创建。
 - Kria device package 已由 `/home/frank/WholeFile/FPGAs_AdaptiveSoCs_Unified_SDI_2025.1_0530_0145` 的离线 2025.1 installer 非交互 Add 到现有 Vivado；Tcl 验证 `xck26-sfvc784-2LV-c` 与 `xilinx.com:kr260_som:part0:1.0/1.1` 可见。完整源码 Vivado 重建已完成；认证信息不写入仓库。
@@ -89,7 +89,7 @@
 
 - `hardware/vivado_kr260/report_manifest.template.json` 固定 KR260/K26、software-only 和 hardware `not_run` 语义；真实结果记录于 `hardware/vivado_kr260/report_manifest.json`。
 - `python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.json`：通过；当前源码 timing/utilization/power/CDC 均为 `passed`，hardware bring-up 仍单独保持 `not_run`。
-- 本地归档的 bitstream/XSA、post-route timing、utilization、power、CDC 报告通过 software-only manifest 校验；它们不是当前 checkout 可独立复核的另一台机器构建证据。归档指标为 WNS `3.512 ns`、TNS `0`、功耗 `2.742 W`、CDC critical violations `0`；LUT `19.85%`、FF `13.25%`、DSP `2.00%`、BRAM `5.21%`、URAM `0%`。
+- 本机当前源码 bitstream/XSA、post-route timing、utilization、power、CDC 报告通过 software-only 构建；WNS `3.476 ns`、TNS `0`、WHS `0.010 ns`、功耗估算 `2.741 W`、LUT `19.88%`、FF `13.25%`、DSP `2.00%`、BRAM `5.21%`、URAM `0%`。`clk_pl_0` 实际约 `96.974 MHz`，不是 200 MHz 验收；功耗受 reset 活动告警影响，CDC 不覆盖未约束输入端口。
 
 ## T009 runtime 证据
 
@@ -113,7 +113,7 @@
 
 - `tools/generate_release_manifest.py` 生成 `docs/release/turbovla_lite_release_manifest.json`，收集 T001-T012 状态、当前 commit、artifact checksum 和阻塞 gate。
 - `docs/release/turbovla_lite_acceptance.md` 完成 thermo-nuclear 汇总，结果为 `BLOCKED_BY_ACCEPTANCE_GATES`。
-- 所有已运行的 software-only C/replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 仍未闭合。gated-fusion RTL co-sim 已通过；板端当前仍是 starter-kit overlay，当前 checkout 没有可验证的 TurboVLA live bitstream。
+- 所有已运行的 software-only C/replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 仍未闭合。当前 checkout 已有本机新生成的 bitstream/XSA，但没有 `.bit.bin/.dtbo`；Block Design 缺少 action MLP 实例和 DMA S2MM 返回通路，板端仍是 starter-kit overlay，不能宣称完整 PL 推理已上板。
 - system Python 因缺少 `torch` 不能作为完整回归环境；仓库 `.venv` 已存在并提供 PyTorch/NumPy，使用 `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v` 的本次回归为 9 tests 通过。
 
 ## T007 block design 证据

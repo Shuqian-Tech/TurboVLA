@@ -1,48 +1,48 @@
 {
   "artifacts": {
     "build/hls/fusion_action/ip/action_mlp.zip": {
-      "bytes": 514140,
-      "sha256": "6a13d6bd0af226cfd0511e354a05401c9dca1741234a6ceb1c217744e92df68a"
+      "bytes": 514141,
+      "sha256": "bfcaaba877549079f45184a6cfd2dacac5eeccf37ca0824c2b0c96edf5a51451"
     },
     "build/hls/fusion_action/ip/gated_fusion.zip": {
-      "bytes": 445975,
-      "sha256": "823aa84666e490680c988c18626e8625039bb110db29f6487cc7d4517f4b0b42"
+      "bytes": 445972,
+      "sha256": "83993bd952c16dd78b6376a01f002b64702b13e82a396b8ff84a964e8d89df47"
     },
     "build/hls/gemm/ip/conv1x1.zip": {
       "bytes": 247279,
-      "sha256": "713798648274b7f118f6c00d117195470c4a4831054c96aabb7564d91a76c3f7"
+      "sha256": "fa6cab164c1f3954856d70fbf16e1b65484c8e2d6a026ff78cdb301344860a91"
     },
     "build/hls/gemm/ip/gemm.zip": {
-      "bytes": 246281,
-      "sha256": "a4bd91180ad5b31b217732ef73311914a4e01f4a375a48065fd99ef991906d7b"
+      "bytes": 246280,
+      "sha256": "d03f27f3b4c74e9a017f5a6da72374d59fa9c81bb16b3905be943005fcc58b78"
     },
     "hardware/vivado_kr260/build/cdc.rpt": {
       "bytes": 949,
-      "sha256": "23e583e7f8f44e7e4c13963138b3ee21fda890046e5b5f6cf710a99688890c75"
+      "sha256": "b914633e629a052273a0f89842b82c7e5879c37ba76a31ba824c5597f9b2fc69"
     },
     "hardware/vivado_kr260/build/power.rpt": {
       "bytes": 11950,
-      "sha256": "cda3748b745240bf880477145b9516d3b9aa9e18dac25e0e70a97f0ed3a30739"
+      "sha256": "6282225c013e30e68c3672364de00db6631be916e5cd854e4264a2f87dd16e22"
     },
     "hardware/vivado_kr260/build/timing_summary.rpt": {
-      "bytes": 19564,
-      "sha256": "37b7309be92243b1a257dc947bc627454a9b3d87655b161fe7585a67bccd12b6"
+      "bytes": 24213,
+      "sha256": "d0707440aefcc7082eb70a1245559d872fcebb447f27912ff5645d440a20444d"
     },
     "hardware/vivado_kr260/build/turbovla_kr260.bit": {
       "bytes": 7797870,
-      "sha256": "bbd3cee859cf369cdfafcbeb3e31cb7180da61a66edf036e3486a057fb000a28"
+      "sha256": "c31f375d5f604d3fb57c890c986665e6a05f1f5d2c3749140f8f90dde9e2a2c6"
     },
     "hardware/vivado_kr260/build/turbovla_kr260.xsa": {
-      "bytes": 1811082,
-      "sha256": "9dd8a92ef3cc721312e58eb6eace9612cb8f2cfe8eff8ab114cb9d4d36642519"
+      "bytes": 1836909,
+      "sha256": "7566e039aa4776f43d41509c34def2129338026d93a9caf48b40aeae13282438"
     },
     "hardware/vivado_kr260/build/utilization.rpt": {
       "bytes": 13026,
-      "sha256": "ea905f23b3cb16616835cd7f6ebd529cef57c75c7df196d79f39269739f5caf1"
+      "sha256": "895b1d7c014ea35cba581b4f39534e70c4982a9a8fd1564011770c50a5072d48"
     },
     "hardware/vivado_kr260/report_manifest.json": {
-      "bytes": 1180,
-      "sha256": "ed4acf5b6c82b9f2c0965e8390919f412dc376081dec41b9e2dcf1575292c753"
+      "bytes": 1473,
+      "sha256": "1d2bbc3d332e40c165a24cdfa6f28d43fe0fd7c942b0ff5bcc1b5aeb3f7c75e0"
     },
     "tests/data/lite_golden/golden_tensors.npz": {
       "bytes": 47503,
@@ -67,12 +67,13 @@
   },
   "blocking_gates": [
     "independent task PRs are not yet created",
-    "the current checkout does not contain the other machine's Vivado build log or non-ignored bitstream/XSA; local archived hashes are not independently reproducible as current-source evidence",
+    "the local current-source Vivado build passed, but no TurboVLA bit.bin/DTBO or restricted load service is available; the block design has no action MLP instance or DMA S2MM return path for full PL inference",
+    "post-route timing passes at the generated 96.974 MHz PL clock, not the documented 200 MHz timing target",
     "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-    "KR260 currently exposes the k26-starter-kits overlay; Hardware Manager has zero JTAG targets and board root access is unavailable, so bitstream load, PL DMA, and hardware inference are not_run"
+    "KR260 currently exposes the k26-starter-kits overlay; Hardware Manager has zero JTAG targets and noninteractive root access is unavailable, so TurboVLA bitstream load, PL DMA, and hardware inference are not_run"
   ],
   "hardware_bringup": "not_run",
-  "head_commit": "120c5f2446c3c605097f43b1cf521592ccc72325",
+  "head_commit": "f52534cc670b773f8a50aa83ff178df100e16db1",
   "platform": "kr260-k26",
   "release_status": "blocked_by_acceptance_gates",
   "tasks": [

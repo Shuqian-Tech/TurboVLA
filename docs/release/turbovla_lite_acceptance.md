@@ -14,9 +14,8 @@ parameter-pack export, portable and Vitis HLS C kernel simulations, runtime
 model, replay, and safety replay evidence. GEMM/Conv, action MLP, and staged
 gated-fusion RTL co-simulation have passed. The project is not marked
 `accepted` or `done` because independent task PRs are not yet created, formal
-teacher/LIBERO training data is absent, the current checkout cannot independently
-verify the other machine's current-source Vivado bitstream/XSA and build log,
-and KR260 hardware bring-up is `not_run`.
+teacher/LIBERO training data is absent, the current Block Design lacks action
+MLP and a DMA S2MM return path, and KR260 hardware bring-up is `not_run`.
 
 ## Thermo-Nuclear Review
 
@@ -32,10 +31,12 @@ The machine-readable artifact and task status index is
 `docs/release/turbovla_lite_release_manifest.json`. The recorded software
 checks include Python unit tests, `g++ -Werror` C simulations, Vitis HLS C
 simulation, ruff checks, contract/register-map validation, deterministic replay,
-and 1000-cycle safety replay. The local Vivado report manifest and archived
-bitstream/XSA remain software-only artifacts; because the current-source build
-log and non-ignored outputs from the other machine are not present here, they
-are not treated as independently reproducible release evidence. The board
-probe found the `k26-starter-kits` overlay, no TurboVLA device-tree nodes, and
-zero local JTAG targets. Hardware Manager, TurboVLA bitstream load, PL DMA,
-hardware inference, and KR260 30-minute stability remain `not_run`.
+and 1000-cycle safety replay. The local current-source Vivado synthesis,
+implementation, post-route, bitstream, and XSA run passed with WNS 3.476 ns;
+its bitstream and XSA have reproducible local checksums. The reported PL clock
+is 96.974 MHz, not a 200 MHz acceptance result. Power is a vectorless estimate
+with a reset-activity warning, and CDC skips unconstrained input ports. The
+board probe found the `k26-starter-kits` overlay, no TurboVLA device-tree nodes,
+and zero local JTAG targets. There is no matching `.bit.bin/.dtbo` or complete
+PL action-output chain; TurboVLA bitstream load, PL DMA, hardware inference,
+and KR260 30-minute stability remain `not_run`.

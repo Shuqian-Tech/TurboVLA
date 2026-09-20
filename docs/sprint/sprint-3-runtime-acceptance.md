@@ -16,7 +16,7 @@
 
 当前执行任务：[T012：最终 thermo-nuclear 审查与发布归档](../tasks/T012-final-acceptance.md)
 
-执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（Draft PR #1、发布 manifest、分阶段 gated-fusion co-sim 和 board probe 记录已生成）。当前源码 Vivado 2025.1 全量重建由另一台机器声明完成，但本 checkout 的二进制/日志不可复核；板端仍为 starter-kit overlay，硬件 bring-up 仍为 `not_run`。
+执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（Draft PR #1、发布 manifest、分阶段 gated-fusion co-sim 和 board probe 记录已生成）。当前源码 Vivado 2025.1 全量重建已在本机完成，日志 `/tmp/turbovla-current-build.3zY7TN/vivado-current.log`，bitstream/XSA 可本地复核；板端仍为 starter-kit overlay，缺匹配的 `.bit.bin/.dtbo` 和完整 PL action 输出链，硬件 bring-up 仍为 `not_run`。
 
 ## 进入条件
 

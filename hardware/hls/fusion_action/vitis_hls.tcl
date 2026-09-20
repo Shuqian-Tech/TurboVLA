@@ -65,7 +65,9 @@ if {[info exists ::env(TURBOVLA_HLS_SYNTH)] && $::env(TURBOVLA_HLS_SYNTH) eq "1"
   set_part xck26-sfvc784-2LV-c
   csynth_design
   export_design -format ip_catalog -output [file normalize [file join $project_dir ip action_mlp]]
-  if {[info exists ::env(TURBOVLA_HLS_ALLOW_COSIM_FAILURE)] && $::env(TURBOVLA_HLS_ALLOW_COSIM_FAILURE) eq "1"} {
+  if {[info exists ::env(TURBOVLA_HLS_SKIP_ACTION_COSIM)] && $::env(TURBOVLA_HLS_SKIP_ACTION_COSIM) eq "1"} {
+    puts "WARNING: action MLP co-simulation skipped for local synthesis and IP export"
+  } elseif {[info exists ::env(TURBOVLA_HLS_ALLOW_COSIM_FAILURE)] && $::env(TURBOVLA_HLS_ALLOW_COSIM_FAILURE) eq "1"} {
     if {[catch {turbovla_run_cosim $project_dir} cosim_error]} {
       puts "WARNING: Action MLP co-simulation failed after synthesis: $cosim_error"
     }

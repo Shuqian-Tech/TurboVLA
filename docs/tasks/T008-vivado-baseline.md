@@ -14,7 +14,7 @@
 - report template：`hardware/vivado_kr260/report_manifest.template.json`
 - report archive：`hardware/vivado_kr260/reports/`
 - validator：`tools/validate_vivado_baseline.py`
-- 当前状态：真实 KR260/K26 baseline 已归档；它早于 `tanh_q15` 负数插值修正，结果 manifest 已标记 `rebuild_required`
+- 当前状态：本机已从当前源码重建 KR260/K26 software-only baseline；仍无实机加载证据
 - 硬件 bring-up：`not_run`
 
 ## 验证记录
@@ -25,7 +25,9 @@
 - `vivado -version`：通过，wrapper 已指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado/bin/vivado`（v2025.1）
 - `vivado -mode batch -source hardware/vivado_kr260/build.tcl -nolog -nojournal -notrace`：通过；完整日志：`/tmp/turbovla-vivado-build-final.log`
 - bitstream、XSA、post-route timing、utilization、power、CDC：通过；WNS `3.512 ns`、TNS `0`、WHS `0.010 ns`、THS `0`、power `2.742 W`、CDC critical `0`
-- 当前源码全量 Vivado 重建：本机在 block-design generation 后按用户要求停止，以释放内存；待另一台机器执行
+- 当前源码本机重建：`/tmp/turbovla-current-build.3zY7TN/vivado-current.log` 返回 0；synthesis、implementation、post-route、bitstream、XSA 通过，WNS `3.476 ns`、TNS `0`、WHS `0.010 ns`、THS `0`；LUT `19.88%`、FF `13.25%`、DSP `2.00%`、BRAM `5.21%`、URAM `0%`；功耗估算 `2.741 W`
+- 本次软件时钟 `clk_pl_0=96.974 MHz`，不能据此宣称 200 MHz；功耗为 medium-confidence vectorless 估算并提示 reset 活动可能影响精度；CDC 报告未列 crossing 违规，但未约束输入端口被跳过
+- bitstream SHA256 `c31f375d5f604d3fb57c890c986665e6a05f1f5d2c3749140f8f90dde9e2a2c6`；XSA SHA256 `7566e039aa4776f43d41509c34def2129338026d93a9caf48b40aeae13282438`
 
 ## Thermo-Nuclear Review（中间审查）
 
@@ -34,8 +36,8 @@
 - review 结果：`PASS_WITH_PR_GATE`
 - 结构检查：报告模板、归档说明和 validator 分离；无巨型 Tcl 或临时条件分支
 - code-judo 检查：同一 manifest 同时承载平台、artifact、timing、资源和 power 门禁，避免多个互相漂移的阈值文件
-- blocking findings：无代码 blocking finding；当前源码的 post-route/bitstream/XSA 重建以及板端 bring-up 尚未运行
-- disposition：回到 `in_progress`，等待另一台机器完成全量 Vivado 重建
+- blocking findings：无代码 blocking finding；本机当前源码 Vivado 重建已完成，但仅在 `96.974 MHz` 下有 post-route 正余量；200 MHz 目标、实机 bring-up 和独立任务 PR 尚未运行
+- disposition：保持 `in_progress`，本地软件构建证据通过但不替代板端或 PR gate
 
 ## 任务要求
 

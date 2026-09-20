@@ -16,7 +16,7 @@
 
 当前执行任务：[T008：完成综合、布局布线和报告基线](../tasks/T008-vivado-baseline.md)
 
-执行进度：T005 `in_review`（GEMM/Conv HLS synthesis、IP export、RTL co-sim 通过）；T006 `in_review`（fusion/action C simulation、synthesis/IP export、action RTL co-sim 通过；gated-fusion case 0/1 已分阶段完成 RTL co-sim，日志 `/tmp/turbovla-fusion-cosim-upgraded.log`）；T007/T008 `in_progress`（当前源码 Vivado 全量重建、post-route、bitstream 和 XSA 已通过）；Sprint 1 T001-T004 的 PR/正式训练门仍未闭合。
+执行进度：T005 `in_review`（本机 GEMM/Conv HLS synthesis、IP export、RTL co-sim 通过）；T006 `in_review`（本机 fusion/action synthesis/IP export 通过；gated-fusion case 0/1 和 action RTL co-sim 由扩容主机完成，本机因 31 GiB RAM 跳过）；T007/T008 `in_progress`（本机当前源码 Vivado 全量重建、post-route、bitstream 和 XSA 通过，日志 `/tmp/turbovla-current-build.3zY7TN/vivado-current.log`）；板端加载及 Sprint 1 T001-T004 的 PR/正式训练门仍未闭合。
 
 ## 进入条件
 
