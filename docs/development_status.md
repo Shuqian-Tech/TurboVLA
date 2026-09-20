@@ -40,20 +40,20 @@
 
 ## 未开始
 
-- [ ] T007-T008：当前 HLS 源码对应的 Vivado 全量重建待另一台机器执行
+- [x] T007-T008：当前 HLS 源码对应的 Vivado 全量重建、post-route 报告、bitstream 和 XSA 已完成
 - [ ] T009-T012：runtime、回放、闭环和发布验收
 
 ## 当前阻塞
 
-- Vivado v2025.1 已识别 `xck26-sfvc784-2LV-c`；旧源码的真实 block design validation、synthesis、implementation、post-route timing、bitstream 和 XSA 已完成，`tanh_q15` 修正后的全量重建待另一台机器执行。
+- Vivado v2025.1 已识别 `xck26-sfvc784-2LV-c`；当前源码的 block design validation、synthesis、implementation、post-route timing、bitstream 和 XSA 均已完成。
 - KR260 板端已完成非破坏性 SSH 可达性检查；不把该检查写成 bitstream load 或硬件 inference 证据。
 - 尚未拥有训练 checkpoint；T002 当前使用确定性占位 instruction table，正式表待 T003/T004 生成。
 - T003 当前只有确定性 smoke checkpoint；真实 teacher checkpoint、LIBERO 蒸馏数据和正式成功率尚未生成。
 - T004 当前参数包来自 smoke checkpoint；正式 student checkpoint 替换前不宣称发布参数包。
-- Vivado wrapper 已指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado/bin/vivado`；GEMM/Conv/action RTL co-sim 通过，gated-fusion C simulation、synthesis、IP export 通过，RTL co-sim deferred。
-- 已建立 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，并已标记当前源码 `rebuild_required`。
+- Vivado v2025.1 安装根目录为 `/home/frank/AMD/vivado/2025.01/2025.1`；GEMM/Conv/action RTL co-sim 通过。2026-09-20 原始双事务诊断运行完成第 1/2 事务后，XSIM 匿名 RSS 超过用户指定的 96 GiB 阈值并终止；随后加入 case 0/1 事务拆分和 `-wdb /dev/null` footprint 修复，并在扩容主机上完成完整流程：日志 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0/1 和 action MLP 均 `RTL Simulation : 1 / 1` 且 C post-check 通过。
+- 已建立当前源码对应的 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，状态为 `current_source_verified`。
 - upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 Draft PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已创建，T001-T011 的独立任务 PR 尚未创建。
-- Kria device package 的非交互 Add 已尝试，安装器因过期 AMD authentication token 拒绝下载；认证信息不写入仓库。
+- Kria device package 已由 `/home/frank/WholeFile/FPGAs_AdaptiveSoCs_Unified_SDI_2025.1_0530_0145` 的离线 2025.1 installer 非交互 Add 到现有 Vivado；Tcl 验证 `xck26-sfvc784-2LV-c` 与 `xilinx.com:kr260_som:part0:1.0/1.1` 可见。完整源码 Vivado 重建已完成；认证信息不写入仓库。
 
 ## T002 软件 reference 证据
 
@@ -83,13 +83,13 @@
 
 - `hardware/hls/gemm/gemm.cpp` 提供固定上界 INT8 GEMM 和 1x1 Conv，累加器为 INT32，支持 HLS AXI interface directives。
 - `python3 tools/run_gemm_csim.py`：通过；`g++ -std=c++17 -O2 -Wall -Wextra -Werror`。
-- Vitis HLS C simulation：T005 `gemm/conv C simulation passed`、T006 `fusion/action C simulation passed`；GEMM/Conv/action `COSIM 212-1000 PASS`，gated-fusion RTL co-sim deferred by XSIM resource behavior。硬件 bring-up：`not_run`。
+- Vitis HLS C simulation：T005 `gemm/conv C simulation passed`、T006 `fusion/action C simulation passed`；GEMM/Conv/action `COSIM 212-1000 PASS`。gated-fusion testbench 支持 `argv=0/1` 分事务运行，Tcl 自动关闭 WDB；完整 case 0/1 RTL co-sim 已通过并记录于 `/tmp/turbovla-fusion-cosim-upgraded.log`，硬件 bring-up：`not_run`。
 
 ## T008 baseline 证据
 
 - `hardware/vivado_kr260/report_manifest.template.json` 固定 KR260/K26、software-only 和 hardware `not_run` 语义；真实结果记录于 `hardware/vivado_kr260/report_manifest.json`。
-- `python3 tools/validate_vivado_baseline.py ... --allow-not-run`：通过；默认模式拒绝未完成的报告状态。
-- 归档 bitstream/XSA、post-route timing、utilization、power、CDC：此前通过；WNS `3.512 ns`、TNS `0`、WHS `0.010 ns`、THS `0`、功耗 `2.742 W`、CDC critical violations `0`。该 baseline 早于 `tanh_q15` 修正，当前源码必须重建。
+- `python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.json`：通过；当前源码 timing/utilization/power/CDC 均为 `passed`，hardware bring-up 仍单独保持 `not_run`。
+- 当前源码 bitstream/XSA、post-route timing、utilization、power、CDC：通过；WNS `3.476 ns`、TNS `0`、WHS `0.010 ns`、THS `0`、功耗 `2.741 W`、CDC critical violations `0`；LUT `19.88%`、FF `13.25%`、DSP `2.00%`、BRAM `5.21%`、URAM `0%`。
 
 ## T009 runtime 证据
 
@@ -113,16 +113,17 @@
 
 - `tools/generate_release_manifest.py` 生成 `docs/release/turbovla_lite_release_manifest.json`，收集 T001-T012 状态、当前 commit、artifact checksum 和阻塞 gate。
 - `docs/release/turbovla_lite_acceptance.md` 完成 thermo-nuclear 汇总，结果为 `BLOCKED_BY_ACCEPTANCE_GATES`。
-- 所有低内存 software-only C/Python replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据、gated-fusion RTL co-sim、当前源码全量 Vivado 重建和 KR260 hardware inference bring-up 仍未闭合。
+- 所有已运行的 software-only C/replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 仍未闭合。gated-fusion RTL co-sim 已通过，当前系统 bitstream/XSA 已准备好进入非破坏性板端测试流程。
+- 本机 system Python 回归复核因缺少 `torch` 有 1 个测试导入失败；此前带 PyTorch 的环境证据仍保留，但当前工作树未提供 `.venv`，因此不把本次复核写成全绿。
 
 ## T007 block design 证据
 
 - `hardware/vivado_kr260/` 已建立 KR260-only project/build Tcl、block design Tcl、200 MHz XDC 和 register map。
 - `python3 tools/validate_kr260_block_manifest.py`：通过，15 registers 与 T001 contract 一致。
-- Tcl 对缺少 T005/T006 packaged IP 直接 fail-fast；归档 KR260 block design/bitstream/XSA 曾成功，当前源码全量重建待执行，Hardware Manager/JTAG 和板端推理仍 `not_run`。
+- Tcl 对缺少 T005/T006 packaged IP 直接 fail-fast；当前源码 KR260 block design/bitstream/XSA 已成功，Hardware Manager/JTAG 和板端推理仍 `not_run`。
 
 ## T006 fusion/action 证据
 
 - `hardware/hls/fusion_action/fusion_action.cpp` 复用 T005 GEMM，实现固定 shape gated fusion、state projection 和 12x7 action MLP。
 - `python3 tools/run_fusion_action_csim.py`：通过；hard-sigmoid/tanh 路径和零权重 action 输出均验证。
-- HLS C simulation、synthesis、IP export 已通过；action RTL co-sim 通过，gated-fusion RTL co-sim deferred；当前 HLS IP 的 Vivado 全量重建待执行，硬件 bring-up 仍 `not_run`。
+- HLS C simulation、synthesis、IP export 已通过；action MLP RTL co-sim 通过（`/tmp/turbovla-fusion-skip-gated.log`，并在完整流程中复核）。gated-fusion case 0/1 已完成事务拆分和无 WDB launcher 修复后的 RTL co-sim；当前 HLS IP 的 Vivado 全量重建已通过，硬件 bring-up 仍 `not_run`。

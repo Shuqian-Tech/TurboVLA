@@ -18,14 +18,26 @@
 
 ## 验证记录
 
-- 全仓 Python unit tests：通过，9 tests
+- 全仓 Python unit tests：此前带 PyTorch 环境通过，9 tests
+- 本机当前环境复核：`python3 -m unittest discover -s tests -v` 运行了 8 个测试，其中 1 个因系统 Python 缺少 `torch` 导入失败；仓库要求的 `.venv` 在本机不存在，因此未将这次环境缺口伪装成通过。
 - T005 GEMM/Conv C simulation：通过
 - T006 fusion/action C simulation：通过
 - T009 runtime C simulation：通过
 - T010 deterministic replay：通过
 - T011 1000-cycle safety replay：通过
 - `ruff`：新增 Python 文件通过
-- Vitis HLS C simulation（T005/T006）：通过；GEMM/Conv/action RTL co-sim：通过；gated-fusion RTL co-sim：deferred；归档 Vivado baseline 通过但早于 `tanh_q15` 修正，当前源码全量重建待另一台机器执行；Hardware Manager/JTAG/hardware inference：`not_run`
+- KR260 device gate：使用 `/home/frank/WholeFile/FPGAs_AdaptiveSoCs_Unified_SDI_2025.1_0530_0145` 的离线 2025.1 installer 执行 `Add` 到 `/home/frank/AMD/vivado/2025.01`；Vivado Tcl `get_parts xck26-sfvc784-2LV-c` 返回 1 个精确匹配，`get_board_parts *kr260*` 返回 `xilinx.com:kr260_som:part0:1.0` 和 `1.1`；project smoke 创建成功并报告 `PROJECT_PART=xck26-sfvc784-2LV-c`。安装证据日志：`/tmp/turbovla-kria-add.log`、`/tmp/turbovla-vivado-device-check.log`、`/tmp/turbovla-device-smoke.K35df0/log`。
+- Vitis HLS C simulation（T005/T006）：通过；GEMM/Conv/action RTL co-sim：通过。2026-09-20 原始双事务诊断运行在日志 `/tmp/turbovla-fusion-cosim-full.log` 完成第 1/2 事务后，`xsimk` 匿名 RSS 超过 96 GiB，按用户指定阈值终止；该日志不是通过证据。扩容及修复后的完整流程 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0、case 1 和 action MLP 均报告 `RTL Simulation : 1 / 1 [100.00%]` 并完成 C post-check；Hardware Manager/JTAG/hardware inference：`not_run`
+- gated-fusion co-sim 修复：testbench 支持 `argv` case 0/1；Tcl 对两个 case 分别 setup/run，并将 XSIM launcher 注入 `-wdb /dev/null` 以避免 WDB 无界积累。修复后的完整 RTL co-sim 已在扩容主机完成，日志记录三个独立 XSIM 峰值约 `84057088 KB` 且进程均正常退出。
+- 当前源码 Vivado 2025.1 全量重建：通过；日志 `/tmp/turbovla-vivado-current.log`；器件 `xck26-sfvc784-2LV-c`；post-route WNS `3.476 ns`、TNS `0`、WHS `0.010 ns`、THS `0`；LUT `19.88%`、FF `13.25%`、DSP `2.00%`、BRAM `5.21%`、URAM `0%`；功耗 `2.741 W`；CDC critical violations `0`；bitstream/XSA 已生成于 `hardware/vivado_kr260/build/`
+- gated-fusion 跳过后的 action MLP 独立 synthesis、IP export 和 RTL co-sim：通过；历史日志 `/tmp/turbovla-fusion-skip-gated.log`，`RTL Simulation : 1 / 1`，`COSIM 212-1000 PASS`；完整流程中的 action MLP 结果见 `/tmp/turbovla-fusion-cosim-upgraded.log`
+- 首次 FPGA 测试准备 artifact：`hardware/vivado_kr260/build/turbovla_kr260.bit`（SHA256 `c61ce3c97acaeabe2d57d1c50a657d64181807efc4a24fd81541245a6c049c79`）、`hardware/vivado_kr260/build/turbovla_kr260.xsa`（SHA256 `0cea12b20853ab22f9b532347678f25054aa5b8f9fcc44505fea6b0ab02fe83a`）、当前参数包和 `docs/release/turbovla_lite_release_manifest.json`
+
+## 首次 FPGA 测试准备状态
+
+- 已准备：KR260/K26 bitstream、XSA、Vivado post-route 报告、寄存器表、runtime/replay model、参数包 checksum。
+- 首次加载前必须在 Hardware Manager 确认 active device 为 `xck26-sfvc784-2LV-c`，核对 bitstream/XSA SHA256，并保留下载日志。
+- 当前状态：bitstream load、Hardware Manager/JTAG、PL DMA、硬件 inference 和 30 分钟稳定性仍为 `not_run`；SSH/JTAG 失败不能被软件报告替代。
 - 独立 PR：T012 Draft PR #1 已创建；T001-T011 的独立任务 PR 仍待创建
 
 ## Thermo-Nuclear Review
@@ -37,8 +49,8 @@
 - code-judo 检查：T005 GEMM 被 T006 复用；contract/register map/manifest 避免重复 shape、offset 和 checksum 定义
 - 本次增量检查（当前 `task/T012-final-acceptance` 分支与工作树 diff）：HLS launcher 61 行，两个 kernel Tcl 分别覆盖 GEMM/1x1 Conv 与 gated fusion/action MLP solution；无源码文件超过 1k 行，无新增 fallback 或散落的板卡分支
 - 审查 finding：`tanh_q15` 的负小数区间最初受 C++ 向零整除影响；已改为显式 floor 区间并增加 `-1.5/+1.5` 回归用例，`python3 tools/run_fusion_action_csim.py` 通过
-- blocking findings：独立任务 PR、正式 teacher/LIBERO 数据、gated-fusion RTL co-sim、当前源码 Vivado 全量重建和 KR260 hardware inference bring-up 未完成
-- disposition：保留 `in_progress`；低内存软件/HLS gate 已通过，重型 Vivado gate 交接到另一台机器，不把旧 baseline 写成当前源码通过
+- blocking findings：独立任务 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 未完成；KR260 device package 及当前源码 Vivado gate 已闭合
+- disposition：保留 `in_progress`；gated-fusion 分阶段 co-sim 已通过并归档，bitstream/XSA 可进入后续非破坏性板端加载准备
 
 ## 任务要求
 

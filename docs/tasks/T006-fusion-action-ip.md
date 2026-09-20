@@ -24,8 +24,11 @@
 - `ruff check hardware/hls/fusion_action tools/run_fusion_action_csim.py`：通过
 - `TURBOVLA_LOCALE_ROOT=/tmp/turbovla-repo-locale tools/run_vitis_hls.sh hardware/hls/fusion_action/vitis_hls.tcl`：通过，Vitis HLS C simulation 输出 `fusion/action C simulation passed`
 - `TURBOVLA_HLS_SYNTH=1 tools/run_vitis_hls.sh hardware/hls/fusion_action/vitis_hls.tcl`：fusion/action synthesis、IP export 通过
-- action MLP RTL co-simulation：`COSIM 212-1000 PASS`；gated-fusion RTL co-sim deferred because the XSIM wrapper grows without bounded completion, not claimed as pass
-- Vivado system synthesis/implementation/post-route：归档 baseline 通过；`tanh_q15` 修正后的系统重建待另一台机器执行
+- action MLP RTL co-simulation：`COSIM 212-1000 PASS`（此前 `/tmp/turbovla-fusion-skip-gated.log`，本次完整流程再次通过）
+- 2026-09-20 co-sim 诊断：原始双事务运行在 `/tmp/turbovla-fusion-cosim-full.log` 完成第 1/2 事务后，`xsimk` 匿名 RSS 超过 96 GiB，按安全阈值终止；该日志不是通过证据。
+- co-sim 修复已落地：`tb_fusion_action.cpp` 支持 `argv` 选择 case 0/1，Tcl 对每个 case 独立 `cosim_design -setup`/post-check，并将生成的 XSIM launcher 设置为 `-wdb /dev/null`；默认 C simulation 仍覆盖两个 case。
+- 修复验证：`python3 tools/run_fusion_action_csim.py`、`/tmp/turbovla-fusion-tb 0`、`/tmp/turbovla-fusion-tb 1` 均通过；扩容后的完整流程 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0 和 case 1 均报告 `RTL Simulation : 1 / 1 [100.00%]`、C post-check 通过；每个独立 XSIM 峰值约 `84057088 KB`，action MLP 同样完成 `1 / 1` 和 post-check。
+- Vivado system synthesis/implementation/post-route：当前源码 KR260 全量重建通过；bitstream/XSA 和 post-route 报告位于 `hardware/vivado_kr260/build/`
 - action output shape：固定 `12x7`
 
 ## Thermo-Nuclear Review（中间审查）
@@ -35,8 +38,8 @@
 - review 结果：`PASS_WITH_COSIM_GATE`
 - 结构检查：fusion 负责 gated mixing，action MLP 只负责 state/pool/projection；GEMM 由 T005 统一复用
 - code-judo 检查：没有引入 attention/softmax 模式开关；固定 shape 和 hard nonlinearity 保持单一路径
-- blocking findings：无代码 blocking finding；gated-fusion RTL co-sim deferred，独立 PR 尚未创建
-- disposition：进入 `in_review`；不得把 deferred co-sim 写成通过
+- blocking findings：无代码 blocking finding；独立 PR 尚未创建
+- disposition：保持 `in_review`；case 0/1 分阶段 RTL co-sim 和 action MLP 已以完整日志闭合，硬件 bring-up 与独立 PR 仍待后续验收
 
 ## 任务要求
 
