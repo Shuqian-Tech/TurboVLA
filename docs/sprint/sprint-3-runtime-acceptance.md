@@ -1,10 +1,10 @@
 # Sprint 3：Runtime、闭环与发布验收
 
-- 状态：`planned`
+- 状态：`in_progress`
 - 目标：先完成无 CPU inference fallback 的软件 runtime、回放和 Vivado 证据归档；实机闭环作为 board-ready 后的追加 gate
 - 平台：KR260/K26，Vivado bitstream + PS runtime
-- Sprint owner：待指定
-- 开始时间：待指定
+- Sprint owner：Codex
+- 开始时间：2026-09-19
 - 结束时间：待指定
 
 ## 任务
@@ -13,6 +13,10 @@
 - [T010：实现数据回放与数值对齐测试](../tasks/T010-replay-validation.md)
 - [T011：完成机器人闭环与稳定性测试](../tasks/T011-closed-loop-stability.md)
 - [T012：最终 thermo-nuclear 审查与发布归档](../tasks/T012-final-acceptance.md)
+
+当前执行任务：[T009：实现 PS DMA/AXI-Lite Runtime](../tasks/T009-ps-runtime.md)
+
+执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010-T012 尚未开始。Sprint 2 Vivado post-route 门仍待工具恢复。
 
 ## 进入条件
 

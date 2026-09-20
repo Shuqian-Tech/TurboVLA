@@ -5,8 +5,8 @@
 - 更新时间：2026-09-19
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
-- 当前 Sprint：[Sprint 2：PL Kernel 与 Vivado Block Design](sprint/sprint-2-pl-kernels.md)
-- 当前任务：[T008：完成综合、布局布线和报告基线](tasks/T008-vivado-baseline.md)（`in_progress`）
+- 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)
+- 当前任务：[T009：实现 PS DMA/AXI-Lite Runtime](tasks/T009-ps-runtime.md)（`in_progress`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
@@ -33,6 +33,7 @@
 - [ ] T006：实现 Fusion 与 Action MLP IP（`in_progress`）
 - [ ] T007：搭建 KR260 Vivado Block Design（`in_progress`）
 - [ ] T008：完成综合、布局布线和报告基线（`in_progress`）
+- [ ] T009：实现 PS DMA/AXI-Lite Runtime（`in_progress`）
 
 ## 未开始
 
@@ -86,6 +87,12 @@
 - `hardware/vivado_kr260/report_manifest.template.json` 固定 KR260/K26、software-only 和 hardware `not_run` 语义。
 - `python3 tools/validate_vivado_baseline.py ... --allow-not-run`：通过；默认模式拒绝未完成的报告状态。
 - 真实 bitstream/XSA、post-route timing、utilization、power、CDC：`not_run`，不使用模板冒充结果。
+
+## T009 runtime 证据
+
+- `runtime/` 提供 host/replay C++ register/DMA model；runtime 通过显式 PL executor 接口运行，不包含 CPU inference fallback。
+- `python3 tools/run_runtime_csim.py`：通过；正常提交、版本拒绝、instruction 越界和 DMA timeout 均验证。
+- 实机 DMA/cache/interrupt 和 Hardware Manager：`not_run`。
 
 ## T007 block design 证据
 
