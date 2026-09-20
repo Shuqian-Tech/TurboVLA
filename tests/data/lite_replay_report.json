@@ -1,0 +1,94 @@
+{
+  "action_error": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "bundle": "tests/data/lite_golden/golden_tensors.npz",
+  "hardware_bringup": "not_run",
+  "latency_ms": {
+    "fp32": {
+      "p50_ms": 0.9906400009640492,
+      "p99_ms": 3.4619075979571794
+    },
+    "int8": {
+      "p50_ms": 5.653428997902665,
+      "p99_ms": 7.7418724619201384
+    }
+  },
+  "layers": {
+    "fp32:action": {
+      "max_abs_error": 2.7939677238464355e-09,
+      "mean_abs_error": 8.904386117336571e-10
+    },
+    "fp32:action_hidden": {
+      "max_abs_error": 1.4901161193847656e-08,
+      "mean_abs_error": 9.713403414934874e-10
+    },
+    "fp32:fusion_0": {
+      "max_abs_error": 7.450580596923828e-09,
+      "mean_abs_error": 1.2173781982482978e-09
+    },
+    "fp32:fusion_1": {
+      "max_abs_error": 7.450580596923828e-09,
+      "mean_abs_error": 1.4918839497113368e-09
+    },
+    "fp32:image_normalized": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "fp32:language_embedding": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "fp32:state_projection": {
+      "max_abs_error": 7.450580596923828e-09,
+      "mean_abs_error": 4.911271389573812e-10
+    },
+    "fp32:visual_conv": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "fp32:visual_tokens": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "int8:action": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "int8:action_hidden": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "int8:fusion_0": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "int8:fusion_1": {
+      "max_abs_error": 3.725290298461914e-09,
+      "mean_abs_error": 9.662812772148754e-10
+    },
+    "int8:image_normalized": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "int8:language_embedding": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "int8:state_projection": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "int8:visual_conv": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    },
+    "int8:visual_tokens": {
+      "max_abs_error": 0.0,
+      "mean_abs_error": 0.0
+    }
+  },
+  "sample_count": 1,
+  "verification_mode": "software_only"
+}

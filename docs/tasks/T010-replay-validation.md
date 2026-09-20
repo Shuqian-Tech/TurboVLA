@@ -1,11 +1,39 @@
 # T010：实现数据回放与数值对齐测试
 
-- 状态：`planned`
+- 状态：`in_progress`
 - Sprint：Sprint 3
 - 分支：`task/T010-replay-validation`
 - PR：待创建
 - 依赖：T009
 - 验收 skill：`thermo-nuclear-code-quality-review`
+
+## 当前执行记录
+
+- 开始时间：2026-09-19
+- 当前分支：`task/T010-replay-validation`
+- replay runner：`tools/run_lite_replay.py`
+- 输入 bundle：`tests/data/lite_golden/golden_tensors.npz`
+- 输出报告：`tests/data/lite_replay_report.json`
+- verification mode：`software_only`；hardware bring-up：`not_run`
+
+## 验证记录
+
+- `PYTHONPATH=. .venv/bin/python tools/run_lite_replay.py --bundle tests/data/lite_golden/golden_tensors.npz --output tests/data/lite_replay_report.json --repeats 10`：通过
+- FP32/INT8 每层 shape 与 golden：通过
+- INT8 action replay：`max_abs_error=0.0`，`mean_abs_error=0.0`
+- software-only latency：FP32 p50/p99 `0.9769/2.4611 ms`；INT8 p50/p99 `5.7439/9.0162 ms`
+- `ruff check tools/run_lite_replay.py`：通过
+- HLS/RTL/Vivado target replay 和实机回放：`not_run`
+
+## Thermo-Nuclear Review（中间审查）
+
+- review 时间：2026-09-19
+- reviewer：Codex
+- review 结果：`PASS_WITH_HARDWARE_GATE`
+- 结构检查：bundle loader、逐层 comparator、latency recorder 和 report writer 在一个无隐式状态的 replay flow 中完成
+- code-judo 检查：FP32/INT8 通过同一 `replay_bundle` 路径分派，不复制 golden parser 或手工修正输出
+- blocking findings：无代码 blocking finding；硬件 kernel/Vivado replay 尚未可运行
+- disposition：保留 `in_progress`，待 T005-T008 工具链和真实 PL capture 接入
 
 ## 任务要求
 

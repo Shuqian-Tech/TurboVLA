@@ -14,9 +14,9 @@
 - [T011：完成机器人闭环与稳定性测试](../tasks/T011-closed-loop-stability.md)
 - [T012：最终 thermo-nuclear 审查与发布归档](../tasks/T012-final-acceptance.md)
 
-当前执行任务：[T009：实现 PS DMA/AXI-Lite Runtime](../tasks/T009-ps-runtime.md)
+当前执行任务：[T010：实现数据回放与数值对齐测试](../tasks/T010-replay-validation.md)
 
-执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010-T012 尚未开始。Sprint 2 Vivado post-route 门仍待工具恢复。
+执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011-T012 尚未开始。Sprint 2 Vivado post-route 门仍待工具恢复。
 
 ## 进入条件
 

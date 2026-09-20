@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)
-- 当前任务：[T009：实现 PS DMA/AXI-Lite Runtime](tasks/T009-ps-runtime.md)（`in_progress`）
+- 当前任务：[T010：实现数据回放与数值对齐测试](tasks/T010-replay-validation.md)（`in_progress`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`ubuntu@192.168.68.123`（不在仓库保存凭据）
@@ -34,6 +34,7 @@
 - [ ] T007：搭建 KR260 Vivado Block Design（`in_progress`）
 - [ ] T008：完成综合、布局布线和报告基线（`in_progress`）
 - [ ] T009：实现 PS DMA/AXI-Lite Runtime（`in_progress`）
+- [ ] T010：实现数据回放与数值对齐测试（`in_progress`）
 
 ## 未开始
 
@@ -93,6 +94,12 @@
 - `runtime/` 提供 host/replay C++ register/DMA model；runtime 通过显式 PL executor 接口运行，不包含 CPU inference fallback。
 - `python3 tools/run_runtime_csim.py`：通过；正常提交、版本拒绝、instruction 越界和 DMA timeout 均验证。
 - 实机 DMA/cache/interrupt 和 Hardware Manager：`not_run`。
+
+## T010 replay 证据
+
+- `tools/run_lite_replay.py` 从 T002 golden bundle 重放 FP32/INT8 reference，自动比较每层和 action，不允许手工跳过样本。
+- `tests/data/lite_replay_report.json`：INT8 action replay `max_abs_error=0.0`、`mean_abs_error=0.0`；software-only INT8 p50/p99 `5.7439/9.0162 ms`。
+- HLS/RTL/Vivado target replay、DDR 带宽和实机回放：`not_run`。
 
 ## T007 block design 证据
 
