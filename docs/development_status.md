@@ -125,6 +125,7 @@
 - 2026-09-21 项目 owner 将 T013 首版上板的 WNS/TNS 改为 reporting-only；任何负 slack 只允许以 `bringup_owner_waived` 进入 bring-up，报告不得写成 timing clean，发布验收前仍必须完成时序收敛。
 - T013 200 MHz Vivado backend 已完成：post-route WNS `+0.002 ns`、TNS `0`、WHS `+0.010 ns`、THS `0`，LUT `29.29%`、FF `16.46%`、DSP `13.46%`、BRAM `5.21%`、估算功耗 `3.185 W`；bitstream/XSA 已生成。
 - KR260 首次完整 PL inference 已通过，84 个 action 与 golden 对齐（max absolute error `1.86265e-09`、mean absolute error `4.14556e-10`）。首次锁机根因是旧 DTBO 的 `generic-uio` 不会启用 PL0 clock；commit `ee22fc1` 增加 `xlnx,fclk` consumer，overlay 从 `CLKACT=0` 加载后自动得到 `pl0_ref enable_count=1`，probe/full inference 均无需手写寄存器。证据见 `hardware/vivado_kr260/reports/t013_board_bringup.md`。
+- 2026-09-21 追加 12-sample live load capture：12/12 次 PL inference 成功；`Temp_PL` 29.003-31.396 C，INA260 board power 3.350-3.440 W，VCCINT 719-721 mV，VCCBRAM 841-846 mV；overlay、FPGA manager 和 PL0 clock 全程稳定。原始数据见 `hardware/vivado_kr260/reports/t013_board_live_sample.csv`，统计与边界说明见同目录 Markdown。
 - T013 exact-vector RTL co-sim 在 exact commit `dc31221` 完成 `2/2`，C post-check parity 与 invalid-instruction gate 通过，runner exit 0；30 分钟板端运行完成 17,019 次完整 parity 检查，温度/功耗稳定。最终 thermo-nuclear review 为 `PASS`，无剩余 blocking finding；任务进入 `in_review`，等待 PR #2 review/merge。
 
 ## T007 block design 证据
