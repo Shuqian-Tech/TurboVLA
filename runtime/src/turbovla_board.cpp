@@ -33,6 +33,7 @@ using turbovla::runtime::PlArenaExecutor;
 using turbovla::runtime::VolatileRegisterIo;
 using turbovla::runtime::kActionValues;
 using turbovla::runtime::kArenaBytes;
+using turbovla::runtime::kControlOffset;
 using turbovla::runtime::kImageBytes;
 using turbovla::runtime::kModelBytes;
 using turbovla::runtime::kStateValues;
@@ -179,19 +180,34 @@ class XrtArena final : public CacheMaintenance {
   std::uint64_t address_ = 0;
 };
 
-int run(const fs::path& fixture, const std::string& uio_name) {
+int run(const fs::path& fixture, const std::string& uio_name, bool probe_only) {
   const auto model = read_file(fixture / "model.bin", kModelBytes);
   const auto image = read_file(fixture / "image.bin", kImageBytes);
   const auto state = read_file(fixture / "state.bin", kStateValues * sizeof(std::int16_t));
   const auto instruction = read_file(fixture / "instruction_id.bin", sizeof(std::uint16_t));
   const auto expected_bytes = read_file(fixture / "action.bin", kActionValues * sizeof(float));
 
+  std::cout << "KR260 board stage=open_uio name=" << uio_name << std::endl;
   UioRegisters mapped_registers(uio_name);
   VolatileRegisterIo registers(mapped_registers.data(), mapped_registers.words());
+  std::cout << "KR260 board stage=uio_ready control=0x" << std::hex
+            << registers.read32(kControlOffset) << std::dec << std::endl;
+
+  std::cout << "KR260 board stage=open_xrt" << std::endl;
   XrtArena arena;
+  const auto arena_buffer = arena.arena();
+  std::cout << "KR260 board stage=xrt_ready arena_address=0x" << std::hex
+            << arena_buffer.physical_address << std::dec << " arena_bytes=" << arena_buffer.bytes
+            << std::endl;
   PlArenaExecutor executor(arena.arena(), registers, arena);
   if (executor.load_model(model.data(), model.size()) != ErrorCode::kNone) {
     throw std::runtime_error("model contract rejected before board execution");
+  }
+  std::cout << "KR260 board stage=model_ready" << std::endl;
+
+  if (probe_only) {
+    std::cout << "KR260 board probe passed; PL start not issued" << std::endl;
+    return 0;
   }
 
   FrameInput input;
@@ -201,7 +217,10 @@ int run(const fs::path& fixture, const std::string& uio_name) {
                          (static_cast<std::uint16_t>(instruction[1]) << 8U);
 
   ActionOutput output;
+  std::cout << "KR260 board stage=start_pl" << std::endl;
   const auto result = executor.run(input, output, kBoardTimeoutPolls);
+  std::cout << "KR260 board stage=pl_return result=" << static_cast<std::uint32_t>(result)
+            << std::endl;
   if (result != ErrorCode::kNone) {
     throw std::runtime_error("PL inference failed with error " +
                              std::to_string(static_cast<std::uint32_t>(result)));
@@ -228,12 +247,27 @@ int run(const fs::path& fixture, const std::string& uio_name) {
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc < 2 || argc > 3) {
-    std::cerr << "usage: turbovla_board <fixture-dir> [uio-name]\n";
+  if (argc < 2 || argc > 4) {
+    std::cerr << "usage: turbovla_board <fixture-dir> [uio-name] [--probe-only]\n";
     return 2;
   }
+  std::string uio_name = "turbovla-lite-e2e";
+  bool uio_name_set = false;
+  bool probe_only = false;
+  for (int index = 2; index < argc; ++index) {
+    const std::string argument = argv[index];
+    if (argument == "--probe-only") {
+      probe_only = true;
+    } else if (!uio_name_set) {
+      uio_name = argument;
+      uio_name_set = true;
+    } else {
+      std::cerr << "usage: turbovla_board <fixture-dir> [uio-name] [--probe-only]\n";
+      return 2;
+    }
+  }
   try {
-    return run(argv[1], argc == 3 ? argv[2] : "turbovla-lite-e2e");
+    return run(argv[1], uio_name, probe_only);
   } catch (const std::exception& error) {
     std::cerr << "turbovla_board: " << error.what() << '\n';
     return 3;
