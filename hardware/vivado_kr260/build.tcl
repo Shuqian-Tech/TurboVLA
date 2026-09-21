@@ -17,6 +17,7 @@ add_files -norecurse [glob -nocomplain $project_dir/$project_name.gen/sources_1/
 update_compile_order -fileset sources_1
 launch_runs synth_1 -jobs 8
 wait_on_run synth_1
+set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
 launch_runs impl_1 -to_step write_bitstream -jobs 8
 wait_on_run impl_1
 open_run impl_1
