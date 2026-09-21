@@ -32,11 +32,19 @@ Complete the fixed-shape image/state/instruction-to-action inference path in PL,
 
 ## Changed Files
 
-- Pending implementation.
+- `hardware/hls/e2e/`: complete fixed-shape HLS top, model layout, parity testbench, and Vitis HLS flow.
+- `turbovla/lite_hardware_pack.py`, `tools/export_lite_hardware_fixture.py`: reproducible PL model/fixture export.
+- `runtime/`: contiguous arena, MMIO, cache maintenance, polling, version/error/sequence validation, and fake-device tests.
+- `hardware/contracts/turbovla_lite_contract.json`, `hardware/vivado_kr260/register_map.json`: v0.2 arena ABI.
+- `hardware/vivado_kr260/`: single-IP KR260 block design with one AXI4-MM path and interrupt.
 
 ## Validation Evidence
 
-- Pending implementation.
+- `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`: 11 tests passed.
+- `PYTHONPATH=. .venv/bin/python tools/run_e2e_csim.py`: 84 action values passed, max absolute error `1.86265e-09`, mean absolute error `4.14556e-10`.
+- `PYTHONPATH=. .venv/bin/python tools/run_runtime_csim.py`: arena/MMIO/cache path passed.
+- `tools/run_vitis_hls.sh hardware/hls/e2e/vitis_hls.tcl`: Vitis HLS 2025.1 C simulation passed on `xck26-sfvc784-2LV-c`.
+- HLS synthesis/IP export, RTL co-simulation, Vivado backend and board execution: pending exact-commit remote runs.
 
 ## Thermo-Nuclear Review
 

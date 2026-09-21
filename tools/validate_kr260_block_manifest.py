@@ -35,10 +35,13 @@ def main() -> int:
     for name, buffer in register_map["buffers"].items():
         if buffer["alignment_bytes"] != 64:
             raise AssertionError(f"buffer {name} is not 64-byte aligned")
+    if register_map["control_protocol"] != "ap_ctrl_hs":
+        raise AssertionError("runtime must use the HLS ap_ctrl_hs protocol")
+    if register_map["buffers"]["arena"]["size_bytes"] != 200320:
+        raise AssertionError("runtime arena size mismatch")
     print(f"validated KR260 block manifest with {len(actual)} registers")
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -1,5 +1,5 @@
 {
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "platform": "kr260-k26",
   "inference_location": "fpga_pl",
   "batch_size": 1,
@@ -72,33 +72,29 @@
     "zero_point": 0
   },
   "buffers": {
-    "image": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
-    "state": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
-    "instruction_id": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
-    "action": {"direction": "pl_to_ps", "alignment_bytes": 64, "cache": "invalidate_after_dma"}
+    "arena": {"direction": "bidirectional", "alignment_bytes": 64, "size_bytes": 200320},
+    "header": {"direction": "bidirectional", "alignment_bytes": 64, "offset": 0, "size_bytes": 64, "cache": "flush_before_start_invalidate_after_done"},
+    "image": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 64, "size_bytes": 49152, "cache": "flush_before_start"},
+    "state": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 49216, "size_bytes": 16, "cache": "flush_before_start"},
+    "model": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 49280, "size_bytes": 150656, "cache": "flush_after_load"},
+    "action": {"direction": "pl_to_ps", "alignment_bytes": 64, "offset": 199936, "size_bytes": 336, "cache": "invalidate_after_done"}
+  },
+  "arena_header": {
+    "magic": {"offset": 0, "value": "0x54564C41"},
+    "contract_version": {"offset": 4, "encoding": "major_minor_patch_8_8_16", "value": "0x00020000"},
+    "frame_sequence": {"offset": 8},
+    "instruction_id": {"offset": 12},
+    "completed_sequence": {"offset": 16},
+    "error_code": {"offset": 20},
+    "hardware_version": {"offset": 24, "value": "0x00020000"}
   },
   "registers": {
-    "control": {"offset": "0x00", "width_bits": 32, "write": ["start", "soft_reset"]},
-    "status": {"offset": "0x04", "width_bits": 32, "read": ["idle", "busy", "done", "error"]},
-    "error_code": {"offset": "0x08", "width_bits": 32, "read": true},
-    "contract_version": {
-      "offset": "0x0C",
-      "width_bits": 32,
-      "read": true,
-      "encoding": "major_minor_patch_8_8_16",
-      "value": "0x00010000"
-    },
-    "image_addr_lo": {"offset": "0x10", "width_bits": 32, "write": true},
-    "image_addr_hi": {"offset": "0x14", "width_bits": 32, "write": true},
-    "state_addr_lo": {"offset": "0x18", "width_bits": 32, "write": true},
-    "state_addr_hi": {"offset": "0x1C", "width_bits": 32, "write": true},
-    "instruction_addr_lo": {"offset": "0x20", "width_bits": 32, "write": true},
-    "instruction_addr_hi": {"offset": "0x24", "width_bits": 32, "write": true},
-    "action_addr_lo": {"offset": "0x28", "width_bits": 32, "write": true},
-    "action_addr_hi": {"offset": "0x2C", "width_bits": 32, "write": true},
-    "instruction_id": {"offset": "0x30", "width_bits": 32, "write": true},
-    "frame_sequence": {"offset": "0x34", "width_bits": 32, "write": true},
-    "error_clear": {"offset": "0x38", "width_bits": 32, "write": true}
+    "control": {"offset": "0x00", "width_bits": 32, "fields": ["start", "done", "idle", "ready", "auto_restart"]},
+    "global_interrupt_enable": {"offset": "0x04", "width_bits": 32},
+    "interrupt_enable": {"offset": "0x08", "width_bits": 32},
+    "interrupt_status": {"offset": "0x0C", "width_bits": 32},
+    "arena_addr_lo": {"offset": "0x10", "width_bits": 32},
+    "arena_addr_hi": {"offset": "0x14", "width_bits": 32}
   },
   "errors": {
     "none": 0,
