@@ -10,7 +10,7 @@
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`amd-edf@192.168.68.123`（passwordless key；不在仓库保存凭据）
-- 开发板状态：SSH 可达，`/dev/fpga0` 存在；bitstream load、Hardware Manager/JTAG 和硬件推理仍 `not_run`
+- 开发板状态：T013 bitstream/DTBO 已加载，Hardware Manager/JTAG AXI-Lite 读、runtime probe 和一次完整 PL 推理通过；84-value action parity 通过，30 分钟稳定性仍 `not_run`
 - 当前验证模式：纯软件 Vivado，目标器件仍固定为 KR260/K26
 - Vivado Hardware Manager：暂不作为 T001-T008 验证门；实机 bring-up 阶段再验证 active target/device
 - `fpl26` MCP：当前环境未发现资源或模板，后续可用时接入
@@ -123,6 +123,9 @@
 - 高内存 HLS/Vivado 作业固定在 `frank@192.168.68.119` 的隔离 worktree 运行，源代码只通过 GitHub branch/PR 交接；不会覆盖该机器现有 `/home/frank/TurboVLA` 脏工作区。
 - 当前正在用单一 HLS AXI4-MM/AXI-Lite top 替换未连接的 AXI DMA 与不完整 kernel 组合，并补齐真实 PS buffer/MMIO/cache runtime 边界和 84-value action parity。
 - 2026-09-21 项目 owner 将 T013 首版上板的 WNS/TNS 改为 reporting-only；任何负 slack 只允许以 `bringup_owner_waived` 进入 bring-up，报告不得写成 timing clean，发布验收前仍必须完成时序收敛。
+- T013 200 MHz Vivado backend 已完成：post-route WNS `+0.002 ns`、TNS `0`、WHS `+0.010 ns`、THS `0`，LUT `29.29%`、FF `16.46%`、DSP `13.46%`、BRAM `5.21%`、估算功耗 `3.185 W`；bitstream/XSA 已生成。
+- KR260 首次完整 PL inference 已通过，84 个 action 与 golden 对齐（max absolute error `1.86265e-09`、mean absolute error `4.14556e-10`）。首次锁机根因是旧 DTBO 的 `generic-uio` 不会启用 PL0 clock；commit `ee22fc1` 增加 `xlnx,fclk` consumer，overlay 从 `CLKACT=0` 加载后自动得到 `pl0_ref enable_count=1`，probe/full inference 均无需手写寄存器。证据见 `hardware/vivado_kr260/reports/t013_board_bringup.md`。
+- T013 exact-vector RTL co-sim 仍在 `frank@192.168.68.119` 运行；T013 最终 thermo-nuclear review 和 30 分钟硬件稳定性尚未完成。
 
 ## T007 block design 证据
 

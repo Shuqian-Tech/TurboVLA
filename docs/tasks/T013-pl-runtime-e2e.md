@@ -4,7 +4,7 @@
 - Branch: `task/T013-pl-runtime-e2e`
 - Pull request: [#2](https://github.com/Shuqian-Tech/TurboVLA/pull/2) (`draft`)
 - Platform: AMD Kria KR260/K26 (`xck26-sfvc784-2LV-c`)
-- Hardware bring-up: `not_run`
+- Hardware bring-up: `passed_one_shot` (84-value parity; 30-minute stability pending)
 - Started: 2026-09-20
 
 ## Objective
@@ -27,7 +27,7 @@ Complete the fixed-shape image/state/instruction-to-action inference path in PL,
 - Vivado block design contains the complete inference top, its AXI-Lite control, DDR master ports, and interrupt; there is no unused AXI DMA transport.
 - Vivado synthesis, implementation, post-route timing, resource, power, CDC, bitstream, and XSA results are recorded for KR260/K26. For the first board bring-up, the project owner explicitly made WNS/TNS reporting-only on 2026-09-21: any negative WNS must be recorded as `bringup_owner_waived`, never as timing clean or release timing closure. Timing closure remains required before release acceptance.
 - Runtime fake-MMIO tests prove buffer layout, address programming, cache direction, successful completion, contract rejection, and timeout/error behavior without CPU inference.
-- KR260 execution evidence is recorded separately and remains `not_run` until a compatible `.bit.bin`/device-tree overlay and non-destructive load procedure are available.
+- KR260 execution evidence is recorded separately and must remain `not_run` unless a compatible `.bit.bin`/device-tree overlay and non-destructive load procedure are available.
 - The task branch and PR pass `thermo-nuclear-code-quality-review` with every blocking finding resolved or owner-waived.
 
 ## Changed Files
@@ -44,7 +44,10 @@ Complete the fixed-shape image/state/instruction-to-action inference path in PL,
 - `PYTHONPATH=. .venv/bin/python tools/run_e2e_csim.py`: 84 action values passed, max absolute error `1.86265e-09`, mean absolute error `4.14556e-10`.
 - `PYTHONPATH=. .venv/bin/python tools/run_runtime_csim.py`: arena/MMIO/cache path passed.
 - `tools/run_vitis_hls.sh hardware/hls/e2e/vitis_hls.tcl`: Vitis HLS 2025.1 C simulation passed on `xck26-sfvc784-2LV-c`.
-- HLS synthesis/IP export, RTL co-simulation, Vivado backend and board execution: pending exact-commit remote runs.
+- HLS synthesis/IP export and the 200 MHz Vivado backend completed from commit `64acaa9`: post-route WNS `+0.002 ns`, TNS `0`, WHS `+0.010 ns`, THS `0`; bitstream and XSA were generated with zero errors/critical warnings. LUT `29.29%`, FF `16.46%`, DSP `13.46%`, BRAM `5.21%`, and estimated power `3.185 W`.
+- KR260 package load, JTAG AXI-Lite read, non-starting runtime probe, and full PL inference passed. All 84 action values matched the golden vector with max absolute error `1.86265e-09` and mean absolute error `4.14556e-10`. Evidence: `hardware/vivado_kr260/reports/t013_board_bringup.md`.
+- Board lockup root cause: the old `generic-uio` overlay referenced PL0 but did not enable it (`CLKACT=0`, `pl0_ref enable_count=0`). Commit `ee22fc1` adds an `xlnx,fclk` clock consumer; a cold overlay reload from an explicitly disabled PL0 state produced `enable_count=1`, restored JTAG control reads, and passed inference without manual register writes.
+- Exact-vector RTL co-simulation is still running on the high-memory host; final thermo-nuclear review remains pending that result.
 - Timing gate contract update (2026-09-21, project owner): first-board bring-up may proceed regardless of final WNS/TNS so the PS-to-PL path can be exercised. Negative slack is `bringup_owner_waived`, is not timing clean, and remains a release blocker to be optimized after the path is operational.
 - Cross-machine alignment: local and isolated remote worktrees use GitHub commit `b703e39`; pre-existing remote T012 edits are preserved at `archive/remote-t012-wip-20260920` (`52bcb81`). Only its previously missing `.119` Vitis discovery path was carried forward; stale report/status changes were not merged.
 
