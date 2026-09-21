@@ -2,7 +2,7 @@
 
 - Status: `in_progress`
 - Branch: `task/T013-pl-runtime-e2e`
-- Pull request: pending
+- Pull request: [#2](https://github.com/Shuqian-Tech/TurboVLA/pull/2) (`draft`)
 - Platform: AMD Kria KR260/K26 (`xck26-sfvc784-2LV-c`)
 - Hardware bring-up: `not_run`
 - Started: 2026-09-20
@@ -45,6 +45,7 @@ Complete the fixed-shape image/state/instruction-to-action inference path in PL,
 - `PYTHONPATH=. .venv/bin/python tools/run_runtime_csim.py`: arena/MMIO/cache path passed.
 - `tools/run_vitis_hls.sh hardware/hls/e2e/vitis_hls.tcl`: Vitis HLS 2025.1 C simulation passed on `xck26-sfvc784-2LV-c`.
 - HLS synthesis/IP export, RTL co-simulation, Vivado backend and board execution: pending exact-commit remote runs.
+- Cross-machine alignment: local and isolated remote worktrees use GitHub commit `b703e39`; pre-existing remote T012 edits are preserved at `archive/remote-t012-wip-20260920` (`52bcb81`). Only its previously missing `.119` Vitis discovery path was carried forward; stale report/status changes were not merged.
 
 ## Thermo-Nuclear Review
 

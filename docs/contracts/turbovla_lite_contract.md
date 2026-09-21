@@ -37,10 +37,10 @@ Runtime ABI `0.2.0` 使用一个 64-byte 对齐、200320-byte 的连续 arena。
 
 - 模型在初始化时写入 arena 并 flush 一次；每帧启动前分别 flush header、image 和 state；
 - 完成 interrupt 后 invalidate header 和 action，再读取 error、hardware version、completed sequence 和 84 个 action；
-- arena 的 64-bit DDR 物理地址写入 HLS `arena` pointer 的 low/high AXI-Lite register；
+- `0x10` 是 HLS `ap_return`；arena 的 64-bit DDR 物理地址写入 `0x18/0x1c` 的 low/high AXI-Lite register；
 - 控制采用 Vitis HLS 标准 `ap_ctrl_hs`，包括 start/done/idle/ready 和 GIE/IER/ISR；
 - `done` 只表示 action 和 completion header 已写完，不表示机器人已执行动作；
-- arena header 的 `error_code` 非零时，runtime 不返回 action；
+- `ap_return` 或 arena header 的 `error_code` 非零时，runtime 不返回 action；
 - `contract_version` 使用 `major_minor_patch_8_8_16` 编码；当前 `0.2.0` 对应 `0x00020000`；
 - request version、model version 或 PL 写回的 hardware version 不匹配时，runtime 必须拒绝该结果。
 

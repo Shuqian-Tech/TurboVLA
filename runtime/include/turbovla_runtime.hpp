@@ -25,8 +25,9 @@ constexpr std::uint32_t kControlOffset = 0x00;
 constexpr std::uint32_t kGlobalInterruptOffset = 0x04;
 constexpr std::uint32_t kInterruptEnableOffset = 0x08;
 constexpr std::uint32_t kInterruptStatusOffset = 0x0C;
-constexpr std::uint32_t kArenaAddressLowOffset = 0x10;
-constexpr std::uint32_t kArenaAddressHighOffset = 0x14;
+constexpr std::uint32_t kKernelReturnOffset = 0x10;
+constexpr std::uint32_t kArenaAddressLowOffset = 0x18;
+constexpr std::uint32_t kArenaAddressHighOffset = 0x1C;
 
 enum class ErrorCode : std::uint32_t {
   kNone = 0,

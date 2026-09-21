@@ -8,8 +8,9 @@
     "global_interrupt_enable": {"offset": "0x04", "access": "read_write"},
     "interrupt_enable": {"offset": "0x08", "access": "read_write"},
     "interrupt_status": {"offset": "0x0C", "access": "read_write_clear"},
-    "arena_addr_lo": {"offset": "0x10", "access": "write"},
-    "arena_addr_hi": {"offset": "0x14", "access": "write"}
+    "kernel_return": {"offset": "0x10", "access": "read"},
+    "arena_addr_lo": {"offset": "0x18", "access": "write"},
+    "arena_addr_hi": {"offset": "0x1C", "access": "write"}
   },
   "buffers": {
     "arena": {"direction": "bidirectional", "alignment_bytes": 64, "size_bytes": 200320},

@@ -109,8 +109,12 @@ ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, st
   cache_.invalidate(kActionOffset, kActionValues * sizeof(float));
 
   const auto error = static_cast<ErrorCode>(read_u32(arena_.data, kHeaderErrorCode));
+  const auto kernel_return = static_cast<ErrorCode>(registers_.read32(kKernelReturnOffset));
   if (error != ErrorCode::kNone) {
     return error;
+  }
+  if (kernel_return != ErrorCode::kNone) {
+    return kernel_return;
   }
   if (read_u32(arena_.data, kHeaderHardwareVersion) != kContractVersion) {
     return ErrorCode::kContractMismatch;
