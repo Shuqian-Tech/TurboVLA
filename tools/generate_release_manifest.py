@@ -71,14 +71,10 @@ def main() -> int:
         "tasks": tasks,
         "artifacts": artifacts,
         "blocking_gates": [
-            "independent task PRs are not yet created",
-            "the archived Vivado reports, bitstream, and XSA predate the tanh_q15 "
-            "negative-interpolation fix; a full rebuild is pending on another machine",
-            "gated-fusion RTL co-simulation remains deferred because the XSIM wrapper "
-            "grows beyond the available simulation resource budget; C simulation, "
-            "synthesis, and IP export pass",
-            "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-            "KR260 bitstream load, Hardware Manager/JTAG, and hardware inference are not_run",
+            "独立任务 PR 尚未全部创建",
+            "gated-fusion RTL co-sim 因 XSIM 在 0/2 事务处持续增长并超过可接受内存预算而延期；C simulation、synthesis 和 IP export 已通过",
+            "正式 T003 teacher/LIBERO 训练数据和成功率评估尚未提供",
+            "KR260 bitstream load、Hardware Manager/JTAG 和 hardware inference 仍为 not_run",
         ],
     }
     output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")

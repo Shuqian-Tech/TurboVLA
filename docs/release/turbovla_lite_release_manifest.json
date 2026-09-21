@@ -1,48 +1,48 @@
 {
   "artifacts": {
     "build/hls/fusion_action/ip/action_mlp.zip": {
-      "bytes": 514140,
-      "sha256": "6a13d6bd0af226cfd0511e354a05401c9dca1741234a6ceb1c217744e92df68a"
+      "bytes": 514136,
+      "sha256": "1baec325bbe497d980342b72a94ef5706c04deeeafcd112ef2ce7bc8af4da220"
     },
     "build/hls/fusion_action/ip/gated_fusion.zip": {
-      "bytes": 445975,
-      "sha256": "823aa84666e490680c988c18626e8625039bb110db29f6487cc7d4517f4b0b42"
+      "bytes": 445981,
+      "sha256": "66e594caf1252ed3aaf731b11830d29e69e742ae672f3554cdc665dca09962a8"
     },
     "build/hls/gemm/ip/conv1x1.zip": {
-      "bytes": 247279,
-      "sha256": "713798648274b7f118f6c00d117195470c4a4831054c96aabb7564d91a76c3f7"
+      "bytes": 247283,
+      "sha256": "a677751290ff7b39de69cc8de0a3d39359890c2c345d0008e64d006c8819e6d3"
     },
     "build/hls/gemm/ip/gemm.zip": {
-      "bytes": 246281,
-      "sha256": "a4bd91180ad5b31b217732ef73311914a4e01f4a375a48065fd99ef991906d7b"
+      "bytes": 246287,
+      "sha256": "ea2e84599eb3d51fd031e7657dcfba540c2bae1e0c535498cef5f88a3cb69988"
     },
     "hardware/vivado_kr260/build/cdc.rpt": {
-      "bytes": 949,
-      "sha256": "23e583e7f8f44e7e4c13963138b3ee21fda890046e5b5f6cf710a99688890c75"
+      "bytes": 929,
+      "sha256": "9c1033651f8f657868c2124f4b5d1ef998ad4c54b6f923d0fdcf5550a539afba"
     },
     "hardware/vivado_kr260/build/power.rpt": {
-      "bytes": 11950,
-      "sha256": "cda3748b745240bf880477145b9516d3b9aa9e18dac25e0e70a97f0ed3a30739"
+      "bytes": 11930,
+      "sha256": "0062a69e0c938761a4dcc42912fb5d1f60f5917aeb37294258da83220f62fa24"
     },
     "hardware/vivado_kr260/build/timing_summary.rpt": {
-      "bytes": 19564,
-      "sha256": "37b7309be92243b1a257dc947bc627454a9b3d87655b161fe7585a67bccd12b6"
+      "bytes": 24193,
+      "sha256": "b37229eecdc892c0d296975bbd64d99c3b4fe1448527a4eebe29cfa1e4f118e1"
     },
     "hardware/vivado_kr260/build/turbovla_kr260.bit": {
       "bytes": 7797870,
-      "sha256": "bbd3cee859cf369cdfafcbeb3e31cb7180da61a66edf036e3486a057fb000a28"
+      "sha256": "c61ce3c97acaeabe2d57d1c50a657d64181807efc4a24fd81541245a6c049c79"
     },
     "hardware/vivado_kr260/build/turbovla_kr260.xsa": {
-      "bytes": 1811082,
-      "sha256": "9dd8a92ef3cc721312e58eb6eace9612cb8f2cfe8eff8ab114cb9d4d36642519"
+      "bytes": 1836923,
+      "sha256": "0cea12b20853ab22f9b532347678f25054aa5b8f9fcc44505fea6b0ab02fe83a"
     },
     "hardware/vivado_kr260/build/utilization.rpt": {
-      "bytes": 13026,
-      "sha256": "ea905f23b3cb16616835cd7f6ebd529cef57c75c7df196d79f39269739f5caf1"
+      "bytes": 13006,
+      "sha256": "ec788f3bfb9479b3f2b943811292d2efd5764f69b2867cbc7fa86a5d965d493c"
     },
     "hardware/vivado_kr260/report_manifest.json": {
-      "bytes": 1180,
-      "sha256": "ed4acf5b6c82b9f2c0965e8390919f412dc376081dec41b9e2dcf1575292c753"
+      "bytes": 1179,
+      "sha256": "57b04ac0720648874240c189e545125a38966010f8c856e7fd1b7c5d1e97c42a"
     },
     "tests/data/lite_golden/golden_tensors.npz": {
       "bytes": 47503,
@@ -66,14 +66,13 @@
     }
   },
   "blocking_gates": [
-    "independent task PRs are not yet created",
-    "the archived Vivado reports, bitstream, and XSA predate the tanh_q15 negative-interpolation fix; a full rebuild is pending on another machine",
-    "gated-fusion RTL co-simulation remains deferred because the XSIM wrapper grows beyond the available simulation resource budget; C simulation, synthesis, and IP export pass",
-    "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-    "KR260 bitstream load, Hardware Manager/JTAG, and hardware inference are not_run"
+    "\u72ec\u7acb\u4efb\u52a1 PR \u5c1a\u672a\u5168\u90e8\u521b\u5efa",
+    "gated-fusion RTL co-sim \u56e0 XSIM \u5728 0/2 \u4e8b\u52a1\u5904\u6301\u7eed\u589e\u957f\u5e76\u8d85\u8fc7\u53ef\u63a5\u53d7\u5185\u5b58\u9884\u7b97\u800c\u5ef6\u671f\uff1bC simulation\u3001synthesis \u548c IP export \u5df2\u901a\u8fc7",
+    "\u6b63\u5f0f T003 teacher/LIBERO \u8bad\u7ec3\u6570\u636e\u548c\u6210\u529f\u7387\u8bc4\u4f30\u5c1a\u672a\u63d0\u4f9b",
+    "KR260 bitstream load\u3001Hardware Manager/JTAG \u548c hardware inference \u4ecd\u4e3a not_run"
   ],
   "hardware_bringup": "not_run",
-  "head_commit": "a4a765070ce78e12ffcd80cf3f10df0c9e4c2ad5",
+  "head_commit": "37710c4d3dab001ceca379f8dfc1358421d3f85c",
   "platform": "kr260-k26",
   "release_status": "blocked_by_acceptance_gates",
   "tasks": [

@@ -21,11 +21,11 @@
 - `python3 tools/run_gemm_csim.py`：通过，输出 `gemm/conv C simulation passed`
 - 编译参数：`g++ -std=c++17 -O2 -Wall -Wextra -Werror`
 - `ruff check hardware/hls/gemm tools/run_gemm_csim.py`：通过（`.venv` ruff 0.16.8）
-- `vivado -version`：通过，wrapper 已指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado/bin/vivado`（v2025.1）
+- `/home/frank/AMD/vivado/2025.01/2025.1/Vivado/bin/vivado -version`：通过（v2025.1）
 - `TURBOVLA_LOCALE_ROOT=/tmp/turbovla-repo-locale tools/run_vitis_hls.sh hardware/hls/gemm/vitis_hls.tcl`：通过，Vitis HLS C simulation 输出 `gemm/conv C simulation passed`
 - `TURBOVLA_HLS_SYNTH=1 tools/run_vitis_hls.sh hardware/hls/gemm/vitis_hls.tcl`：GEMM/Conv synthesis、IP export 通过
 - GEMM/Conv RTL co-simulation：`COSIM 212-1000 PASS`；reports 在 `build/hls/gemm/{gemm_solution,conv1x1_solution}/sim/report/`
-- Vivado system synthesis/implementation/post-route：归档 baseline 通过；当前 fusion 修正后的系统重建待另一台机器执行
+- Vivado system synthesis/implementation/post-route：当前源码 KR260 全量重建通过；bitstream/XSA 和 post-route 报告位于 `hardware/vivado_kr260/build/`
 - 硬件 bring-up：`not_run`
 
 ## Thermo-Nuclear Review（中间审查）

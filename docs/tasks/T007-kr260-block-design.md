@@ -22,9 +22,9 @@
 - `python3 tools/validate_kr260_block_manifest.py`：通过，15 registers
 - register offset 与 T001 contract：一致且 4-byte 对齐
 - DMA buffer alignment：全部 64-byte
-- `vivado -version`：通过，wrapper 已指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado/bin/vivado`（v2025.1）
-- `vivado -mode batch -source hardware/vivado_kr260/build.tcl -nolog -nojournal -notrace`：归档 run 通过，Vivado v2025.1，part `xck26-sfvc784-2LV-c`；当前源码 run 在启动 synthesis 前停止并交接
-- block design validation、synthesis、implementation、XSA/bitstream：此前通过；归档产物早于 `tanh_q15` 负数插值修正，当前源码的全量重建待另一台机器执行
+- `/home/frank/AMD/vivado/2025.01/2025.1/Vivado/bin/vivado -version`：通过（v2025.1）；离线 Kria device package 已补齐
+- `vivado -mode batch -source hardware/vivado_kr260/build.tcl -nolog -nojournal -notrace`：当前源码 run 通过，Vivado v2025.1，part `xck26-sfvc784-2LV-c`；日志 `/tmp/turbovla-vivado-current.log`
+- block design validation、synthesis、implementation、post-route、XSA/bitstream：当前源码均通过；硬件 bring-up 仍为 `not_run`
 
 ## Thermo-Nuclear Review（中间审查）
 

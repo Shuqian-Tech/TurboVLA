@@ -14,7 +14,7 @@
 - report template：`hardware/vivado_kr260/report_manifest.template.json`
 - report archive：`hardware/vivado_kr260/reports/`
 - validator：`tools/validate_vivado_baseline.py`
-- 当前状态：真实 KR260/K26 baseline 已归档；它早于 `tanh_q15` 负数插值修正，结果 manifest 已标记 `rebuild_required`
+- 当前状态：当前源码对应的 KR260/K26 baseline 已重新归档；结果 manifest 标记 `current_source_verified`
 - 硬件 bring-up：`not_run`
 
 ## 验证记录
@@ -22,10 +22,11 @@
 - `python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.json`：通过
 - 默认校验会拒绝模板的 `not_run` timing/utilization/power/CDC 状态：符合 T008 门禁
 - `ruff check tools/validate_vivado_baseline.py`：通过
-- `vivado -version`：通过，wrapper 已指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado/bin/vivado`（v2025.1）
-- `vivado -mode batch -source hardware/vivado_kr260/build.tcl -nolog -nojournal -notrace`：通过；完整日志：`/tmp/turbovla-vivado-build-final.log`
-- bitstream、XSA、post-route timing、utilization、power、CDC：通过；WNS `3.512 ns`、TNS `0`、WHS `0.010 ns`、THS `0`、power `2.742 W`、CDC critical `0`
-- 当前源码全量 Vivado 重建：本机在 block-design generation 后按用户要求停止，以释放内存；待另一台机器执行
+- `/home/frank/AMD/vivado/2025.01/2025.1/Vivado/bin/vivado -version`：通过（v2025.1）；离线 Kria device package 已补齐
+- `vivado -mode batch -source hardware/vivado_kr260/build.tcl -nolog -nojournal -notrace`：当前源码通过；完整日志：`/tmp/turbovla-vivado-current.log`
+- bitstream、XSA、post-route timing、utilization、power、CDC：当前源码通过；WNS `3.476 ns`、TNS `0`、WHS `0.010 ns`、THS `0`、power `2.741 W`、CDC critical `0`
+- 当前源码全量 Vivado 重建：通过；日志 `/tmp/turbovla-vivado-current.log`；生成 `hardware/vivado_kr260/build/turbovla_kr260.bit` 与 `turbovla_kr260.xsa`
+- 当前源码 post-route 结果：WNS `3.476 ns`、TNS `0`、WHS `0.010 ns`、THS `0`、power `2.741 W`、CDC critical `0`；资源为 LUT `19.88%`、FF `13.25%`、DSP `2.00%`、BRAM `5.21%`、URAM `0%`
 
 ## Thermo-Nuclear Review（中间审查）
 
@@ -34,8 +35,8 @@
 - review 结果：`PASS_WITH_PR_GATE`
 - 结构检查：报告模板、归档说明和 validator 分离；无巨型 Tcl 或临时条件分支
 - code-judo 检查：同一 manifest 同时承载平台、artifact、timing、资源和 power 门禁，避免多个互相漂移的阈值文件
-- blocking findings：无代码 blocking finding；当前源码的 post-route/bitstream/XSA 重建以及板端 bring-up 尚未运行
-- disposition：回到 `in_progress`，等待另一台机器完成全量 Vivado 重建
+- blocking findings：无代码 blocking finding；gated-fusion RTL co-sim 和板端 bring-up 仍未完成
+- disposition：回到 `in_progress`，当前源码的软件 Vivado gate 已闭合，等待独立 PR、co-sim 资源问题处理和硬件 bring-up
 
 ## 任务要求
 

@@ -2,6 +2,11 @@
 
 ## Initialization Is Mandatory
 
+## 语言要求
+
+- 所有代理回复、进度更新、验收记录和文档更新必须使用中文，即使用户使用英文提问。
+- 本文件中的新增或修改内容也必须使用中文。
+
 Every agent session working in this repository must read these documents before inspecting or changing implementation files:
 
 1. `docs/development_status.md`

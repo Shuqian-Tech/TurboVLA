@@ -4,8 +4,8 @@
   "verification_mode": "software_only",
   "hardware_bringup": "not_run",
   "source_consistency": {
-    "status": "rebuild_required",
-    "reason": "Archived Vivado outputs predate the tanh_q15 negative-interpolation fix"
+    "status": "current_source_verified",
+    "reason": "已使用当前工作树通过 Vivado 2025.1 完成全量重建"
   },
   "git_commit": "working-tree-build",
   "vivado_version": "Vivado v2025.1 (Build 6140274)",
@@ -17,15 +17,15 @@
     "power": {"status": "passed", "path": "build/power.rpt"},
     "cdc": {"status": "passed", "path": "build/cdc.rpt"}
   },
-  "timing": {"status": "passed", "wns_ns": 3.512, "tns_ns": 0.0, "violations": 0},
+  "timing": {"status": "passed", "wns_ns": 3.476, "tns_ns": 0.0, "violations": 0},
   "utilization": {
     "status": "passed",
-    "lut_percent": 19.85,
+    "lut_percent": 19.88,
     "ff_percent": 13.25,
     "dsp_percent": 2.0,
     "bram_percent": 5.21,
     "uram_percent": 0.0
   },
-  "power": {"status": "passed", "total_watts": 2.742},
+  "power": {"status": "passed", "total_watts": 2.741},
   "cdc": {"status": "passed", "critical_violations": 0}
 }

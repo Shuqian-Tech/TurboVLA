@@ -1,39 +1,24 @@
-# TurboVLA-Lite Acceptance Review
+# TurboVLA-Lite 验收审查
 
-Review date: 2026-09-20
-Reviewer: Codex  
-Target: AMD Kria KR260/K26 only  
-Verification mode: `software_only`
+审查日期：2026-09-20
+审查者：Codex
+目标：仅 AMD Kria KR260/K26
+验证模式：`software_only`
 
 ## Result
 
 `BLOCKED_BY_ACCEPTANCE_GATES`
 
-The software path has deterministic reference, student smoke training,
-parameter-pack export, portable and Vitis HLS C kernel simulations, runtime
-model, replay, and safety replay evidence. A KR260/K26 Vivado post-route
-baseline, bitstream, and XSA are archived, but they predate the `tanh_q15`
-negative-interpolation fix. A full rebuild is pending on another machine. The
-project is not marked `accepted` or `done` because independent task PRs are not
-yet created, formal teacher/LIBERO training data is absent, gated-fusion RTL
-co-simulation is deferred, and hardware bring-up is `not_run`.
+软件路径已有确定性 reference、student smoke training、参数包导出、portable/Vitis HLS C simulation、runtime model、replay 和 safety replay 证据。当前源码对应的 KR260/K26 Vivado post-route baseline、bitstream 和 XSA 已重新生成。项目仍不能标记为 `accepted` 或 `done`，因为独立任务 PR 尚未全部创建、正式 teacher/LIBERO 训练数据缺失、gated-fusion RTL co-sim 延期，且硬件 bring-up 仍为 `not_run`。
 
 ## Thermo-Nuclear Review
 
-- No new file exceeds the 1k-line decomposition gate.
-- T005/T006 share the T005 GEMM core; fusion/action does not duplicate a MAC implementation.
-- Tensor/register ownership remains in the T001 contract and its KR260 register-map validator.
-- Runtime, safety, replay, and report generation have explicit boundaries; no CPU inference fallback was added.
-- Remaining blocking findings are environment or missing-evidence gates, not waived code findings.
+- 没有新增文件超过 1k 行拆分门槛。
+- T005/T006 复用 T005 GEMM 核心；fusion/action 没有重复 MAC 实现。
+- tensor/register 所有权仍集中在 T001 contract 及 KR260 register-map validator。
+- runtime、safety、replay 和报告生成边界明确；没有加入 CPU inference fallback。
+- 剩余阻塞是环境或缺失证据门，不是被豁免的代码 finding。
 
 ## Evidence
 
-The machine-readable artifact and task status index is
-`docs/release/turbovla_lite_release_manifest.json`. The recorded software
-checks include Python unit tests, `g++ -Werror` C simulations, Vitis HLS C
-simulation, ruff checks, contract/register-map validation, deterministic replay,
-and 1000-cycle safety replay. The archived Vivado synthesis, implementation,
-post-route timing, bitstream/XSA, utilization, power, and CDC run passed in
-software-only mode; it must be repeated for the current source before those
-artifacts are release evidence. Hardware Manager, bitstream load, hardware
-inference, and KR260 30-minute stability remain `not_run`.
+机器可读 artifact 和任务状态索引为 `docs/release/turbovla_lite_release_manifest.json`。软件检查包括 Python 单测、`g++ -Werror` C simulation、Vitis HLS C simulation、ruff、contract/register-map validation、deterministic replay 和 1000-cycle safety replay。当前源码的 Vivado synthesis、implementation、post-route timing、bitstream/XSA、utilization、power 和 CDC 已在 software-only 模式通过；Hardware Manager、bitstream load、hardware inference 和 KR260 30 分钟稳定性仍为 `not_run`。gated-fusion RTL co-sim 在 0/2 事务处持续增长到约 24 GiB RSS 后停止，未计为通过。

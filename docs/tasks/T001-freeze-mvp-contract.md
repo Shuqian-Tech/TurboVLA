@@ -20,7 +20,7 @@
 - `python3 tools/validate_mvp_contract.py`：通过，输出 `validated hardware/contracts/turbovla_lite_contract.json`
 - `ssh -o BatchMode=yes -o ConnectTimeout=8 amd-edf@192.168.68.123 'hostname; id -un; test -e /dev/fpga0'`：通过（hostname `amd-edf`、user `amd-edf`、`/dev/fpga0` present）；不冒充 bitstream/hardware inference
 - `python tools/validate_mvp_contract.py`：未执行，当前环境没有 `python` 命令；改用 `python3`
-- `vivado -version`：通过，wrapper 已修正到 v2025.1；KR260/K26 device definition 已可用并由 T007/T008 完成软件 gate
+- `/home/frank/AMD/vivado/2025.01/2025.1/Vivado/bin/vivado -version`：通过，Vivado v2025.1；KR260/K26 device definition 已安装并由 T012 device gate 重新验证
 - Hardware Manager active target/device：`not_run`，开发板问题期间不执行
 
 ## Thermo-Nuclear Review
