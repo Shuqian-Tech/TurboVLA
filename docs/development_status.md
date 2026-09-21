@@ -122,6 +122,7 @@
 - 独立分支 `task/T013-pl-runtime-e2e` 已开始；任务合同见 `docs/tasks/T013-pl-runtime-e2e.md`。
 - 高内存 HLS/Vivado 作业固定在 `frank@192.168.68.119` 的隔离 worktree 运行，源代码只通过 GitHub branch/PR 交接；不会覆盖该机器现有 `/home/frank/TurboVLA` 脏工作区。
 - 当前正在用单一 HLS AXI4-MM/AXI-Lite top 替换未连接的 AXI DMA 与不完整 kernel 组合，并补齐真实 PS buffer/MMIO/cache runtime 边界和 84-value action parity。
+- 2026-09-21 项目 owner 将 T013 setup timing 改为 WNS >= `-0.010 ns` soft gate；负 WNS 只允许以 `soft_gate_owner_waived` 进入 bring-up，报告不得写成 timing clean，低于该阈值仍停止。
 
 ## T007 block design 证据
 

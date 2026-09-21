@@ -3,6 +3,7 @@ set script_dir [file normalize [file dirname [info script]]]
 set project_dir [file normalize [file join $script_dir build]]
 set project_name turbovla_kr260
 set part xck26-sfvc784-2LV-c
+set timing_soft_gate_ns -0.010
 
 create_project -force $project_name $project_dir -part $part
 set_property target_language Verilog [current_project]
@@ -30,5 +31,14 @@ report_utilization -file [file join $project_dir utilization.rpt]
 report_timing_summary -file [file join $project_dir timing_summary.rpt]
 report_power -file [file join $project_dir power.rpt]
 report_cdc -file [file join $project_dir cdc.rpt]
+set setup_wns [get_property SLACK [get_timing_paths -delay_type max -max_paths 1]]
+if {$setup_wns < $timing_soft_gate_ns} {
+  error "Post-route setup WNS $setup_wns ns is below the owner-approved soft gate $timing_soft_gate_ns ns"
+}
+if {$setup_wns < 0.0} {
+  puts "TIMING_SOFT_GATE: owner-waived setup WNS $setup_wns ns (limit $timing_soft_gate_ns ns)"
+} else {
+  puts "TIMING_CLEAN: post-route setup WNS $setup_wns ns"
+}
 write_bitstream -force [file join $project_dir turbovla_kr260.bit]
 write_hw_platform -fixed -include_bit -force -file [file join $project_dir turbovla_kr260.xsa]
