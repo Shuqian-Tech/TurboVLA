@@ -2,7 +2,10 @@
 
 #include <cstddef>
 
-namespace turbovla::hls::e2e::model {
+namespace turbovla {
+namespace hls {
+namespace e2e {
+namespace model {
 
 constexpr std::size_t kMagic = 0;
 constexpr std::size_t kContractVersion = 4;
@@ -47,4 +50,7 @@ constexpr std::size_t kFusionLanguage1 = kTensorBase + 117248;
 constexpr std::size_t kFusionGate1 = kTensorBase + 133632;
 constexpr std::size_t kFusionBias1 = kTensorBase + 150016;
 
-}  // namespace turbovla::hls::e2e::model
+}  // namespace model
+}  // namespace e2e
+}  // namespace hls
+}  // namespace turbovla

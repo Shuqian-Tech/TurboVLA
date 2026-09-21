@@ -3,7 +3,9 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace turbovla::hls::e2e {
+namespace turbovla {
+namespace hls {
+namespace e2e {
 
 constexpr std::uint32_t kArenaMagic = 0x54564c41U;
 constexpr std::uint32_t kModelMagic = 0x54564d44U;
@@ -40,6 +42,8 @@ enum class ErrorCode : std::uint32_t {
 
 int run(std::uint8_t* arena);
 
-}  // namespace turbovla::hls::e2e
+}  // namespace e2e
+}  // namespace hls
+}  // namespace turbovla
 
 int turbovla_lite_e2e(std::uint8_t* arena);

@@ -4,7 +4,9 @@
 
 #include <cmath>
 
-namespace turbovla::hls::e2e {
+namespace turbovla {
+namespace hls {
+namespace e2e {
 namespace {
 
 constexpr int kImageHeight = 128;
@@ -328,7 +330,9 @@ int run(std::uint8_t* arena) {
   return 0;
 }
 
-}  // namespace turbovla::hls::e2e
+}  // namespace e2e
+}  // namespace hls
+}  // namespace turbovla
 
 int turbovla_lite_e2e(std::uint8_t* arena) {
 #ifdef __SYNTHESIS__

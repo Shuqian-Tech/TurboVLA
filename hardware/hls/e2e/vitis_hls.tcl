@@ -5,8 +5,8 @@ set fixture_dir [file normalize [file join $repo_root tests/data/lite_hardware_e
 
 open_project -reset $project_dir
 set_top turbovla_lite_e2e
-add_files -cflags "-std=c++17" [file join $source_dir e2e.cpp]
-add_files -tb -cflags "-std=c++17" [file join $source_dir tb_e2e.cpp]
+add_files [file join $source_dir e2e.cpp]
+add_files -tb [file join $source_dir tb_e2e.cpp]
 open_solution -reset e2e_solution
 set_part xck26-sfvc784-2LV-c
 create_clock -period 5.0 -name default
