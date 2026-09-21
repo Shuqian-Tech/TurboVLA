@@ -21,6 +21,11 @@ set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
 launch_runs impl_1 -to_step write_bitstream -jobs 8
 wait_on_run impl_1
 open_run impl_1
+set setup_wns [get_property SLACK [get_timing_paths -delay_type max -max_paths 1]]
+if {$setup_wns < 0.0} {
+  puts "Post-route setup WNS is $setup_wns ns; running AggressiveExplore fallback"
+  phys_opt_design -directive AggressiveExplore
+}
 report_utilization -file [file join $project_dir utilization.rpt]
 report_timing_summary -file [file join $project_dir timing_summary.rpt]
 report_power -file [file join $project_dir power.rpt]
