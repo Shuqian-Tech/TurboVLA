@@ -89,8 +89,6 @@ ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, st
   cache_.flush(kStateOffset, kStateValues * sizeof(std::int16_t));
   registers_.write32(kArenaAddressLowOffset, static_cast<std::uint32_t>(arena_.physical_address));
   registers_.write32(kArenaAddressHighOffset, static_cast<std::uint32_t>(arena_.physical_address >> 32U));
-  registers_.write32(kGlobalInterruptOffset, 1U);
-  registers_.write32(kInterruptEnableOffset, 1U);
   registers_.write32(kControlOffset, kStart);
 
   bool completed = false;
@@ -104,7 +102,6 @@ ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, st
   if (!completed) {
     return ErrorCode::kDmaTimeout;
   }
-  registers_.write32(kInterruptStatusOffset, 1U);
   cache_.invalidate(kHeaderOffset, 64);
   cache_.invalidate(kActionOffset, kActionValues * sizeof(float));
 
