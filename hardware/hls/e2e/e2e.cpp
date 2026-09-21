@@ -24,30 +24,29 @@ constexpr float kStateInputScale = 1.0f / 127.0f;
 constexpr float kMean[3] = {0.485f, 0.456f, 0.406f};
 constexpr float kStd[3] = {0.229f, 0.224f, 0.225f};
 
-std::uint16_t read_u16(const std::uint8_t* data, std::size_t offset) {
-  return static_cast<std::uint16_t>(data[offset]) |
-         (static_cast<std::uint16_t>(data[offset + 1]) << 8U);
+std::uint8_t read_u8(const ArenaWord* data, std::size_t offset) {
+  const ArenaWord word = data[offset / sizeof(ArenaWord)];
+  return static_cast<std::uint8_t>(word >> ((offset % sizeof(ArenaWord)) * 8U));
 }
 
-std::int16_t read_i16(const std::uint8_t* data, std::size_t offset) {
+std::uint16_t read_u16(const ArenaWord* data, std::size_t offset) {
+  return static_cast<std::uint16_t>(read_u8(data, offset)) |
+         (static_cast<std::uint16_t>(read_u8(data, offset + 1)) << 8U);
+}
+
+std::int16_t read_i16(const ArenaWord* data, std::size_t offset) {
   return static_cast<std::int16_t>(read_u16(data, offset));
 }
 
-std::uint32_t read_u32(const std::uint8_t* data, std::size_t offset) {
-  return static_cast<std::uint32_t>(data[offset]) |
-         (static_cast<std::uint32_t>(data[offset + 1]) << 8U) |
-         (static_cast<std::uint32_t>(data[offset + 2]) << 16U) |
-         (static_cast<std::uint32_t>(data[offset + 3]) << 24U);
+ArenaWord read_u32(const ArenaWord* data, std::size_t offset) {
+  return data[offset / sizeof(ArenaWord)];
 }
 
-void write_u32(std::uint8_t* data, std::size_t offset, std::uint32_t value) {
-  data[offset] = static_cast<std::uint8_t>(value);
-  data[offset + 1] = static_cast<std::uint8_t>(value >> 8U);
-  data[offset + 2] = static_cast<std::uint8_t>(value >> 16U);
-  data[offset + 3] = static_cast<std::uint8_t>(value >> 24U);
+void write_u32(ArenaWord* data, std::size_t offset, ArenaWord value) {
+  data[offset / sizeof(ArenaWord)] = value;
 }
 
-float read_float(const std::uint8_t* data, std::size_t offset) {
+float read_float(const ArenaWord* data, std::size_t offset) {
   union FloatBits {
     std::uint32_t bits;
     float value;
@@ -56,7 +55,7 @@ float read_float(const std::uint8_t* data, std::size_t offset) {
   return converted.value;
 }
 
-void write_float(std::uint8_t* data, std::size_t offset, float value) {
+void write_float(ArenaWord* data, std::size_t offset, float value) {
   union FloatBits {
     std::uint32_t bits;
     float value;
@@ -65,8 +64,8 @@ void write_float(std::uint8_t* data, std::size_t offset, float value) {
   write_u32(data, offset, converted.bits);
 }
 
-std::int8_t read_i8(const std::uint8_t* data, std::size_t offset) {
-  return static_cast<std::int8_t>(data[offset]);
+std::int8_t read_i8(const ArenaWord* data, std::size_t offset) {
+  return static_cast<std::int8_t>(read_u8(data, offset));
 }
 
 std::int8_t quantize(float value, float scale) {
@@ -84,7 +83,7 @@ float sigmoid(float value) {
   return 1.0f / (1.0f + std::exp(-clipped));
 }
 
-ErrorCode validate(const std::uint8_t* arena) {
+ErrorCode validate(const ArenaWord* arena) {
   if (arena == nullptr) {
     return ErrorCode::kInvalidBuffer;
   }
@@ -92,7 +91,7 @@ ErrorCode validate(const std::uint8_t* arena) {
       read_u32(arena, kHeaderContractVersion) != kContractVersion) {
     return ErrorCode::kContractMismatch;
   }
-  const std::uint8_t* packed = arena + kModelOffset;
+  const ArenaWord* packed = arena + kModelOffset / sizeof(ArenaWord);
   if (read_u32(packed, model::kMagic) != kModelMagic ||
       read_u32(packed, model::kContractVersion) != kContractVersion ||
       read_u32(packed, model::kTotalBytes) != kModelBytes) {
@@ -102,16 +101,17 @@ ErrorCode validate(const std::uint8_t* arena) {
   return instruction < kInstructions ? ErrorCode::kNone : ErrorCode::kInvalidInstructionId;
 }
 
-void finish(std::uint8_t* arena, ErrorCode error) {
+void finish(ArenaWord* arena, ErrorCode error) {
   if (arena == nullptr) {
     return;
   }
+  const ArenaWord frame_sequence = read_u32(arena, kHeaderFrameSequence);
   write_u32(arena, kHeaderHardwareVersion, kContractVersion);
   write_u32(arena, kHeaderErrorCode, static_cast<std::uint32_t>(error));
-  write_u32(arena, kHeaderCompletedSequence, read_u32(arena, kHeaderFrameSequence));
+  write_u32(arena, kHeaderCompletedSequence, frame_sequence);
 }
 
-void encode_visual(const std::uint8_t* arena, const std::uint8_t* packed, std::int8_t visual[kTokens][kHidden]) {
+void encode_visual(const ArenaWord* arena, const ArenaWord* packed, std::int8_t visual[kTokens][kHidden]) {
   const float image_scale = read_float(packed, model::kImageScale);
   const float conv_scale = read_float(packed, model::kConvScale);
   const float visual_scale = read_float(packed, model::kVisualScale);
@@ -131,7 +131,7 @@ void encode_visual(const std::uint8_t* arena, const std::uint8_t* packed, std::i
             const std::size_t image_index =
                 kImageOffset + channel * kImageHeight * kImageWidth + row * kImageWidth + col;
             const float normalized =
-                (static_cast<float>(arena[image_index]) / 255.0f - kMean[channel]) / kStd[channel];
+                (static_cast<float>(read_u8(arena, image_index)) / 255.0f - kMean[channel]) / kStd[channel];
             pixel[channel] = quantize(normalized, image_scale);
           }
           for (int output_channel = 0; output_channel < kConvChannels; ++output_channel) {
@@ -173,7 +173,7 @@ void encode_visual(const std::uint8_t* arena, const std::uint8_t* packed, std::i
   }
 }
 
-void fuse_layer(const std::uint8_t* packed,
+void fuse_layer(const ArenaWord* packed,
                 int layer,
                 const std::int8_t language[kHidden],
                 const std::int8_t input[kTokens][kHidden],
@@ -229,8 +229,8 @@ void fuse_layer(const std::uint8_t* packed,
   }
 }
 
-void decode_action(const std::uint8_t* arena,
-                   const std::uint8_t* packed,
+void decode_action(const ArenaWord* arena,
+                   const ArenaWord* packed,
                    const std::int8_t fused[kTokens][kHidden],
                    float action[kActionValues]) {
   const float fusion_scale = read_float(packed, model::kFusion1Scale);
@@ -302,14 +302,14 @@ void decode_action(const std::uint8_t* arena,
 
 }  // namespace
 
-int run(std::uint8_t* arena) {
+int run(ArenaWord* arena) {
   const ErrorCode validation = validate(arena);
   if (validation != ErrorCode::kNone) {
     finish(arena, validation);
     return static_cast<int>(validation);
   }
 
-  const std::uint8_t* packed = arena + kModelOffset;
+  const ArenaWord* packed = arena + kModelOffset / sizeof(ArenaWord);
   std::int8_t visual[kTokens][kHidden];
   std::int8_t language[kHidden];
   std::int8_t fusion_0[kTokens][kHidden];
@@ -334,9 +334,9 @@ int run(std::uint8_t* arena) {
 }  // namespace hls
 }  // namespace turbovla
 
-int turbovla_lite_e2e(std::uint8_t* arena) {
+int turbovla_lite_e2e(turbovla::hls::e2e::ArenaWord* arena) {
 #ifdef __SYNTHESIS__
-#pragma HLS INTERFACE m_axi port = arena offset = slave depth = 200320 bundle = gmem0
+#pragma HLS INTERFACE m_axi port = arena offset = slave depth = 50080 bundle = gmem0
 #pragma HLS INTERFACE s_axilite port = arena bundle = control
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 #endif

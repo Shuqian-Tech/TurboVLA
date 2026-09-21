@@ -23,18 +23,18 @@ std::vector<std::uint8_t> read_file(const std::string& path) {
   return data;
 }
 
-void write_u16(std::vector<std::uint8_t>& data, std::size_t offset, std::uint16_t value) {
+void write_u16(std::uint8_t* data, std::size_t offset, std::uint16_t value) {
   data[offset] = static_cast<std::uint8_t>(value);
   data[offset + 1] = static_cast<std::uint8_t>(value >> 8U);
 }
 
-void write_u32(std::vector<std::uint8_t>& data, std::size_t offset, std::uint32_t value) {
+void write_u32(std::uint8_t* data, std::size_t offset, std::uint32_t value) {
   for (int byte = 0; byte < 4; ++byte) {
     data[offset + byte] = static_cast<std::uint8_t>(value >> (byte * 8));
   }
 }
 
-std::uint32_t read_u32(const std::vector<std::uint8_t>& data, std::size_t offset) {
+std::uint32_t read_u32(const std::uint8_t* data, std::size_t offset) {
   std::uint32_t value = 0;
   for (int byte = 0; byte < 4; ++byte) {
     value |= static_cast<std::uint32_t>(data[offset + byte]) << (byte * 8);
@@ -75,19 +75,21 @@ int main(int argc, char** argv) {
     return 3;
   }
 
-  std::vector<std::uint8_t> arena(turbovla::hls::e2e::kArenaBytes);
-  write_u32(arena, turbovla::hls::e2e::kHeaderMagic, turbovla::hls::e2e::kArenaMagic);
-  write_u32(arena, turbovla::hls::e2e::kHeaderContractVersion, turbovla::hls::e2e::kContractVersion);
-  write_u32(arena, turbovla::hls::e2e::kHeaderFrameSequence, 17);
-  write_u16(arena, turbovla::hls::e2e::kHeaderInstructionId,
+  std::vector<turbovla::hls::e2e::ArenaWord> arena(turbovla::hls::e2e::kArenaWords);
+  auto* arena_bytes = reinterpret_cast<std::uint8_t*>(arena.data());
+  write_u32(arena_bytes, turbovla::hls::e2e::kHeaderMagic, turbovla::hls::e2e::kArenaMagic);
+  write_u32(arena_bytes, turbovla::hls::e2e::kHeaderContractVersion,
+            turbovla::hls::e2e::kContractVersion);
+  write_u32(arena_bytes, turbovla::hls::e2e::kHeaderFrameSequence, 17);
+  write_u16(arena_bytes, turbovla::hls::e2e::kHeaderInstructionId,
             static_cast<std::uint16_t>(instruction[0] | (instruction[1] << 8U)));
-  std::copy(image.begin(), image.end(), arena.begin() + turbovla::hls::e2e::kImageOffset);
-  std::copy(state.begin(), state.end(), arena.begin() + turbovla::hls::e2e::kStateOffset);
-  std::copy(model.begin(), model.end(), arena.begin() + turbovla::hls::e2e::kModelOffset);
+  std::copy(image.begin(), image.end(), arena_bytes + turbovla::hls::e2e::kImageOffset);
+  std::copy(state.begin(), state.end(), arena_bytes + turbovla::hls::e2e::kStateOffset);
+  std::copy(model.begin(), model.end(), arena_bytes + turbovla::hls::e2e::kModelOffset);
 
   if (turbovla_lite_e2e(arena.data()) != 0 ||
-      read_u32(arena, turbovla::hls::e2e::kHeaderCompletedSequence) != 17 ||
-      read_u32(arena, turbovla::hls::e2e::kHeaderErrorCode) != 0) {
+      read_u32(arena_bytes, turbovla::hls::e2e::kHeaderCompletedSequence) != 17 ||
+      read_u32(arena_bytes, turbovla::hls::e2e::kHeaderErrorCode) != 0) {
     std::cerr << "kernel status mismatch\n";
     return 4;
   }
@@ -95,7 +97,8 @@ int main(int argc, char** argv) {
   float max_error = 0.0f;
   float total_error = 0.0f;
   for (std::size_t index = 0; index < turbovla::hls::e2e::kActionValues; ++index) {
-    const float actual = read_float(arena.data() + turbovla::hls::e2e::kActionOffset + index * sizeof(float));
+    const float actual =
+        read_float(arena_bytes + turbovla::hls::e2e::kActionOffset + index * sizeof(float));
     const float expected = read_float(expected_bytes.data() + index * sizeof(float));
     const float error = std::abs(actual - expected);
     max_error = std::max(max_error, error);
@@ -107,7 +110,7 @@ int main(int argc, char** argv) {
     return 5;
   }
 
-  write_u16(arena, turbovla::hls::e2e::kHeaderInstructionId, 65535);
+  write_u16(arena_bytes, turbovla::hls::e2e::kHeaderInstructionId, 65535);
   if (turbovla_lite_e2e(arena.data()) != static_cast<int>(turbovla::hls::e2e::ErrorCode::kInvalidInstructionId)) {
     return 6;
   }
