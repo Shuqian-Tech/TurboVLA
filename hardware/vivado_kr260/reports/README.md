@@ -11,3 +11,5 @@ for tracking the environment, but it is not a passing T008 baseline.
 T013 hardware evidence is recorded separately in
 [`t013_board_bringup.md`](t013_board_bringup.md). It must not be conflated with
 the older software-only manifest or the initial read-only board probe.
+The corresponding raw HLS synthesis and Vivado post-route reports are indexed
+under [`t013/`](t013/README.md).

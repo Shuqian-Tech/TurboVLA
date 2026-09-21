@@ -4,8 +4,9 @@
 - Target: `amd-edf@192.168.68.123`
 - Board kernel: `6.18.10-xilinx-g4f7afe14f724`
 - Vivado artifact source: commit `64acaa93803c56168a78063dcf2f2b52fd5d59ff`
-- Runtime source: commit `aad4f42`
+- Initial runtime source: commit `aad4f42`
 - Clock-overlay fix: commit `ee22fc1`
+- Final runtime and stability source: commit `dc31221`
 
 ## Artifacts
 
@@ -67,12 +68,42 @@ KR260 action parity max_abs_error=1.86265e-09 mean_abs_error=4.14556e-10
 
 No CPU inference fallback was used. The PS allocated and synchronized the XRT
 buffer, programmed the AXI-Lite control registers, and read back PL output.
+The board runtime was then rebuilt from exact commit `dc31221`; its probe-only
+and full-inference modes passed again with the same 84-value parity metrics.
 
-## Remaining Gates
+## Thirty-Minute Stability
 
-- Exact-vector HLS RTL co-simulation is still running on the high-memory host.
-- The T013 thermo-nuclear review is pending the completed co-simulation result.
-- Thirty-minute board stability, temperature, and power measurements are not
-  part of this one-shot result and remain `not_run`.
+The board runtime from exact commit `dc31221` ran continuously from
+`2026-09-21T06:35:56+00:00` through `2026-09-21T07:05:56+00:00`. Every
+iteration had a 10-second outer timeout and compared all 84 action values with
+the checked-in golden vector.
+
+```text
+KR260_STABILITY_PASS count=17019 end=2026-09-21T07:05:56+00:00
+KR260 board stage=pl_return result=0
+KR260 action parity max_abs_error=1.86265e-09 mean_abs_error=4.14556e-10
+```
+
+No timeout, PL error, non-finite value, parity failure, SSH disconnect, or
+board reset occurred. After the run, the kernel error/critical `dmesg` query
+returned no entries and `/proc/uptime` exceeded 3927 seconds. Sensor samples
+remained stable:
+
+| Elapsed | Temp_PL | Board power |
+|---|---:|---:|
+| Start | 31.5 C | 3.80 W |
+| About 10 minutes | 31.1 C | 3.93 W |
+| About 20 minutes | 30.9 C | 3.80 W |
+| End | 31.8 C | 3.58 W |
+
+At the end of the run, the FPGA manager remained `operating`, the `full`
+overlay remained `applied`, and `pl0_ref` remained enabled at 199.998 MHz with
+`enable_count=1` and consumer `amba_pl:turbovla_fclk0`.
+
+## Remaining Notes
+
+- Exact-commit HLS RTL co-simulation and the T013 thermo-nuclear review passed;
+  see [`t013/README.md`](t013/README.md).
+- PR #2 review and merge remain before the task can be marked `done`.
 - `zocl` logs missing IRQ/CMA reserved-memory warnings during overlay load, but
   device initialization, BO allocation, synchronization, and inference passed.
