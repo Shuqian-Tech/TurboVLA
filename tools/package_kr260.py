@@ -85,6 +85,13 @@ def overlay_source(bitstream_name: str, base: int) -> str:
             #address-cells = <2>;
             #size-cells = <2>;
 
+            turbovla_fclk0 {{
+                compatible = "xlnx,fclk";
+                clocks = <&zynqmp_clk {PL0_CLOCK_ID}>;
+                assigned-clocks = <&zynqmp_clk {PL0_CLOCK_ID}>;
+                assigned-clock-rates = <{PL0_CLOCK_HZ}>;
+            }};
+
             turbovla_lite_e2e@{base:x} {{
                 compatible = "generic-uio";
                 linux,uio-name = "turbovla-lite-e2e";

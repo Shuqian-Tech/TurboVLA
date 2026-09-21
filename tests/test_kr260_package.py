@@ -39,6 +39,8 @@ class Kr260PackageTest(unittest.TestCase):
         self.assertIn('linux,uio-name = "turbovla-lite-e2e"', source)
         self.assertIn("reg = <0x1 0xa0040000 0x0 0x10000>", source)
         self.assertIn('compatible = "xlnx,zocl"', source)
+        self.assertIn('compatible = "xlnx,fclk"', source)
+        self.assertIn("turbovla_fclk0", source)
         self.assertIn("assigned-clock-rates = <200000000>", source)
 
 
