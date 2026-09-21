@@ -34,6 +34,7 @@ connect_bd_net [get_bd_pins ps/pl_clk0] \
   [get_bd_pins memory_smartconnect/aclk] \
   [get_bd_pins proc_sys_reset/slowest_sync_clk] \
   [get_bd_pins ps/maxihpm0_fpd_aclk] \
+  [get_bd_pins ps/maxihpm0_lpd_aclk] \
   [get_bd_pins ps/saxihpc0_fpd_aclk] \
   [get_bd_pins inference/ap_clk]
 connect_bd_net [get_bd_pins ps/pl_resetn0] \
