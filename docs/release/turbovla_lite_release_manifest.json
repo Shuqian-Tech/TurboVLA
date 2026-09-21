@@ -1,0 +1,183 @@
+{
+  "artifacts": {
+    "build/hls/fusion_action/ip/action_mlp.zip": {
+      "bytes": 514141,
+      "sha256": "bfcaaba877549079f45184a6cfd2dacac5eeccf37ca0824c2b0c96edf5a51451"
+    },
+    "build/hls/fusion_action/ip/gated_fusion.zip": {
+      "bytes": 445972,
+      "sha256": "83993bd952c16dd78b6376a01f002b64702b13e82a396b8ff84a964e8d89df47"
+    },
+    "build/hls/gemm/ip/conv1x1.zip": {
+      "bytes": 247279,
+      "sha256": "fa6cab164c1f3954856d70fbf16e1b65484c8e2d6a026ff78cdb301344860a91"
+    },
+    "build/hls/gemm/ip/gemm.zip": {
+      "bytes": 246280,
+      "sha256": "d03f27f3b4c74e9a017f5a6da72374d59fa9c81bb16b3905be943005fcc58b78"
+    },
+    "hardware/vivado_kr260/build/cdc.rpt": {
+      "bytes": 949,
+      "sha256": "b914633e629a052273a0f89842b82c7e5879c37ba76a31ba824c5597f9b2fc69"
+    },
+    "hardware/vivado_kr260/build/power.rpt": {
+      "bytes": 11950,
+      "sha256": "6282225c013e30e68c3672364de00db6631be916e5cd854e4264a2f87dd16e22"
+    },
+    "hardware/vivado_kr260/build/timing_summary.rpt": {
+      "bytes": 24213,
+      "sha256": "d0707440aefcc7082eb70a1245559d872fcebb447f27912ff5645d440a20444d"
+    },
+    "hardware/vivado_kr260/build/turbovla_kr260.bit": {
+      "bytes": 7797870,
+      "sha256": "c31f375d5f604d3fb57c890c986665e6a05f1f5d2c3749140f8f90dde9e2a2c6"
+    },
+    "hardware/vivado_kr260/build/turbovla_kr260.xsa": {
+      "bytes": 1836909,
+      "sha256": "7566e039aa4776f43d41509c34def2129338026d93a9caf48b40aeae13282438"
+    },
+    "hardware/vivado_kr260/build/utilization.rpt": {
+      "bytes": 13026,
+      "sha256": "895b1d7c014ea35cba581b4f39534e70c4982a9a8fd1564011770c50a5072d48"
+    },
+    "hardware/vivado_kr260/report_manifest.json": {
+      "bytes": 1473,
+      "sha256": "1d2bbc3d332e40c165a24cdfa6f28d43fe0fd7c942b0ff5bcc1b5aeb3f7c75e0"
+    },
+    "hardware/vivado_kr260/reports/t013_board_bringup.md": {
+      "bytes": 4261,
+      "sha256": "70a8651b8010c43572d1bd66e3f77157be5f6623b8293cf43b64ab227c6a15ac"
+    },
+    "hardware/vivado_kr260/reports/t013_board_live_sample.csv": {
+      "bytes": 1211,
+      "sha256": "4e4d7c15aaa3c38bbe70640cab50d9fb106cad0674cbc41e3e90e4a894061aed"
+    },
+    "hardware/vivado_kr260/reports/t013_board_live_sample.md": {
+      "bytes": 1809,
+      "sha256": "ca29fb155db4fd5821bb813241ecf697076d67a08cfda9f3db0cc47264590585"
+    },
+    "tests/data/lite_golden/golden_tensors.npz": {
+      "bytes": 47503,
+      "sha256": "307600ad7f29001fee8335921e9d3eaa3bceca8e6383c65252688f2f58390f28"
+    },
+    "tests/data/lite_parameter_pack_smoke/manifest.json": {
+      "bytes": 5519,
+      "sha256": "67c1ce537ed6cad7428eebdac55d72da27bacb7db66d1776a53df92504d99993"
+    },
+    "tests/data/lite_parameter_pack_smoke/weights.bin": {
+      "bytes": 150528,
+      "sha256": "2c6f6081e92ddcf5ffcc22b706f8c0eb7b5c293eae3579d5c78afd9d6acb3242"
+    },
+    "tests/data/lite_replay_report.json": {
+      "bytes": 2296,
+      "sha256": "cc16c71529a0d07b4a36f48a5d2be1d36b054c9b63c1af028cdd5acba0a31aa5"
+    },
+    "tests/data/lite_stability_report.json": {
+      "bytes": 404,
+      "sha256": "cf090a39daa8c3a6493f81e83edef364a03718a01c20e2beccefda11cf86ea1f"
+    }
+  },
+  "blocking_gates": [
+    "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
+    "independent T009-T012 task PRs and final PR #1 release review are not complete",
+    "T013 board bring-up passed, but worst-case thermal qualification and robot closed-loop success-rate evidence are not complete"
+  ],
+  "hardware_bringup": "passed_30_min",
+  "head_commit": "74247ede2cbf0abd85ca5442ced573e3e6eaae05",
+  "platform": "kr260-k26",
+  "release_status": "blocked_by_acceptance_gates",
+  "tasks": [
+    {
+      "branch": "task/T001-freeze-mvp-contract",
+      "file": "docs/tasks/T001-freeze-mvp-contract.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_review",
+      "task": "T001"
+    },
+    {
+      "branch": "task/T002-software-reference",
+      "file": "docs/tasks/T002-software-reference.md",
+      "pr": "\u5f85\u521b\u5efa\uff08GitHub push \u6743\u9650\u6cbf\u7528 T001 \u963b\u585e\uff09",
+      "status": "in_review",
+      "task": "T002"
+    },
+    {
+      "branch": "task/T003-train-lite-student",
+      "file": "docs/tasks/T003-train-lite-student.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_progress",
+      "task": "T003"
+    },
+    {
+      "branch": "task/T004-export-fpga-parameters",
+      "file": "docs/tasks/T004-export-fpga-parameters.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_progress",
+      "task": "T004"
+    },
+    {
+      "branch": "task/T005-gemm-conv-ip",
+      "file": "docs/tasks/T005-gemm-conv-ip.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_review",
+      "task": "T005"
+    },
+    {
+      "branch": "task/T006-fusion-action-ip",
+      "file": "docs/tasks/T006-fusion-action-ip.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_review",
+      "task": "T006"
+    },
+    {
+      "branch": "task/T007-kr260-block-design",
+      "file": "docs/tasks/T007-kr260-block-design.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_progress",
+      "task": "T007"
+    },
+    {
+      "branch": "task/T008-vivado-baseline",
+      "file": "docs/tasks/T008-vivado-baseline.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_progress",
+      "task": "T008"
+    },
+    {
+      "branch": "task/T009-ps-runtime",
+      "file": "docs/tasks/T009-ps-runtime.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_progress",
+      "task": "T009"
+    },
+    {
+      "branch": "task/T010-replay-validation",
+      "file": "docs/tasks/T010-replay-validation.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_progress",
+      "task": "T010"
+    },
+    {
+      "branch": "task/T011-closed-loop-stability",
+      "file": "docs/tasks/T011-closed-loop-stability.md",
+      "pr": "\u5f85\u521b\u5efa",
+      "status": "in_progress",
+      "task": "T011"
+    },
+    {
+      "branch": "task/T012-final-acceptance",
+      "file": "docs/tasks/T012-final-acceptance.md",
+      "pr": "[Shuqian-Tech/TurboVLA#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1)\uff08Draft\uff09",
+      "status": "in_progress",
+      "task": "T012"
+    },
+    {
+      "branch": null,
+      "file": "docs/tasks/T013-pl-runtime-e2e.md",
+      "pr": null,
+      "status": "unknown",
+      "task": "T013"
+    }
+  ],
+  "verification_mode": "software_and_kr260_bringup"
+}

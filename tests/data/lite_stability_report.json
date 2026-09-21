@@ -1,0 +1,14 @@
+{
+  "accepted_cycles": 1000,
+  "cycles": 1000,
+  "elapsed_seconds": 0.014169800000672694,
+  "fault_results": {
+    "communication_disconnected": "communication_disconnected",
+    "emergency_stop": "emergency_stop",
+    "frame_timeout": "frame_timeout",
+    "non_finite_action": "non_finite_action"
+  },
+  "hardware_bringup": "not_run",
+  "max_action_drift": 0.0,
+  "verification_mode": "software_only"
+}

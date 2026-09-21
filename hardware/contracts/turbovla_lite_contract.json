@@ -1,0 +1,108 @@
+{
+  "contract_version": "0.2.0",
+  "platform": "kr260-k26",
+  "inference_location": "fpga_pl",
+  "batch_size": 1,
+  "views": 1,
+  "image": {
+    "shape": [1, 1, 3, 128, 128],
+    "layout": "N V C H W",
+    "input_dtype": "uint8",
+    "input_range": [0, 255],
+    "preprocess": {
+      "output_dtype": "int8",
+      "channel_order": "RGB",
+      "mean": [0.485, 0.456, 0.406],
+      "std": [0.229, 0.224, 0.225],
+      "quantization": "symmetric_per_tensor"
+    }
+  },
+  "language": {
+    "input": {
+      "name": "instruction_id",
+      "dtype": "uint16",
+      "shape": [1],
+      "valid_range": [0, 255],
+      "invalid_value": 65535
+    },
+    "embedding": {
+      "shape": [1, 128],
+      "dtype": "int8",
+      "layout": "N D",
+      "source": "offline_bert_teacher_embedding_table",
+      "quantization": "symmetric_per_tensor"
+    }
+  },
+  "state": {
+    "shape": [1, 8],
+    "layout": "N D",
+    "input_dtype": "int16",
+    "quantization": "symmetric_per_tensor",
+    "normalization": "libero_state_v1"
+  },
+  "visual_tokens": {
+    "shape": [1, 32, 128],
+    "layout": "N T D",
+    "dtype": "int8",
+    "quantization": "symmetric_per_tensor"
+  },
+  "fusion": {
+    "layers": 2,
+    "mode": "gated_fusion",
+    "hidden_dim": 128,
+    "language_tokens": 1,
+    "visual_tokens": 32,
+    "dtype": "int8",
+    "accumulator_dtype": "int32"
+  },
+  "action": {
+    "shape": [1, 12, 7],
+    "layout": "N H A",
+    "model_dtype": "int8",
+    "accumulator_dtype": "int32",
+    "output_dtype": "float32",
+    "normalization": "libero_action_v1",
+    "range": [-1.0, 1.0]
+  },
+  "quantization": {
+    "weights": "int8_symmetric_per_tensor",
+    "activations": "int8_symmetric_per_tensor",
+    "accumulator": "int32",
+    "scale_storage": "float32",
+    "zero_point": 0
+  },
+  "buffers": {
+    "arena": {"direction": "bidirectional", "alignment_bytes": 64, "size_bytes": 200320},
+    "header": {"direction": "bidirectional", "alignment_bytes": 64, "offset": 0, "size_bytes": 64, "cache": "flush_before_start_invalidate_after_done"},
+    "image": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 64, "size_bytes": 49152, "cache": "flush_before_start"},
+    "state": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 49216, "size_bytes": 16, "cache": "flush_before_start"},
+    "model": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 49280, "size_bytes": 150656, "cache": "flush_after_load"},
+    "action": {"direction": "pl_to_ps", "alignment_bytes": 64, "offset": 199936, "size_bytes": 336, "cache": "invalidate_after_done"}
+  },
+  "arena_header": {
+    "magic": {"offset": 0, "value": "0x54564C41"},
+    "contract_version": {"offset": 4, "encoding": "major_minor_patch_8_8_16", "value": "0x00020000"},
+    "frame_sequence": {"offset": 8},
+    "instruction_id": {"offset": 12},
+    "completed_sequence": {"offset": 16},
+    "error_code": {"offset": 20},
+    "hardware_version": {"offset": 24, "value": "0x00020000"}
+  },
+  "registers": {
+    "control": {"offset": "0x00", "width_bits": 32, "fields": ["start", "done", "idle", "ready", "auto_restart"]},
+    "global_interrupt_enable": {"offset": "0x04", "width_bits": 32},
+    "interrupt_enable": {"offset": "0x08", "width_bits": 32},
+    "interrupt_status": {"offset": "0x0C", "width_bits": 32},
+    "kernel_return": {"offset": "0x10", "width_bits": 32},
+    "arena_addr_lo": {"offset": "0x18", "width_bits": 32},
+    "arena_addr_hi": {"offset": "0x1C", "width_bits": 32}
+  },
+  "errors": {
+    "none": 0,
+    "invalid_instruction_id": 1,
+    "invalid_buffer": 2,
+    "dma_timeout": 3,
+    "kernel_fault": 4,
+    "contract_mismatch": 5
+  }
+}

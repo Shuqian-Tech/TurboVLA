@@ -1,0 +1,32 @@
+{
+  "action_shape": [
+    1,
+    12,
+    7
+  ],
+  "checkpoint": "build/lite/student_smoke.pt",
+  "contract_version": "0.1.0",
+  "dataset_mode": "smoke",
+  "final": {
+    "action_l1": 0.049172043800354004,
+    "feature_mse": 0.0007878481410443783,
+    "loss": 0.09827332198619843,
+    "teacher_action_l1": 0.04902249202132225
+  },
+  "initial": {
+    "action_l1": 0.06280834972858429,
+    "feature_mse": 0.0007912474684417248,
+    "loss": 0.12599727511405945,
+    "teacher_action_l1": 0.06310979276895523
+  },
+  "input_shape": [
+    1,
+    1,
+    3,
+    128,
+    128
+  ],
+  "parameter_count": 148948,
+  "samples": 4,
+  "steps": 3
+}

@@ -1,0 +1,32 @@
+{
+  "activations": {
+    "action": 0.00019610640922869285,
+    "action_hidden": 0.0006993977924970191,
+    "fusion_0": 0.0002847308014321515,
+    "fusion_1": 0.0003235507023146772,
+    "image_normalized": 0.020787402400820273,
+    "language_embedding": 0.0011643466987009124,
+    "state_projection": 0.00210668651137765,
+    "visual_conv": 0.0035782646475814458,
+    "visual_tokens": 0.0003356530265075954
+  },
+  "state_input": 0.007874015748031496,
+  "state_normalization": 0.0009765625,
+  "weights": {
+    "action_input": 0.0015920324353721198,
+    "action_input_bias": 1e-06,
+    "action_output": 0.0014264682146507923,
+    "action_output_bias": 1e-06,
+    "conv_bias": 1e-06,
+    "conv_weight": 0.0011308671921256958,
+    "fusion_bias": 1e-06,
+    "fusion_gate": 0.0015862714352570181,
+    "fusion_language": 0.001528872045006339,
+    "fusion_visual": 0.0017267484364547128,
+    "instruction_table": 0.0016933620914699524,
+    "state_bias": 1e-06,
+    "state_projection": 0.001544489048597381,
+    "visual_bias": 1e-06,
+    "visual_projection": 0.0015391904538072001
+  }
+}

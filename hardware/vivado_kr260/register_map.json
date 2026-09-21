@@ -1,0 +1,23 @@
+{
+  "platform": "kr260-k26",
+  "contract_version": "0.2.0",
+  "axi_lite_data_width": 32,
+  "control_protocol": "ap_ctrl_hs",
+  "registers": {
+    "control": {"offset": "0x00", "access": "read_write", "fields": ["start", "done", "idle", "ready", "auto_restart"]},
+    "global_interrupt_enable": {"offset": "0x04", "access": "read_write"},
+    "interrupt_enable": {"offset": "0x08", "access": "read_write"},
+    "interrupt_status": {"offset": "0x0C", "access": "read_write_clear"},
+    "kernel_return": {"offset": "0x10", "access": "read"},
+    "arena_addr_lo": {"offset": "0x18", "access": "write"},
+    "arena_addr_hi": {"offset": "0x1C", "access": "write"}
+  },
+  "buffers": {
+    "arena": {"direction": "bidirectional", "alignment_bytes": 64, "size_bytes": 200320},
+    "header": {"direction": "bidirectional", "alignment_bytes": 64, "offset": 0, "size_bytes": 64},
+    "image": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 64, "size_bytes": 49152},
+    "state": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 49216, "size_bytes": 16},
+    "model": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 49280, "size_bytes": 150656},
+    "action": {"direction": "pl_to_ps", "alignment_bytes": 64, "offset": 199936, "size_bytes": 336}
+  }
+}

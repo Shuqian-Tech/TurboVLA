@@ -41,8 +41,20 @@ tmp/
 # Local migration sources and homepage files excluded from the main branch.
 /benchmarks/
 /website/
-/docs/
 
 # Browser QA artifacts.
 .playwright-cli/
 **/.playwright-cli/
+
+# Vivado per-session state; reproducible reports and artifacts are recorded
+# through the project manifests instead.
+.Xil/
+vivado.jou
+vivado_pid*.str
+
+# Track reviewable build evidence without admitting generated projects,
+# bitstreams, XSA archives, simulation databases, or other binary outputs.
+!hardware/vivado_kr260/build/
+hardware/vivado_kr260/build/*
+!hardware/vivado_kr260/build/*.rpt
+!hardware/vivado_kr260/reports/**/*.log

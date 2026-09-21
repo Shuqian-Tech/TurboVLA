@@ -1,0 +1,38 @@
+{
+  "fp32_action": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "fp32_action_hidden": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "fp32_fusion_0": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "fp32_fusion_1": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "fp32_image_normalized": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "fp32_language_embedding": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "fp32_state_projection": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "fp32_visual_conv": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "fp32_visual_tokens": {
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  }
+}
