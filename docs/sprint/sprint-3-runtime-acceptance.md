@@ -13,10 +13,11 @@
 - [T010：实现数据回放与数值对齐测试](../tasks/T010-replay-validation.md)
 - [T011：完成机器人闭环与稳定性测试](../tasks/T011-closed-loop-stability.md)
 - [T012：最终 thermo-nuclear 审查与发布归档](../tasks/T012-final-acceptance.md)
+- [T013：补齐 PL 推理链、PS Runtime 与端到端数值对齐](../tasks/T013-pl-runtime-e2e.md)
 
-当前执行任务：[T012：最终 thermo-nuclear 审查与发布归档](../tasks/T012-final-acceptance.md)
+当前执行任务：[T013：补齐 PL 推理链、PS Runtime 与端到端数值对齐](../tasks/T013-pl-runtime-e2e.md)
 
-执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（Draft PR #1、发布 manifest、分阶段 gated-fusion co-sim 和 board probe 记录已生成）。当前源码 Vivado 2025.1 全量重建已在本机完成，日志 `/tmp/turbovla-current-build.3zY7TN/vivado-current.log`，bitstream/XSA 可本地复核；板端仍为 starter-kit overlay，缺匹配的 `.bit.bin/.dtbo` 和完整 PL action 输出链，硬件 bring-up 仍为 `not_run`。
+执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（Draft PR #1、发布 manifest、分阶段 gated-fusion co-sim 和 board probe 记录已生成）；T013 `in_progress`（已建立独立任务/分支，开始实现完整 image-to-action PL top、PS DDR/MMIO runtime 和 action parity）。旧版 Vivado build 只覆盖 GEMM/Fusion，不能作为 T013 端到端验收。T013 高内存构建固定从 GitHub branch revision 在 `frank@192.168.68.119:/home/frank/TurboVLA-codex-T013` 独立 worktree 执行。
 
 ## 进入条件
 

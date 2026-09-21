@@ -34,6 +34,16 @@ The agent must use the latest development status, Sprint status, task status, de
 - Do not silently claim an on-board test from a software report. Mark hardware bring-up as `not_run` only when the board or Hardware Manager is unavailable; keep board evidence separate from software-only reports.
 - The board SSH endpoint and Hardware Manager connection are environment facts, not permission to perform destructive board operations. Bring-up commands must remain non-destructive unless explicitly authorized.
 
+## High-Memory Build Host
+
+- SSH endpoint: `frank@192.168.68.119` (passwordless key access).
+- Repository checkout: `/home/frank/TurboVLA`.
+- Use this host for memory-intensive Vitis HLS RTL co-simulation, HLS synthesis/IP export, Vivado synthesis, implementation, post-route reports, bitstream, and XSA generation.
+- GitHub is the only collaboration and source-transfer boundary between machines: commit and push the exact branch revision locally, then fetch that revision on the build host. Do not copy uncommitted source trees between hosts.
+- The existing `/home/frank/TurboVLA` checkout may contain unrelated local changes. Never reset, clean, overwrite, or reuse that dirty worktree for agent builds. Create a separate worktree such as `/home/frank/TurboVLA-codex-<task-id>` from the pushed remote branch.
+- Record the exact commit SHA, commands, tool versions, logs, reports, and artifact checksums for every remote build. Copy back only build evidence or generated deliverables associated with that commit.
+- The build host is not the KR260 target. Results from `.119` are software Vivado/HLS evidence and must not be reported as on-board execution.
+
 ## Task, Branch, and PR Policy
 
 - Every task is represented by its own file under `docs/tasks/`.
@@ -42,6 +52,7 @@ The agent must use the latest development status, Sprint status, task status, de
 - The task file must record branch name, PR link/number, status, changed files, validation commands, software Vivado evidence, and hardware bring-up status (`not_run` until the board is usable).
 - A task cannot be marked `done` without a linked PR and recorded acceptance evidence.
 - Do not edit a task's acceptance criteria to make an implementation pass. Update the task contract first and record the reason.
+- Cross-machine collaboration must use the task branch and its GitHub PR; remote build hosts consume pushed commits and must not become an untracked source of code changes.
 
 ## Acceptance Gate
 

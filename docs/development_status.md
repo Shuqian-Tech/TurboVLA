@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)
-- 当前任务：[T012：最终 thermo-nuclear 审查与发布归档](tasks/T012-final-acceptance.md)（`in_progress`）
+- 当前任务：[T013：PL 推理链、PS Runtime 与端到端数值对齐](tasks/T013-pl-runtime-e2e.md)（`in_progress`）
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`amd-edf@192.168.68.123`（passwordless key；不在仓库保存凭据）
@@ -37,6 +37,7 @@
 - [ ] T010：实现数据回放与数值对齐测试（`in_progress`）
 - [ ] T011：完成机器人闭环与稳定性测试（`in_progress`）
 - [ ] T012：最终 thermo-nuclear 审查与发布归档（`in_progress`）
+- [ ] T013：补齐 PL 推理链、PS Runtime 与端到端 action 数值对齐（`in_progress`）
 
 ## 未开始
 
@@ -115,6 +116,12 @@
 - `docs/release/turbovla_lite_acceptance.md` 完成 thermo-nuclear 汇总，结果为 `BLOCKED_BY_ACCEPTANCE_GATES`。
 - 所有已运行的 software-only C/replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 仍未闭合。当前 checkout 已有本机新生成的 bitstream/XSA，但没有 `.bit.bin/.dtbo`；Block Design 缺少 action MLP 实例和 DMA S2MM 返回通路，板端仍是 starter-kit overlay，不能宣称完整 PL 推理已上板。
 - system Python 因缺少 `torch` 不能作为完整回归环境；仓库 `.venv` 已存在并提供 PyTorch/NumPy，使用 `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v` 的本次回归为 9 tests 通过。
+
+## T013 end-to-end integration
+
+- 独立分支 `task/T013-pl-runtime-e2e` 已开始；任务合同见 `docs/tasks/T013-pl-runtime-e2e.md`。
+- 高内存 HLS/Vivado 作业固定在 `frank@192.168.68.119` 的隔离 worktree 运行，源代码只通过 GitHub branch/PR 交接；不会覆盖该机器现有 `/home/frank/TurboVLA` 脏工作区。
+- 当前正在用单一 HLS AXI4-MM/AXI-Lite top 替换未连接的 AXI DMA 与不完整 kernel 组合，并补齐真实 PS buffer/MMIO/cache runtime 边界和 84-value action parity。
 
 ## T007 block design 证据
 
