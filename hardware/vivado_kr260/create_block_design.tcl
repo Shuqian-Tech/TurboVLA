@@ -19,9 +19,11 @@ create_bd_cell -type ip -vlnv xilinx.com:hls:turbovla_lite_e2e:1.0 inference
 
 set_property -dict [list \
   CONFIG.PSU__USE__M_AXI_GP0 {1} \
+  CONFIG.PSU__USE__M_AXI_GP2 {0} \
   CONFIG.PSU__USE__S_AXI_GP0 {1} \
   CONFIG.PSU__USE__IRQ0 {1} \
   CONFIG.PSU__FPGA_PL0_ENABLE {1} \
+  CONFIG.PSU__CRL_APB__PL0_REF_CTRL__SRCSEL {IOPLL} \
   CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {200}] [get_bd_cells ps]
 set_property CONFIG.NUM_SI 1 [get_bd_cells control_smartconnect]
 set_property CONFIG.NUM_MI 1 [get_bd_cells control_smartconnect]
@@ -34,7 +36,6 @@ connect_bd_net [get_bd_pins ps/pl_clk0] \
   [get_bd_pins memory_smartconnect/aclk] \
   [get_bd_pins proc_sys_reset/slowest_sync_clk] \
   [get_bd_pins ps/maxihpm0_fpd_aclk] \
-  [get_bd_pins ps/maxihpm0_lpd_aclk] \
   [get_bd_pins ps/saxihpc0_fpd_aclk] \
   [get_bd_pins inference/ap_clk]
 connect_bd_net [get_bd_pins ps/pl_resetn0] \
