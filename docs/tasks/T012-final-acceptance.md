@@ -3,8 +3,8 @@
 - 状态：`in_progress`
 - Sprint：Sprint 3
 - 分支：`task/T012-final-acceptance`
-- PR：[Shuqian-Tech/TurboVLA#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1)（Draft）
-- 依赖：T008、T009、T010、T011
+- PR：[Shuqian-Tech/TurboVLA#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1)（已合并到 `main`；任务仍受发布 gate 约束）
+- 依赖：T008、T009、T010、T011、T014
 - 验收 skill：`thermo-nuclear-code-quality-review`
 
 ## 当前执行记录
@@ -13,7 +13,7 @@
 - 当前分支：`task/T012-final-acceptance`
 - 发布 manifest：`docs/release/turbovla_lite_release_manifest.json`
 - 审查报告：`docs/release/turbovla_lite_acceptance.md`
-- 当前结果：`blocked_by_acceptance_gates`（T013 端到端 gate 已闭合；最终发布仍受独立任务 PR、正式 teacher/LIBERO 数据和 release timing closure 约束）
+- 当前结果：`blocked_by_acceptance_gates`（T013 端到端 gate 已闭合；最终发布仍受独立任务 PR、T014 GPU TinyCNN 能力评估、正式 teacher/LIBERO 数据和 release timing closure 约束）
 - 硬件 bring-up：T013 已提供 compatible `.bit.bin`/DTBO、Hardware Manager/JTAG、完整 PL inference 和 30 分钟稳定性证据；本任务保留独立发布 gate，不把 T013 证据扩写成正式机器人成功率或发布 timing closure。
 
 ## 验证记录
@@ -41,7 +41,7 @@
 - 已准备：KR260/K26 software-only bitstream、XSA、Vivado post-route 报告、寄存器表、runtime/replay model、参数包 checksum；Block Design 尚无 action MLP 实例或 DMA S2MM 返回通路。
 - 首次加载前必须在 Hardware Manager 确认 active device 为 `xck26-sfvc784-2LV-c`，核对 bitstream/XSA SHA256，并保留下载日志。
 - 当前状态：SSH/board probe 已完成；bitstream load、Hardware Manager/JTAG target、PL DMA、硬件 inference 和 30 分钟稳定性仍为 `not_run`；板上当前是 starter-kit overlay，不能把它写成 TurboVLA bring-up。
-- 独立 PR：T012 Draft PR #1 已创建；T001-T011 的独立任务 PR 仍待创建
+- 独立 PR：T012 PR #1 已合并到 `main`；T001-T011 的独立任务 PR 仍缺失，需按项目流程另行处置
 
 ## Thermo-Nuclear Review
 

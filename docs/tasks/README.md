@@ -18,6 +18,7 @@
 - [T002：建立 FP32/INT8 软件 reference](T002-software-reference.md)
 - [T003：训练 TurboVLA-Lite student](T003-train-lite-student.md)
 - [T004：生成 FPGA 参数包](T004-export-fpga-parameters.md)
+- [T014：GPU TinyCNN 学习能力评估](T014-gpu-tinycnn-evaluation.md)
 
 ### Sprint 2
 

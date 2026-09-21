@@ -34,6 +34,7 @@
 ## 当前验收边界
 
 - T003 尚未进入 `in_review`：缺少真实 teacher/student 训练数据、LIBERO 子集成功率和正式 checkpoint hash
+- 正式训练参数冻结前先执行 T014 GPU 学习能力评估，区分模型容量、训练流程与量化损失；T014 的结论作为 T003 后续 `keep`、`tune` 或模型合同变更依据
 - 不使用 CPU inference fallback；训练脚本缺少 PyTorch 时直接报依赖错误，推理仍由 T002 reference/后续 PL kernel 定义
 
 ## Thermo-Nuclear Review（中间审查）

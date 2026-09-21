@@ -13,10 +13,11 @@
 - [T002：建立 FP32/INT8 软件 reference](../tasks/T002-software-reference.md)
 - [T003：训练 TurboVLA-Lite student](../tasks/T003-train-lite-student.md)
 - [T004：生成 FPGA 参数包](../tasks/T004-export-fpga-parameters.md)
+- [T014：GPU TinyCNN 学习能力评估](../tasks/T014-gpu-tinycnn-evaluation.md)
 
 当前执行任务：[T004：生成 FPGA 参数包](../tasks/T004-export-fpga-parameters.md)
 
-执行进度：T001 `in_review`（新 upstream 已配置，独立 PR 待创建）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）；T004 `in_progress`（参数包导出和 round-trip 已验证）。
+执行进度：T001 `in_review`（新 upstream 已配置，独立 PR 待创建）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）；T004 `in_progress`（参数包导出和 round-trip 已验证）；T014 `planned`（先用 CUDA 测量精确硬件等价 TinyCNN 的 FP32/QAT/INT8 学习能力，再继续正式 T003/T004 闭环）。
 
 ## 进入条件
 
@@ -28,6 +29,7 @@
 
 - 固定 shape 和量化格式冻结；
 - FP32/INT8 reference 可重复运行；
+- 当前硬件等价 TinyCNN 的 GPU 学习能力、量化损失和 LIBERO 闭环表现已测量；
 - student checkpoint、instruction embedding table 和参数 metadata 已生成；
 - 所有任务完成独立 PR 和 thermo-nuclear acceptance。
 
