@@ -17,7 +17,7 @@
 
 当前执行任务：[T013：补齐 PL 推理链、PS Runtime 与端到端数值对齐](../tasks/T013-pl-runtime-e2e.md)
 
-执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（Draft PR #1、发布 manifest、分阶段 gated-fusion co-sim 和 board probe 记录已生成）；T013 `in_progress`（已建立独立任务/分支，开始实现完整 image-to-action PL top、PS DDR/MMIO runtime 和 action parity）。旧版 Vivado build 只覆盖 GEMM/Fusion，不能作为 T013 端到端验收。T013 高内存构建固定从 GitHub branch revision 在 `frank@192.168.68.119:/home/frank/TurboVLA-codex-T013` 独立 worktree 执行。项目 owner 于 2026-09-21 批准 setup WNS `-0.010 ns` soft gate；负 WNS 必须标记 `soft_gate_owner_waived`，不得称为 timing clean。
+执行进度：T009 `in_progress`（host/replay register/DMA model 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（Draft PR #1、发布 manifest、分阶段 gated-fusion co-sim 和 board probe 记录已生成）；T013 `in_progress`（已建立独立任务/分支，开始实现完整 image-to-action PL top、PS DDR/MMIO runtime 和 action parity）。旧版 Vivado build 只覆盖 GEMM/Fusion，不能作为 T013 端到端验收。T013 高内存构建固定从 GitHub branch revision 在 `frank@192.168.68.119:/home/frank/TurboVLA-codex-T013` 独立 worktree 执行。项目 owner 于 2026-09-21 将首版上板的 WNS/TNS 改为 reporting-only；负 slack 必须标记 `bringup_owner_waived`，不得称为 timing clean，并在发布验收前继续收敛。
 
 ## 进入条件
 

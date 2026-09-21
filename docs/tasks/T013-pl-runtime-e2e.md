@@ -25,7 +25,7 @@ Complete the fixed-shape image/state/instruction-to-action inference path in PL,
 - HLS C simulation checks all 84 action values against the Python INT8 golden with recorded maximum and mean absolute error thresholds.
 - RTL co-simulation passes for the same vector on the exact accepted commit.
 - Vivado block design contains the complete inference top, its AXI-Lite control, DDR master ports, and interrupt; there is no unused AXI DMA transport.
-- Vivado synthesis, implementation, post-route timing, resource, power, CDC, bitstream, and XSA gates are recorded for KR260/K26. The project-owner-approved setup timing soft gate is WNS >= `-0.010 ns`; a negative WNS inside that 10 ps window must be recorded as `soft_gate_owner_waived`, never as timing clean.
+- Vivado synthesis, implementation, post-route timing, resource, power, CDC, bitstream, and XSA results are recorded for KR260/K26. For the first board bring-up, the project owner explicitly made WNS/TNS reporting-only on 2026-09-21: any negative WNS must be recorded as `bringup_owner_waived`, never as timing clean or release timing closure. Timing closure remains required before release acceptance.
 - Runtime fake-MMIO tests prove buffer layout, address programming, cache direction, successful completion, contract rejection, and timeout/error behavior without CPU inference.
 - KR260 execution evidence is recorded separately and remains `not_run` until a compatible `.bit.bin`/device-tree overlay and non-destructive load procedure are available.
 - The task branch and PR pass `thermo-nuclear-code-quality-review` with every blocking finding resolved or owner-waived.
@@ -45,7 +45,7 @@ Complete the fixed-shape image/state/instruction-to-action inference path in PL,
 - `PYTHONPATH=. .venv/bin/python tools/run_runtime_csim.py`: arena/MMIO/cache path passed.
 - `tools/run_vitis_hls.sh hardware/hls/e2e/vitis_hls.tcl`: Vitis HLS 2025.1 C simulation passed on `xck26-sfvc784-2LV-c`.
 - HLS synthesis/IP export, RTL co-simulation, Vivado backend and board execution: pending exact-commit remote runs.
-- Timing gate contract update (2026-09-21, project owner): allow board bring-up at post-route setup WNS >= `-0.010 ns`; values below zero remain an explicit owner waiver and do not satisfy a timing-clean claim.
+- Timing gate contract update (2026-09-21, project owner): first-board bring-up may proceed regardless of final WNS/TNS so the PS-to-PL path can be exercised. Negative slack is `bringup_owner_waived`, is not timing clean, and remains a release blocker to be optimized after the path is operational.
 - Cross-machine alignment: local and isolated remote worktrees use GitHub commit `b703e39`; pre-existing remote T012 edits are preserved at `archive/remote-t012-wip-20260920` (`52bcb81`). Only its previously missing `.119` Vitis discovery path was carried forward; stale report/status changes were not merged.
 
 ## Thermo-Nuclear Review

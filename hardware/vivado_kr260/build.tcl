@@ -33,9 +33,8 @@ report_power -file [file join $project_dir power.rpt]
 report_cdc -file [file join $project_dir cdc.rpt]
 set setup_wns [get_property SLACK [get_timing_paths -delay_type max -max_paths 1]]
 if {$setup_wns < $timing_soft_gate_ns} {
-  error "Post-route setup WNS $setup_wns ns is below the owner-approved soft gate $timing_soft_gate_ns ns"
-}
-if {$setup_wns < 0.0} {
+  puts "TIMING_BRINGUP_OWNER_WAIVED: setup WNS $setup_wns ns is below the former soft gate $timing_soft_gate_ns ns; bring-up only"
+} elseif {$setup_wns < 0.0} {
   puts "TIMING_SOFT_GATE: owner-waived setup WNS $setup_wns ns (limit $timing_soft_gate_ns ns)"
 } else {
   puts "TIMING_CLEAN: post-route setup WNS $setup_wns ns"
