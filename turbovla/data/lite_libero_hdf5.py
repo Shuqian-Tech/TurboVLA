@@ -62,6 +62,7 @@ class LiberoHdf5LiteDataset(Dataset):
         seed: int = 20260921,
         action_horizon: int = 12,
         rotate_images: bool = True,
+        include_teacher_observations: bool = False,
     ) -> None:
         if split not in {"train", "validation", "all"}:
             raise ValueError("split must be train, validation, or all")
@@ -76,6 +77,7 @@ class LiberoHdf5LiteDataset(Dataset):
         self.seed = int(seed)
         self.action_horizon = int(action_horizon)
         self.rotate_images = bool(rotate_images)
+        self.include_teacher_observations = bool(include_teacher_observations)
         if self.action_horizon < 1:
             raise ValueError("action_horizon must be positive")
 
@@ -186,14 +188,34 @@ class LiberoHdf5LiteDataset(Dataset):
         mask = np.zeros(self.action_horizon, dtype=np.float32)
         mask[:valid_length] = 1.0
         file_name = self.files[sample.file_index].name
-        return {
+        result: dict[str, torch.Tensor | str] = {
             "image": torch.from_numpy(image),
             "state": torch.from_numpy(self._encode_state(state)),
             "instruction_id": torch.tensor(self.instruction_ids[file_name], dtype=torch.long),
+            "instruction": self.instructions[self.instruction_ids[file_name]],
             "action_target": torch.from_numpy(actions),
             "action_mask": torch.from_numpy(mask),
             "task_name": self.files[sample.file_index].stem.removesuffix("_demo"),
         }
+        if self.include_teacher_observations:
+            wrist = np.asarray(demo["obs"]["eye_in_hand_rgb"][raw_step], dtype=np.uint8)
+            if wrist.shape != (128, 128, 3):
+                raise ValueError(f"expected a 128x128 wrist RGB image, got {wrist.shape}")
+            if self.rotate_images:
+                wrist = wrist[::-1, ::-1]
+            result["teacher_wrist_image"] = torch.from_numpy(
+                np.ascontiguousarray(wrist.transpose(2, 0, 1))
+            )
+            result["teacher_raw_state"] = torch.from_numpy(state.astype(np.float32, copy=False))
+        return result
+
+    def index_sha256(self) -> str:
+        digest = hashlib.sha256()
+        for sample in self._samples:
+            raw_step = self._kept_by_demo[(sample.file_index, sample.demo_name)][sample.step_position]
+            identity = f"{self.files[sample.file_index].name}\0{sample.demo_name}\0{raw_step}\n"
+            digest.update(identity.encode("utf-8"))
+        return digest.hexdigest()
 
     def manifest(self) -> dict:
         return {
@@ -203,6 +225,7 @@ class LiberoHdf5LiteDataset(Dataset):
             "validation_fraction": self.validation_fraction,
             "split_seed": self.seed,
             "samples": len(self),
+            "index_sha256": self.index_sha256(),
             "instructions": [
                 {"instruction_id": index, "text": instruction}
                 for index, instruction in enumerate(self.instructions)

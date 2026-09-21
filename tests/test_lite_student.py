@@ -4,6 +4,7 @@ import unittest
 
 import torch
 
+from turbovla.distillation import token_relation_matrix
 from turbovla.lite_reference import load_contract
 from turbovla.lite_student import LiteStudentConfig, TurboVLALiteStudent, lite_distillation_loss
 
@@ -29,10 +30,11 @@ class LiteStudentTest(unittest.TestCase):
             torch.zeros((2,), dtype=torch.long),
         )
         targets = torch.zeros((2, 12, 7))
-        features = torch.zeros((2, 32, 128))
+        features = token_relation_matrix(torch.zeros((2, 32, 256)))
         loss, metrics = lite_distillation_loss(outputs, targets, targets, features, self.config)
         self.assertTrue(torch.isfinite(loss))
         self.assertIn("teacher_action_l1", metrics)
+        self.assertIn("feature_relation_mse", metrics)
 
     def test_qat_forward_quantizes_hardware_weights_without_extra_fusion_biases(self) -> None:
         calibration = {

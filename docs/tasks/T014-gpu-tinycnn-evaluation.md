@@ -25,12 +25,12 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - CUDA runtime：13.0
 - `torch.cuda.is_available()`：`True`
 - 当前 student：固定 128x128 单视角、32 visual tokens、hidden 128、两层 gated fusion、12x7 action，共 148436 参数
-- 当前缺口：teacher action/feature 蒸馏和扩大闭环 episode 数尚未完成；当前 3 episodes/task 仅作为 pilot
+- 当前缺口：扩大闭环 episode 数和最终 FPGA 参数包尚未完成；当前 3 episodes/task 仅作为 pilot
 
 ## 当前执行记录
 
 - 开始时间：2026-09-21
-- 当前阶段：无 teacher 行为克隆基线、FP32/PTQ/QAT 离线与闭环 pilot 已完成
+- 当前阶段：行为克隆 baseline、teacher action/feature 蒸馏和 FP32/PTQ/QAT 闭环 pilot 已完成
 - 数据策略：官方 `libero_spatial` 10-task HDF5，按 demo 固定划分，流式生成固定 128x128 单视角训练样本
 - 硬件部署边界：本任务不修改 KR260 bitstream、PL runtime 或 PS/PL 分工
 
@@ -54,7 +54,7 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 
 ## 当前验证记录
 
-- `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`：22 tests 通过
+- `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`：27 tests 通过
 - changed-file `ruff check`：通过；仓库全量 ruff 仍有 30 个与本任务无关的既有 finding
 - CUDA checkpoint load：通过，无 CPU fallback
 - LIBERO EGL offscreen rollout：通过，10/10 tasks 均产生明确 episode 分母
@@ -62,9 +62,24 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - 官方 checkpoint loader 同时支持 `ema_model_state_dict` 和 release 使用的 `model_state_dict`
 - PTQ checkpoint SHA256：`65ff8cb5de0f294772af8dc0b5ba48d2df8ac7aa91b92da41c91323ff3bfe9af`
 
+## 2026-09-21 Distillation Pilot
+
+- teacher cache：51,109 train + 11,044 validation；teacher BF16 action 与主视角 task-conditioned token relation 均使用 FP16 持久化
+- feature target：teacher 主视角 post-language-fusion `16x16` token 自适应池化到 `4x8`，再计算 channel-independent `32x32` cosine relation；学生使用 `fusion_1` 对齐，不新增部署参数
+- cache index SHA256：train `571ad7ddc4dcc307779aaec3c9b75492fc2acb6d37653d6b1c20ec6767a7df98`；validation `c059e5112e3ddef6fe9b124382f0efd0ebb66bf39244e187cbd8e28fdea3441e`
+- cache tensor SHA256：train action/relation `3637e30db0906204caaa0e0c314160f4fb33b39ffd45805b51e3385846b29547 / f5a6c9a2d1c85c07292fde517783605ba63ec536dbdfd842b7ed3eca4157f024`；validation action/relation `5220641e8441be5653a371ebed83df3eb9b9e35364a1afb5059de461545038c3 / 0c9f45fa64a5232ed4f7eee7b03552e78dd8f078dfe3c7d4a29ef5cbf16efac8`
+- distillation loss：ground-truth action : teacher action : relation = `1.0 : 1.0 : 0.1`
+- FP32 validation：action MAE `0.127495 -> 0.126056`；teacher-action MAE `0.103029 -> 0.077485`；feature relation MSE `0.011283 -> 0.005770`
+- distilled FP32 checkpoint SHA256：`dce6da5c26a4f06e5121ab7e0efee88cfc459c0aacfc9633e00c9c3ecde4a03a`
+- distilled PTQ/QAT validation MAE：`0.130382 / 0.128996`
+- distilled PTQ/QAT checkpoint SHA256：`38f783732d01272b8b5a7831ef82afebb03e86229524061079fca8eb01fc9a97 / 7209a40065aa72628bd1a2b3b92d92a205ac97a4bb1a4577c1e4eda3d5d5dc1a`
+- matched 30-episode baseline FP32/PTQ/QAT：`22/30 / 18/30 / 19/30`
+- matched 30-episode distilled FP32/PTQ/QAT：`24/30 / 22/30 / 23/30`
+- teacher：`30/30`；蒸馏将 FP32 teacher gap 从 8 个回合缩到 6 个，QAT 相对 distilled FP32 仅少 1 个回合
+- 机器可读报告：`tests/data/lite_distillation_report.json`
+
 ## 剩余 gate
 
-- 接入 teacher action 与 visual feature 蒸馏，并记录 teacher/student 同协议对照
 - 扩大闭环 episode 数，缩窄总体和逐任务置信区间
 - 从最终 QAT checkpoint 生成 T004 参数包并执行软件/PL parity
 - 完成 `thermo-nuclear-code-quality-review` 后才能进入 `in_review`

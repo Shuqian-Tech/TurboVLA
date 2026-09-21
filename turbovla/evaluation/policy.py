@@ -18,6 +18,8 @@ import numpy as np
 import torch
 from PIL import Image
 
+from ..distillation import pool_spatial_tokens, token_relation_matrix
+
 EXPECTED_IMAGE_SIZE = 256
 DINO_PATCH_SIZE = 16
 ACTION_CHUNK_SIZE = 12
@@ -517,6 +519,37 @@ class TurboVLAPolicy:
                 f"precision={self.precision} expected forward output dtype {self.model_dtype}, got {pred.dtype}"
             )
         return sanitize_pred_chunk(pred.detach().float().cpu().numpy()[0])
+
+    def predict_distillation_targets_batch(
+        self,
+        primary_images: Sequence[np.ndarray],
+        wrist_images: Sequence[np.ndarray],
+        instructions: Sequence[str],
+        states: Sequence[np.ndarray],
+    ) -> dict[str, np.ndarray]:
+        """Return normalized actions and task-conditioned primary-view relations."""
+
+        batch_size = len(primary_images)
+        if not batch_size or not (
+            len(wrist_images) == len(instructions) == len(states) == batch_size
+        ):
+            raise ValueError("distillation target inputs must have the same non-zero batch size")
+        samples, state_tensors = self._build_batch(primary_images, wrist_images, states)
+        samples, state_tensors = self._prepare_model_inputs(samples, state_tensors)
+        with torch.inference_mode():
+            condition = self.model.encode_condition(instructions, samples)
+            action_dtype = self.model.action_head.decoder.action_queries.weight.dtype
+            action = self.model.action_head(
+                condition.to(dtype=action_dtype),
+                state_tensors.to(dtype=action_dtype),
+            )
+            primary_tokens = condition[:, : self.model.vision_encoder.num_patches]
+            pooled = pool_spatial_tokens(primary_tokens)
+            relation = token_relation_matrix(pooled)
+        return {
+            "teacher_action": action.detach().float().cpu().numpy(),
+            "teacher_visual_relation": relation.detach().float().cpu().numpy(),
+        }
 
     def predict_env_action_chunk(
         self,

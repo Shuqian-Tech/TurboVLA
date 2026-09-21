@@ -19,8 +19,14 @@ from torch.utils.data import DataLoader, Subset
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from turbovla.data.lite_libero_hdf5 import LiberoHdf5LiteDataset
+from turbovla.distillation import CachedDistillationDataset, token_relation_matrix
 from turbovla.lite_reference import load_contract
-from turbovla.lite_student import LiteStudentConfig, TurboVLALiteStudent
+from turbovla.lite_student import (
+    LiteStudentConfig,
+    TurboVLALiteStudent,
+    lite_distillation_loss,
+    masked_action_l1,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATS = ROOT / "experiments" / "libero" / "configs" / "libero_all4_stats.json"
@@ -40,6 +46,10 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=2.0e-3)
     parser.add_argument("--weight-decay", type=float, default=1.0e-5)
     parser.add_argument("--gripper-loss-weight", type=float, default=1.0)
+    parser.add_argument("--teacher-cache-dir", type=Path)
+    parser.add_argument("--action-loss-weight", type=float, default=1.0)
+    parser.add_argument("--teacher-action-loss-weight", type=float, default=1.0)
+    parser.add_argument("--feature-loss-weight", type=float, default=0.1)
     parser.add_argument("--validation-fraction", type=float, default=0.2)
     parser.add_argument("--validation-batches", type=int, default=0, help="0 evaluates the complete validation split")
     parser.add_argument("--eval-interval", type=int, default=100)
@@ -66,6 +76,14 @@ def _parse_args() -> argparse.Namespace:
         parser.error("--overfit-samples must be positive")
     if args.gripper_loss_weight <= 0:
         parser.error("--gripper-loss-weight must be positive")
+    if min(args.action_loss_weight, args.teacher_action_loss_weight, args.feature_loss_weight) < 0:
+        parser.error("distillation loss weights cannot be negative")
+    if args.teacher_cache_dir is not None and args.overfit_samples is not None:
+        parser.error("--teacher-cache-dir cannot be combined with --overfit-samples")
+    if args.teacher_cache_dir is not None and (
+        args.max_train_samples is not None or args.max_validation_samples is not None
+    ):
+        parser.error("teacher caches require the complete deterministic train and validation indexes")
     return args
 
 
@@ -98,11 +116,7 @@ def _masked_action_l1(
     action_mask: torch.Tensor,
     gripper_loss_weight: float,
 ) -> torch.Tensor:
-    mask = action_mask[:, :, None]
-    weights = torch.ones(prediction.shape[-1], dtype=prediction.dtype, device=prediction.device)
-    weights[-1] = gripper_loss_weight
-    denominator = mask.sum() * weights.sum()
-    return (torch.abs(prediction - target) * mask * weights).sum() / denominator.clamp_min(1.0)
+    return masked_action_l1(prediction, target, action_mask, gripper_loss_weight)
 
 
 @torch.no_grad()
@@ -121,6 +135,10 @@ def _evaluate(
     dimension_count = torch.zeros(7, dtype=torch.float64)
     gripper_correct = 0
     gripper_count = 0
+    teacher_absolute_sum = 0.0
+    teacher_absolute_count = 0.0
+    feature_relation_sum = 0.0
+    feature_relation_count = 0
     per_task: dict[str, dict[str, float]] = {}
     for batch_index, batch in enumerate(loader):
         if max_batches and batch_index >= max_batches:
@@ -130,7 +148,8 @@ def _evaluate(
         instruction_id = batch["instruction_id"].to(device, non_blocking=True)
         target = batch["action_target"].to(device, non_blocking=True)
         mask = batch["action_mask"].to(device, non_blocking=True)[:, :, None]
-        prediction = model(image, state, instruction_id)["action"]
+        outputs = model(image, state, instruction_id)
+        prediction = outputs["action"]
         error = torch.abs(prediction - target) * mask
         absolute_sum += float(error.sum().cpu())
         absolute_count += float(mask.sum().cpu()) * error.shape[-1]
@@ -149,9 +168,22 @@ def _evaluate(
             entry = per_task.setdefault(task_name, {"sum": 0.0, "samples": 0.0})
             entry["sum"] += float(value)
             entry["samples"] += 1.0
+        if "teacher_action" in batch:
+            teacher_action = batch["teacher_action"].to(device, non_blocking=True)
+            teacher_error = torch.abs(prediction - teacher_action) * mask
+            teacher_absolute_sum += float(teacher_error.sum().cpu())
+            teacher_absolute_count += float(mask.sum().cpu()) * teacher_error.shape[-1]
+            teacher_relation = batch["teacher_visual_relation"].to(device, non_blocking=True)
+            relation_error = torch.nn.functional.mse_loss(
+                token_relation_matrix(outputs["fusion_1"]),
+                teacher_relation.float(),
+                reduction="sum",
+            )
+            feature_relation_sum += float(relation_error.cpu())
+            feature_relation_count += teacher_relation.numel()
     if absolute_count == 0:
         raise RuntimeError("validation loader produced no valid action values")
-    return {
+    result = {
         "action_mae": absolute_sum / absolute_count,
         "action_max_abs_error": maximum,
         "action_dimension_mae": (dimension_sum / dimension_count.clamp_min(1.0)).tolist(),
@@ -161,6 +193,10 @@ def _evaluate(
             task: values["sum"] / values["samples"] for task, values in sorted(per_task.items())
         },
     }
+    if teacher_absolute_count:
+        result["teacher_action_mae"] = teacher_absolute_sum / teacher_absolute_count
+        result["teacher_feature_relation_mse"] = feature_relation_sum / feature_relation_count
+    return result
 
 
 def _sha256(path: Path) -> str:
@@ -210,6 +246,18 @@ def main() -> int:
         )
         train_data = _limit(train_base, args.max_train_samples)
         validation_data = _limit(validation_base, args.max_validation_samples)
+    distillation_metadata = None
+    if args.teacher_cache_dir is not None:
+        train_data = CachedDistillationDataset(train_data, args.teacher_cache_dir / "train")
+        validation_data = CachedDistillationDataset(
+            validation_data,
+            args.teacher_cache_dir / "validation",
+        )
+        distillation_metadata = {
+            "cache_dir": str(args.teacher_cache_dir),
+            "train": train_data.cache.metadata,
+            "validation": validation_data.cache.metadata,
+        }
     generator = torch.Generator().manual_seed(args.seed)
     loader_kwargs = {
         "batch_size": args.batch_size,
@@ -222,7 +270,13 @@ def main() -> int:
 
     contract = load_contract()
     calibration = json.loads(args.calibration.read_text(encoding="utf-8"))
-    config = replace(LiteStudentConfig.from_contract(contract, args.calibration), fake_quant=args.mode == "qat")
+    config = replace(
+        LiteStudentConfig.from_contract(contract, args.calibration),
+        fake_quant=args.mode == "qat",
+        action_loss_weight=args.action_loss_weight,
+        teacher_action_loss_weight=args.teacher_action_loss_weight,
+        feature_loss_weight=args.feature_loss_weight,
+    )
     model = TurboVLALiteStudent(config, calibration if args.mode == "qat" else None).to(device)
     if args.resume is not None:
         saved = torch.load(args.resume, map_location="cpu", weights_only=False)
@@ -254,9 +308,22 @@ def main() -> int:
         action_target = batch["action_target"].to(device, non_blocking=True)
         action_mask = batch["action_mask"].to(device, non_blocking=True)
         outputs = model(image, state, instruction_id)
-        loss = _masked_action_l1(
-            outputs["action"], action_target, action_mask, args.gripper_loss_weight
-        )
+        if "teacher_action" in batch:
+            teacher_action = batch["teacher_action"].to(device, non_blocking=True)
+            teacher_relation = batch["teacher_visual_relation"].to(device, non_blocking=True)
+            loss, _ = lite_distillation_loss(
+                outputs,
+                action_target,
+                teacher_action,
+                teacher_relation,
+                config,
+                action_mask,
+                args.gripper_loss_weight,
+            )
+        else:
+            loss = _masked_action_l1(
+                outputs["action"], action_target, action_mask, args.gripper_loss_weight
+            )
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -268,7 +335,7 @@ def main() -> int:
             curve.append(
                 {
                     "step": step,
-                    "train_action_l1": train_loss_sum / train_samples,
+                    "train_loss": train_loss_sum / train_samples,
                     "validation": validation,
                 }
             )
@@ -294,6 +361,7 @@ def main() -> int:
             "dataset_revision": args.dataset_revision,
             "seed": args.seed,
             "mode": args.mode,
+            "distillation": distillation_metadata,
         }
         torch.save(checkpoint, args.output)
         checkpoint_path = args.output
@@ -322,6 +390,12 @@ def main() -> int:
         "learning_rate": args.learning_rate,
         "weight_decay": args.weight_decay,
         "gripper_loss_weight": args.gripper_loss_weight,
+        "distillation": distillation_metadata,
+        "loss_weights": {
+            "ground_truth_action": args.action_loss_weight,
+            "teacher_action": args.teacher_action_loss_weight,
+            "teacher_feature_relation": args.feature_loss_weight,
+        },
         "parameter_count": sum(parameter.numel() for parameter in model.parameters()),
         "elapsed_seconds": elapsed,
         "samples_per_second": steps_to_run * args.batch_size / elapsed if steps_to_run else None,

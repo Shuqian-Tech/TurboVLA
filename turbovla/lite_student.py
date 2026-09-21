@@ -11,6 +11,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from turbovla.distillation import token_relation_matrix
+
 
 @dataclass(frozen=True)
 class LiteStudentConfig:
@@ -170,14 +172,26 @@ def lite_distillation_loss(
     outputs: Mapping[str, torch.Tensor],
     action_target: torch.Tensor,
     teacher_action: torch.Tensor,
-    teacher_visual_tokens: torch.Tensor,
+    teacher_visual_relation: torch.Tensor,
     config: LiteStudentConfig,
+    action_mask: torch.Tensor | None = None,
+    gripper_loss_weight: float = 1.0,
 ) -> tuple[torch.Tensor, dict[str, float]]:
     """Combine ground-truth action, teacher action and visual feature losses."""
 
-    action_loss = torch.nn.functional.l1_loss(outputs["action"], action_target)
-    teacher_action_loss = torch.nn.functional.l1_loss(outputs["action"], teacher_action)
-    feature_loss = torch.nn.functional.mse_loss(outputs["visual_tokens"], teacher_visual_tokens)
+    action_loss = masked_action_l1(
+        outputs["action"], action_target, action_mask, gripper_loss_weight
+    )
+    teacher_action_loss = masked_action_l1(
+        outputs["action"], teacher_action, action_mask, gripper_loss_weight
+    )
+    student_relation = token_relation_matrix(outputs["fusion_1"])
+    if teacher_visual_relation.shape != student_relation.shape:
+        raise ValueError(
+            "teacher visual relation must match the student's [B,32,32] relation matrix, "
+            f"got {tuple(teacher_visual_relation.shape)}"
+        )
+    feature_loss = torch.nn.functional.mse_loss(student_relation, teacher_visual_relation.float())
     total = (
         config.action_loss_weight * action_loss
         + config.teacher_action_loss_weight * teacher_action_loss
@@ -187,5 +201,26 @@ def lite_distillation_loss(
         "loss": float(total.detach().cpu()),
         "action_l1": float(action_loss.detach().cpu()),
         "teacher_action_l1": float(teacher_action_loss.detach().cpu()),
-        "feature_mse": float(feature_loss.detach().cpu()),
+        "feature_relation_mse": float(feature_loss.detach().cpu()),
     }
+
+
+def masked_action_l1(
+    prediction: torch.Tensor,
+    target: torch.Tensor,
+    action_mask: torch.Tensor | None = None,
+    gripper_loss_weight: float = 1.0,
+) -> torch.Tensor:
+    if prediction.shape != target.shape or prediction.ndim != 3:
+        raise ValueError("prediction and target must have matching [B,H,A] shapes")
+    if gripper_loss_weight <= 0:
+        raise ValueError("gripper loss weight must be positive")
+    if action_mask is None:
+        action_mask = torch.ones(prediction.shape[:2], device=prediction.device, dtype=prediction.dtype)
+    if action_mask.shape != prediction.shape[:2]:
+        raise ValueError("action mask must have shape [B,H]")
+    mask = action_mask.to(device=prediction.device, dtype=prediction.dtype).unsqueeze(-1)
+    weights = torch.ones(prediction.shape[-1], device=prediction.device, dtype=prediction.dtype)
+    weights[-1] = gripper_loss_weight
+    denominator = mask.sum() * weights.sum()
+    return (torch.abs(prediction - target) * mask * weights).sum() / denominator.clamp_min(1.0)

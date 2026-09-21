@@ -31,6 +31,7 @@ class LiteLiberoHdf5Test(unittest.TestCase):
                 images[:, 0, 0, 0] = 11
                 images[:, -1, -1, 0] = 22
                 obs.create_dataset("agentview_rgb", data=images)
+                obs.create_dataset("eye_in_hand_rgb", data=images)
                 obs.create_dataset("ee_states", data=np.zeros((4, 6), dtype=np.float32))
                 obs.create_dataset("gripper_states", data=np.zeros((4, 2), dtype=np.float32))
         stats_path = root / "stats.json"
@@ -66,6 +67,20 @@ class LiteLiberoHdf5Test(unittest.TestCase):
             self.assertEqual(tuple(sample["action_target"].shape), (12, 7))
             self.assertEqual(int(sample["instruction_id"]), 0)
             self.assertEqual(int(sample["image"][0, 0, 0, 0]), 22)
+
+            teacher_train = LiberoHdf5LiteDataset(
+                dataset_dir,
+                stats_path,
+                stats_key="test",
+                split="train",
+                validation_fraction=0.25,
+                seed=7,
+                include_teacher_observations=True,
+            )
+            teacher_sample = teacher_train[0]
+            self.assertEqual(tuple(teacher_sample["teacher_wrist_image"].shape), (3, 128, 128))
+            self.assertEqual(tuple(teacher_sample["teacher_raw_state"].shape), (8,))
+            self.assertEqual(len(teacher_train.index_sha256()), 64)
 
 
 if __name__ == "__main__":
