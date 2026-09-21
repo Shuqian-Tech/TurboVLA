@@ -44,6 +44,18 @@
       "bytes": 1473,
       "sha256": "1d2bbc3d332e40c165a24cdfa6f28d43fe0fd7c942b0ff5bcc1b5aeb3f7c75e0"
     },
+    "hardware/vivado_kr260/reports/t013_board_bringup.md": {
+      "bytes": 4261,
+      "sha256": "70a8651b8010c43572d1bd66e3f77157be5f6623b8293cf43b64ab227c6a15ac"
+    },
+    "hardware/vivado_kr260/reports/t013_board_live_sample.csv": {
+      "bytes": 1211,
+      "sha256": "4e4d7c15aaa3c38bbe70640cab50d9fb106cad0674cbc41e3e90e4a894061aed"
+    },
+    "hardware/vivado_kr260/reports/t013_board_live_sample.md": {
+      "bytes": 1809,
+      "sha256": "ca29fb155db4fd5821bb813241ecf697076d67a08cfda9f3db0cc47264590585"
+    },
     "tests/data/lite_golden/golden_tensors.npz": {
       "bytes": 47503,
       "sha256": "307600ad7f29001fee8335921e9d3eaa3bceca8e6383c65252688f2f58390f28"
@@ -66,14 +78,12 @@
     }
   },
   "blocking_gates": [
-    "independent task PRs are not yet created",
-    "the local current-source Vivado build passed, but no TurboVLA bit.bin/DTBO or restricted load service is available; the block design has no action MLP instance or DMA S2MM return path for full PL inference",
-    "post-route timing passes at the generated 96.974 MHz PL clock, not the documented 200 MHz timing target",
     "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-    "KR260 currently exposes the k26-starter-kits overlay; Hardware Manager has zero JTAG targets and noninteractive root access is unavailable, so TurboVLA bitstream load, PL DMA, and hardware inference are not_run"
+    "independent T009-T012 task PRs and final PR #1 release review are not complete",
+    "T013 board bring-up passed, but worst-case thermal qualification and robot closed-loop success-rate evidence are not complete"
   ],
-  "hardware_bringup": "not_run",
-  "head_commit": "5e21569ffb795a5b01291e0b7e700cd93f238adc",
+  "hardware_bringup": "passed_30_min",
+  "head_commit": "74247ede2cbf0abd85ca5442ced573e3e6eaae05",
   "platform": "kr260-k26",
   "release_status": "blocked_by_acceptance_gates",
   "tasks": [
@@ -160,7 +170,14 @@
       "pr": "[Shuqian-Tech/TurboVLA#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1)\uff08Draft\uff09",
       "status": "in_progress",
       "task": "T012"
+    },
+    {
+      "branch": null,
+      "file": "docs/tasks/T013-pl-runtime-e2e.md",
+      "pr": null,
+      "status": "unknown",
+      "task": "T013"
     }
   ],
-  "verification_mode": "software_only"
+  "verification_mode": "software_and_kr260_bringup"
 }

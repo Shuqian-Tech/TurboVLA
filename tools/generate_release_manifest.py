@@ -24,6 +24,9 @@ ARTIFACTS = [
     ROOT / "hardware" / "vivado_kr260" / "build" / "power.rpt",
     ROOT / "hardware" / "vivado_kr260" / "build" / "cdc.rpt",
     ROOT / "hardware" / "vivado_kr260" / "report_manifest.json",
+    ROOT / "hardware" / "vivado_kr260" / "reports" / "t013_board_bringup.md",
+    ROOT / "hardware" / "vivado_kr260" / "reports" / "t013_board_live_sample.csv",
+    ROOT / "hardware" / "vivado_kr260" / "reports" / "t013_board_live_sample.md",
     ROOT / "build" / "hls" / "gemm" / "ip" / "gemm.zip",
     ROOT / "build" / "hls" / "gemm" / "ip" / "conv1x1.zip",
     ROOT / "build" / "hls" / "fusion_action" / "ip" / "gated_fusion.zip",
@@ -65,22 +68,16 @@ def main() -> int:
     manifest = {
         "release_status": "blocked_by_acceptance_gates",
         "platform": "kr260-k26",
-        "verification_mode": "software_only",
-        "hardware_bringup": "not_run",
+        "verification_mode": "software_and_kr260_bringup",
+        "hardware_bringup": "passed_30_min",
         "head_commit": _git("rev-parse", "HEAD"),
         "tasks": tasks,
         "artifacts": artifacts,
         "blocking_gates": [
-            "independent task PRs are not yet created",
-            "the local current-source Vivado build passed, but no TurboVLA bit.bin/DTBO "
-            "or restricted load service is available; the block design has no action MLP "
-            "instance or DMA S2MM return path for full PL inference",
-            "post-route timing passes at the generated 96.974 MHz PL clock, not "
-            "the documented 200 MHz timing target",
             "formal T003 teacher/LIBERO training data and success-rate evaluation are absent",
-            "KR260 currently exposes the k26-starter-kits overlay; Hardware Manager "
-            "has zero JTAG targets and noninteractive root access is unavailable, so "
-            "TurboVLA bitstream load, PL DMA, and hardware inference are not_run",
+            "independent T009-T012 task PRs and final PR #1 release review are not complete",
+            "T013 board bring-up passed, but worst-case thermal qualification and robot closed-loop "
+            "success-rate evidence are not complete",
         ],
     }
     output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")

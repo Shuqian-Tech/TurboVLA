@@ -1,9 +1,9 @@
 # TurboVLA-Lite Acceptance Review
 
-Review date: 2026-09-20
+Review date: 2026-09-21
 Reviewer: Codex  
 Target: AMD Kria KR260/K26 only  
-Verification mode: `software_only`
+Verification mode: `software_and_kr260_bringup`
 
 ## Result
 
@@ -11,11 +11,11 @@ Verification mode: `software_only`
 
 The software path has deterministic reference, student smoke training,
 parameter-pack export, portable and Vitis HLS C kernel simulations, runtime
-model, replay, and safety replay evidence. GEMM/Conv, action MLP, and staged
-gated-fusion RTL co-simulation have passed. The project is not marked
-`accepted` or `done` because independent task PRs are not yet created, formal
-teacher/LIBERO training data is absent, the current Block Design lacks action
-MLP and a DMA S2MM return path, and KR260 hardware bring-up is `not_run`.
+model, replay, and safety replay evidence. T013 now adds the complete PL
+inference top, PS runtime, exact-vector RTL co-simulation, KR260 bring-up, and
+30-minute parity stability. The project is not marked `accepted` or `done`
+because independent task PRs/final PR #1 review, formal teacher/LIBERO training
+data, robot success-rate evidence, and worst-case thermal qualification remain.
 
 ## Thermo-Nuclear Review
 
@@ -28,15 +28,14 @@ MLP and a DMA S2MM return path, and KR260 hardware bring-up is `not_run`.
 ## Evidence
 
 The machine-readable artifact and task status index is
-`docs/release/turbovla_lite_release_manifest.json`. The recorded software
-checks include Python unit tests, `g++ -Werror` C simulations, Vitis HLS C
-simulation, ruff checks, contract/register-map validation, deterministic replay,
-and 1000-cycle safety replay. The local current-source Vivado synthesis,
-implementation, post-route, bitstream, and XSA run passed with WNS 3.476 ns;
-its bitstream and XSA have reproducible local checksums. The reported PL clock
-is 96.974 MHz, not a 200 MHz acceptance result. Power is a vectorless estimate
-with a reset-activity warning, and CDC skips unconstrained input ports. The
-board probe found the `k26-starter-kits` overlay, no TurboVLA device-tree nodes,
-and zero local JTAG targets. There is no matching `.bit.bin/.dtbo` or complete
-PL action-output chain; TurboVLA bitstream load, PL DMA, hardware inference,
-and KR260 30-minute stability remain `not_run`.
+`docs/release/turbovla_lite_release_manifest.json`. T013's accepted evidence is
+indexed in `hardware/vivado_kr260/reports/t013/README.md` and
+`hardware/vivado_kr260/reports/t013_board_bringup.md`; the follow-up live power,
+temperature, rail, and clock-state capture is in
+`hardware/vivado_kr260/reports/t013_board_live_sample.md`. The Vivado backend
+meets the documented 200 MHz constraint with WNS `+0.002 ns`; this is a narrow
+timing margin and remains a release optimization target. The board record
+measured PL0 at `199.998 MHz`, 30-minute parity stability at 17,019 iterations,
+and the live sample completed 12/12 additional inferences. Vivado power is an
+on-chip estimate (`3.185 W`), while INA260 board power was `3.350-3.440 W` in
+the live sample; these are different measurement boundaries.
