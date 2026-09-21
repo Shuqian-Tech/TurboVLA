@@ -1,0 +1,546 @@
+{
+  "decision_status": "tune",
+  "deployment_claim": "none",
+  "limitations": [
+    "10 episodes per task still yield wide task-level confidence intervals",
+    "the same fixed initial states are used for matched FP32 and quantized comparisons",
+    "simulation success does not establish real-robot transfer or KR260 deployment accuracy"
+  ],
+  "protocol": {
+    "episodes_per_task": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "open_loop_steps": 12,
+    "seed": 7,
+    "suite": "libero_spatial",
+    "task_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  },
+  "runs": [
+    {
+      "absolute_delta_from_baseline": 0.0,
+      "checkpoint": "build/lite/t014_spatial_distill_fp32_seed20260921.pt",
+      "checkpoint_sha256": "dce6da5c26a4f06e5121ab7e0efee88cfc459c0aacfc9633e00c9c3ecde4a03a",
+      "episodes": 100,
+      "label": "distilled_fp32",
+      "source": "build/lite/t014_rollout_distill_fp32_seed20260921_10x10.json",
+      "success_rate": 0.75,
+      "successes": 75,
+      "tasks": [
+        {
+          "episodes": 10,
+          "success_rate": 0.6,
+          "successes": 6,
+          "task_description": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "task_id": 0,
+          "wilson_95_interval": [
+            0.31267376973365824,
+            0.8318196702937638
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.7,
+          "successes": 7,
+          "task_description": "pick up the black bowl next to the ramekin and place it on the plate",
+          "task_id": 1,
+          "wilson_95_interval": [
+            0.39677814746114537,
+            0.8922087325936989
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.8,
+          "successes": 8,
+          "task_description": "pick up the black bowl from table center and place it on the plate",
+          "task_id": 2,
+          "wilson_95_interval": [
+            0.49016247153664183,
+            0.9433178485456247
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl on the cookie box and place it on the plate",
+          "task_id": 3,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+          "task_id": 4,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.9,
+          "successes": 9,
+          "task_description": "pick up the black bowl on the ramekin and place it on the plate",
+          "task_id": 5,
+          "wilson_95_interval": [
+            0.5958499732047615,
+            0.9821237869049271
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.7,
+          "successes": 7,
+          "task_description": "pick up the black bowl next to the cookie box and place it on the plate",
+          "task_id": 6,
+          "wilson_95_interval": [
+            0.39677814746114537,
+            0.8922087325936989
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl on the stove and place it on the plate",
+          "task_id": 7,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.4,
+          "successes": 4,
+          "task_description": "pick up the black bowl next to the plate and place it on the plate",
+          "task_id": 8,
+          "wilson_95_interval": [
+            0.16818032970623614,
+            0.6873262302663417
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.4,
+          "successes": 4,
+          "task_description": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "task_id": 9,
+          "wilson_95_interval": [
+            0.16818032970623614,
+            0.6873262302663417
+          ]
+        }
+      ],
+      "wilson_95_interval": [
+        0.656955364519384,
+        0.8245478863771232
+      ]
+    },
+    {
+      "absolute_delta_from_baseline": 0.020000000000000018,
+      "checkpoint": "build/lite/t014_spatial_distill_ptq_seed20260921.pt",
+      "checkpoint_sha256": "38f783732d01272b8b5a7831ef82afebb03e86229524061079fca8eb01fc9a97",
+      "episodes": 100,
+      "label": "distilled_ptq_fake_int8",
+      "source": "build/lite/t014_rollout_distill_ptq_seed20260921_10x10.json",
+      "success_rate": 0.77,
+      "successes": 77,
+      "tasks": [
+        {
+          "episodes": 10,
+          "success_rate": 0.5,
+          "successes": 5,
+          "task_description": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "task_id": 0,
+          "wilson_95_interval": [
+            0.236593090512564,
+            0.7634069094874361
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.7,
+          "successes": 7,
+          "task_description": "pick up the black bowl next to the ramekin and place it on the plate",
+          "task_id": 1,
+          "wilson_95_interval": [
+            0.39677814746114537,
+            0.8922087325936989
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.9,
+          "successes": 9,
+          "task_description": "pick up the black bowl from table center and place it on the plate",
+          "task_id": 2,
+          "wilson_95_interval": [
+            0.5958499732047615,
+            0.9821237869049271
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl on the cookie box and place it on the plate",
+          "task_id": 3,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+          "task_id": 4,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.7,
+          "successes": 7,
+          "task_description": "pick up the black bowl on the ramekin and place it on the plate",
+          "task_id": 5,
+          "wilson_95_interval": [
+            0.39677814746114537,
+            0.8922087325936989
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl next to the cookie box and place it on the plate",
+          "task_id": 6,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl on the stove and place it on the plate",
+          "task_id": 7,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.4,
+          "successes": 4,
+          "task_description": "pick up the black bowl next to the plate and place it on the plate",
+          "task_id": 8,
+          "wilson_95_interval": [
+            0.16818032970623614,
+            0.6873262302663417
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.5,
+          "successes": 5,
+          "task_description": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "task_id": 9,
+          "wilson_95_interval": [
+            0.236593090512564,
+            0.7634069094874361
+          ]
+        }
+      ],
+      "wilson_95_interval": [
+        0.6784561697712622,
+        0.8415673411969654
+      ]
+    },
+    {
+      "absolute_delta_from_baseline": 0.030000000000000027,
+      "checkpoint": "build/lite/t014_spatial_distill_qat_seed20260921.pt",
+      "checkpoint_sha256": "7209a40065aa72628bd1a2b3b92d92a205ac97a4bb1a4577c1e4eda3d5d5dc1a",
+      "episodes": 100,
+      "label": "distilled_qat_fake_int8",
+      "source": "build/lite/t014_rollout_distill_qat_seed20260921_10x10.json",
+      "success_rate": 0.78,
+      "successes": 78,
+      "tasks": [
+        {
+          "episodes": 10,
+          "success_rate": 0.7,
+          "successes": 7,
+          "task_description": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "task_id": 0,
+          "wilson_95_interval": [
+            0.39677814746114537,
+            0.8922087325936989
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.7,
+          "successes": 7,
+          "task_description": "pick up the black bowl next to the ramekin and place it on the plate",
+          "task_id": 1,
+          "wilson_95_interval": [
+            0.39677814746114537,
+            0.8922087325936989
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl from table center and place it on the plate",
+          "task_id": 2,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.9,
+          "successes": 9,
+          "task_description": "pick up the black bowl on the cookie box and place it on the plate",
+          "task_id": 3,
+          "wilson_95_interval": [
+            0.5958499732047615,
+            0.9821237869049271
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+          "task_id": 4,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.6,
+          "successes": 6,
+          "task_description": "pick up the black bowl on the ramekin and place it on the plate",
+          "task_id": 5,
+          "wilson_95_interval": [
+            0.31267376973365824,
+            0.8318196702937638
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl next to the cookie box and place it on the plate",
+          "task_id": 6,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl on the stove and place it on the plate",
+          "task_id": 7,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.4,
+          "successes": 4,
+          "task_description": "pick up the black bowl next to the plate and place it on the plate",
+          "task_id": 8,
+          "wilson_95_interval": [
+            0.16818032970623614,
+            0.6873262302663417
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.5,
+          "successes": 5,
+          "task_description": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "task_id": 9,
+          "wilson_95_interval": [
+            0.236593090512564,
+            0.7634069094874361
+          ]
+        }
+      ],
+      "wilson_95_interval": [
+        0.6892964648501421,
+        0.8499871761539459
+      ]
+    },
+    {
+      "absolute_delta_from_baseline": 0.19999999999999996,
+      "checkpoint": "data/teacher/TurboVLA/checkpoints/libero/turbovla_libero.pth",
+      "checkpoint_sha256": "d031ad7be05a2f5d04afb3194ed26b0cb46083685edee7a5e145078a37d26bab",
+      "episodes": 100,
+      "label": "teacher_bf16",
+      "source": "build/lite/t014_teacher_rollout_10x10.json",
+      "success_rate": 0.95,
+      "successes": 95,
+      "tasks": [
+        {
+          "episodes": 10,
+          "success_rate": 0.9,
+          "successes": 9,
+          "task_description": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+          "task_id": 0,
+          "wilson_95_interval": [
+            0.5958499732047615,
+            0.9821237869049271
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.9,
+          "successes": 9,
+          "task_description": "pick up the black bowl next to the ramekin and place it on the plate",
+          "task_id": 1,
+          "wilson_95_interval": [
+            0.5958499732047615,
+            0.9821237869049271
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.9,
+          "successes": 9,
+          "task_description": "pick up the black bowl from table center and place it on the plate",
+          "task_id": 2,
+          "wilson_95_interval": [
+            0.5958499732047615,
+            0.9821237869049271
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl on the cookie box and place it on the plate",
+          "task_id": 3,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+          "task_id": 4,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.9,
+          "successes": 9,
+          "task_description": "pick up the black bowl on the ramekin and place it on the plate",
+          "task_id": 5,
+          "wilson_95_interval": [
+            0.5958499732047615,
+            0.9821237869049271
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl next to the cookie box and place it on the plate",
+          "task_id": 6,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl on the stove and place it on the plate",
+          "task_id": 7,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.9,
+          "successes": 9,
+          "task_description": "pick up the black bowl next to the plate and place it on the plate",
+          "task_id": 8,
+          "wilson_95_interval": [
+            0.5958499732047615,
+            0.9821237869049271
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 1.0,
+          "successes": 10,
+          "task_description": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "task_id": 9,
+          "wilson_95_interval": [
+            0.7224672001371107,
+            0.9999999999999999
+          ]
+        }
+      ],
+      "wilson_95_interval": [
+        0.8882495307680808,
+        0.9784563208456319
+      ]
+    }
+  ],
+  "schema_version": "1.0.0",
+  "scope": "libero_spatial_closed_loop_expanded_evaluation"
+}

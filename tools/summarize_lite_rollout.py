@@ -46,6 +46,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--result", type=_parse_result, action="append", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--scope", default="libero_spatial_closed_loop_pilot")
+    parser.add_argument("--decision-status", default="preliminary_tune")
     args = parser.parse_args()
     if len(args.result) < 2:
         parser.error("at least two matched rollout results are required")
@@ -62,6 +64,14 @@ def main() -> int:
     episode_counts_mismatch = any(counts != episode_counts[0] for counts in episode_counts[1:])
     if task_ids_mismatch or episode_counts_mismatch:
         raise ValueError("rollout results must cover identical task IDs and episode counts")
+
+    matched_episode_counts = episode_counts[0]
+    if len(set(matched_episode_counts)) == 1:
+        sampling_limitation = (
+            f"{matched_episode_counts[0]} episodes per task still yield wide task-level confidence intervals"
+        )
+    else:
+        sampling_limitation = "the limited per-task episode counts yield wide task-level confidence intervals"
 
     baseline_rate = loaded[0][2]["overall_success_rate"]
     runs = []
@@ -92,8 +102,8 @@ def main() -> int:
 
     summary = {
         "schema_version": "1.0.0",
-        "scope": "libero_spatial_closed_loop_pilot",
-        "decision_status": "preliminary_tune",
+        "scope": args.scope,
+        "decision_status": args.decision_status,
         "deployment_claim": "none",
         "protocol": {
             "suite": next(iter(suites)),
@@ -104,7 +114,7 @@ def main() -> int:
         },
         "runs": runs,
         "limitations": [
-            "three episodes per task are a pilot and yield wide task-level confidence intervals",
+            sampling_limitation,
             "the same fixed initial states are used for matched FP32 and quantized comparisons",
             "simulation success does not establish real-robot transfer or KR260 deployment accuracy",
         ],

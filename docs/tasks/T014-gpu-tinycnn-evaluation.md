@@ -25,12 +25,12 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - CUDA runtime：13.0
 - `torch.cuda.is_available()`：`True`
 - 当前 student：固定 128x128 单视角、32 visual tokens、hidden 128、两层 gated fusion、12x7 action，共 148436 参数
-- 当前缺口：扩大闭环 episode 数和最终 FPGA 参数包尚未完成；当前 3 episodes/task 仅作为 pilot
+- 当前缺口：最终 FPGA 参数包和强制 code-quality review 尚未完成；10 episodes/task 扩大评测已完成
 
 ## 当前执行记录
 
 - 开始时间：2026-09-21
-- 当前阶段：行为克隆 baseline、teacher action/feature 蒸馏和 FP32/PTQ/QAT 闭环 pilot 已完成
+- 当前阶段：行为克隆 baseline、teacher action/feature 蒸馏和 FP32/PTQ/QAT 100-episode 扩大评测已完成
 - 数据策略：官方 `libero_spatial` 10-task HDF5，按 demo 固定划分，流式生成固定 128x128 单视角训练样本
 - 硬件部署边界：本任务不修改 KR260 bitstream、PL runtime 或 PS/PL 分工
 
@@ -47,7 +47,7 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - 30-episode matched closed-loop pilot：FP32 `22/30`，PTQ `18/30`，QAT `19/30`
 - 同协议 TurboVLA teacher：`30/30`；相对 FP32 TinyCNN 高 26.67 percentage points
 - FP32 Wilson 95% interval：`[0.5555, 0.8582]`；量化区间与其重叠，暂不宣称显著差异
-- 当前数据只使用 ground-truth demonstration action；teacher action/feature 蒸馏尚未开始
+- baseline 只使用 ground-truth demonstration action；后续 teacher action/feature 蒸馏结果见下节
 - 初步决策：`tune`，先做蒸馏与训练策略调整，不立即修改 FPGA 模型合同
 - 完整说明：[`docs/evaluation/t014_gpu_tinycnn_pilot.md`](../evaluation/t014_gpu_tinycnn_pilot.md)
 - 机器可读报告：`tests/data/lite_gpu_evaluation_report.json`、`tests/data/lite_rollout_pilot_report.json`
@@ -78,9 +78,21 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - teacher：`30/30`；蒸馏将 FP32 teacher gap 从 8 个回合缩到 6 个，QAT 相对 distilled FP32 仅少 1 个回合
 - 机器可读报告：`tests/data/lite_distillation_report.json`
 
+## 2026-09-21 Expanded Closed-loop Evidence
+
+- 协议：`libero_spatial` 全 10 tasks，每任务前 10 个固定 initial states，seed 7，每次预测执行 12 个 open-loop actions
+- distilled FP32：`75/100`，Wilson 95% interval `[65.70%, 82.45%]`
+- distilled PTQ fake INT8：`77/100`，Wilson 95% interval `[67.85%, 84.16%]`，相对 FP32 `+2 pp`
+- distilled QAT fake INT8：`78/100`，Wilson 95% interval `[68.93%, 85.00%]`，相对 FP32 `+3 pp`
+- TurboVLA teacher BF16：`95/100`，Wilson 95% interval `[88.82%, 97.85%]`，相对 FP32 `+20 pp`
+- 三个 student 区间高度重叠；当前证据不支持 PTQ/QAT 优于 FP32，只支持“未观察到总体量化退化”
+- student 的主要失败集中在 task 8/9：FP32 均为 `4/10`；task 8 的 PTQ/QAT 均为 `4/10`，task 9 均为 `5/10`；teacher 为 `9/10`、`10/10`
+- 机器可读报告：`tests/data/lite_distillation_expanded_report.json`
+- 决策保持 `tune`：先对 FPGA-friendly `3x3 depthwise + 1x1 pointwise` 视觉 encoder 做 CUDA 消融；只有成功率提升足够覆盖 HLS/时序成本时才更新硬件合同
+
 ## 剩余 gate
 
-- 扩大闭环 episode 数，缩窄总体和逐任务置信区间
+- 对 `3x3 depthwise + 1x1 pointwise` 视觉 encoder 做独立 CUDA 容量消融并与当前 100-episode 结果比较
 - 从最终 QAT checkpoint 生成 T004 参数包并执行软件/PL parity
 - 完成 `thermo-nuclear-code-quality-review` 后才能进入 `in_review`
 

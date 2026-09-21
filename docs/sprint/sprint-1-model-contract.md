@@ -17,7 +17,7 @@
 
 当前执行任务：[T014：GPU TinyCNN 学习能力评估](../tasks/T014-gpu-tinycnn-evaluation.md)
 
-执行进度：T001 `in_review`（新 upstream 已配置，独立 PR 待创建）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）；T004 `in_progress`（参数包导出和 round-trip 已验证）；T014 `in_progress`（baseline、teacher 对照和 action/feature 蒸馏 pilot 已完成；蒸馏 FP32/PTQ/QAT 为 `24/30`、`22/30`、`23/30`，teacher `30/30`，结论保持 `tune`，下一步扩大闭环样本并固化参数包）。
+执行进度：T001 `in_review`（新 upstream 已配置，独立 PR 待创建）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）；T004 `in_progress`（参数包导出和 round-trip 已验证）；T014 `in_progress`（action/feature 蒸馏及 100-episode matched rollout 已完成；蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`，结论保持 `tune`，下一步做 `3x3 depthwise` CUDA 容量消融并固化参数包）。
 
 ## 进入条件
 

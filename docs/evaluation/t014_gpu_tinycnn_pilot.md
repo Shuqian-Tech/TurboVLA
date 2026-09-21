@@ -106,6 +106,31 @@ Machine-readable task-level results and intervals are in
 The baseline/teacher/distillation comparison is in
 [`tests/data/lite_distillation_report.json`](../../tests/data/lite_distillation_report.json).
 
+## Expanded closed-loop evaluation
+
+The expanded matched evaluation uses all 10 `libero_spatial` tasks, the first
+10 fixed initial states per task, seed 7, and 12 open-loop actions per
+prediction. It uses the same distilled checkpoints as the pilot.
+
+| Mode | Successes | Rate | Wilson 95% interval | Delta from FP32 |
+|---|---:|---:|---:|---:|
+| Distilled FP32 | 75/100 | 75.00% | 65.70%-82.45% | 0.00 pp |
+| Distilled PTQ fake INT8 | 77/100 | 77.00% | 67.85%-84.16% | +2.00 pp |
+| Distilled QAT fake INT8 | 78/100 | 78.00% | 68.93%-85.00% | +3.00 pp |
+| TurboVLA teacher BF16 | 95/100 | 95.00% | 88.82%-97.85% | +20.00 pp |
+
+The student intervals overlap heavily. The positive PTQ/QAT deltas are not
+evidence that quantization improves the policy; they show that no aggregate
+quantization regression was observed in this matched sample. Per-task results
+locate the remaining gap: FP32 reaches only 4/10 on both tasks 8 and 9, PTQ
+and QAT remain at 4/10 and 4/10 on task 8 and 5/10 and 5/10 on task 9, while
+the teacher reaches 9/10 and 10/10. This is a model/training-capacity target,
+not an INT8-recovery target.
+
+The expanded machine-readable report, including per-task Wilson intervals and
+checkpoint hashes, is in
+[`tests/data/lite_distillation_expanded_report.json`](../../tests/data/lite_distillation_expanded_report.json).
+
 ## Decision
 
 The preliminary decision is `tune`:
@@ -116,12 +141,16 @@ The preliminary decision is `tune`:
 - Treat the remaining 20 percentage-point distilled-FP32 teacher gap as the
   optimization target; do not attribute it to quantization alone.
 - Retain QAT; it recovered one matched pilot success over PTQ, but larger
-  rollouts are required before attributing a reliable benefit.
-- Increase closed-loop episode count after distillation and use the same fixed
-  initial states for FP32/PTQ/QAT comparisons.
+  and expanded-rollout success over PTQ, but the overlapping intervals do not
+  establish a reliable QAT advantage.
+- Run a CUDA-only capacity ablation with a small `3x3` depthwise-separable
+  visual encoder, focused on tasks 8 and 9. Do not change the FPGA contract
+  unless the success-rate gain justifies new HLS, parameter-pack, parity, and
+  timing work.
 
-T014 remains `in_progress`. Final acceptance still requires the larger rollout,
-recorded checkpoint/parameter artifacts, and the mandated thermo-nuclear review.
+T014 remains `in_progress`. Final acceptance still requires the capacity
+ablation decision, recorded final parameter artifacts, and the mandated
+thermo-nuclear review.
 
 ## Reproduction commands
 
