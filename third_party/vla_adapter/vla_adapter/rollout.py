@@ -1,9 +1,9 @@
-"""VLA-Adapter-derived LIBERO evaluation for a TurboVLA checkpoint.
+"""VLA-Adapter-derived LIBERO evaluation for TurboVLA checkpoints.
 
 This script intentionally reuses the VLA-Adapter task/episode protocol shape,
 but bypasses OpenVLA/Prismatic preprocessing and action unnormalization. The
-policy adapter keeps TurboVLA's 256px DINOv3 inputs, proprio stats, hard
-action min/max, and gripper sign rule.
+policy adapters keep each checkpoint's image, proprio, action scaling, and
+gripper sign contracts explicit.
 
 VLA-Adapter is MIT-licensed; see ../LICENSES/VLA-Adapter.txt.
 """
@@ -11,19 +11,17 @@ VLA-Adapter is MIT-licensed; see ../LICENSES/VLA-Adapter.txt.
 from __future__ import annotations
 
 import argparse
-from collections import deque
-from dataclasses import dataclass, fields
 import json
 import logging
 import os
-from pathlib import Path
 import sys
-from typing import Optional
+from collections import deque
+from dataclasses import dataclass, fields
+from pathlib import Path
 
 import imageio
 import numpy as np
 import tqdm
-
 
 TASK_MAX_STEPS = {
     "libero_spatial": 220,
@@ -38,6 +36,7 @@ LIBERO_SUITES = tuple(TASK_MAX_STEPS.keys())
 
 @dataclass
 class GenerateConfig:
+    policy_kind: str = "turbovla"
     ckpt_path: str = ""
     libero_root: str = ""
     dinov3_path: str = ""
@@ -65,6 +64,7 @@ class GenerateConfig:
     result_json_path: str = ""
     log_path: str = ""
     dry_run_model_load: bool = False
+    device: str = "cuda"
 
     hidden_dim: int = 256
     nheads: int = 8
@@ -106,7 +106,9 @@ def parse_args() -> GenerateConfig:
         arg_name = f"--{name}"
         dashed_arg_name = f"--{name.replace('_', '-')}"
         kwargs = {"default": default, "help": f"default: {default}"}
-        if isinstance(default, bool):
+        if name == "policy_kind":
+            parser.add_argument(arg_name, dashed_arg_name, type=str, choices=("turbovla", "lite"), **kwargs)
+        elif isinstance(default, bool):
             parser.add_argument(arg_name, dashed_arg_name, type=_parse_bool, nargs="?", const=True, **kwargs)
             parser.add_argument(f"--no_{name}", f"--no-{name.replace('_', '-')}", dest=name, action="store_false")
         elif name == "precision":
@@ -120,7 +122,16 @@ def parse_args() -> GenerateConfig:
     return GenerateConfig(**vars(parser.parse_args()))
 
 
-def _import_turbovla_adapter():
+def _import_turbovla_adapter(policy_kind: str):
+    if policy_kind == "lite":
+        from turbovla.evaluation.lite_suite_policy import (
+            TurboVLALitePolicy,
+            get_libero_dummy_action,
+            rotate_libero_image,
+            set_seed_everywhere,
+        )
+
+        return TurboVLALitePolicy, get_libero_dummy_action, rotate_libero_image, set_seed_everywhere
     from turbovla.evaluation.suite_policy import (
         TurboVLAPolicy,
         get_libero_dummy_action,
@@ -281,14 +292,16 @@ def eval_libero(cfg: GenerateConfig) -> float:
         raise ValueError("--ckpt_path is required for TurboVLA evaluation.")
     if not Path(cfg.ckpt_path).exists():
         raise FileNotFoundError(f"TurboVLA checkpoint not found: {cfg.ckpt_path}")
-    if not cfg.dinov3_path:
+    if cfg.policy_kind == "turbovla" and not cfg.dinov3_path:
         raise ValueError("--dinov3_path is required")
-    if not cfg.bert_path:
+    if cfg.policy_kind == "turbovla" and not cfg.bert_path:
         raise ValueError("--bert_path is required")
     if not Path(cfg.stats_path).is_file():
         raise FileNotFoundError(f"stats file not found: {cfg.stats_path}")
     if cfg.task_suite_name not in LIBERO_SUITES:
         raise ValueError(f"Unknown task suite {cfg.task_suite_name}; choose from {LIBERO_SUITES}")
+    if cfg.policy_kind == "lite" and cfg.env_img_res != 128:
+        raise ValueError("TurboVLA-Lite rollout requires --env-img-res 128")
 
     if cfg.num_open_loop_steps != cfg.chunk_size:
         logging.warning(
@@ -302,36 +315,44 @@ def eval_libero(cfg: GenerateConfig) -> float:
         get_libero_dummy_action,
         rotate_libero_image,
         set_seed_everywhere,
-    ) = _import_turbovla_adapter()
+    ) = _import_turbovla_adapter(cfg.policy_kind)
     set_seed_everywhere(cfg.seed)
 
-    logging.info("Loading TurboVLA policy from %s", cfg.ckpt_path)
-    policy = TurboVLAPolicy(
-        ckpt_path=cfg.ckpt_path,
-        dinov3_path=cfg.dinov3_path,
-        bert_path=cfg.bert_path,
-        stats_path=cfg.stats_path,
-        stats_key=cfg.stats_key,
-        normalize_binary_gripper=cfg.normalize_binary_gripper,
-        allow_hf_download=cfg.allow_hf_download,
-        hidden_dim=cfg.hidden_dim,
-        nheads=cfg.nheads,
-        dim_feedforward=cfg.dim_feedforward,
-        max_text_len=cfg.max_text_len,
-        text_padding_length=cfg.text_padding_length,
-        vla_feature_enhancer_layers=cfg.vla_feature_enhancer_layers,
-        enhancer_inner_dim=cfg.enhancer_inner_dim,
-        action_dim=cfg.action_dim,
-        chunk_size=cfg.chunk_size,
-        state_dim=cfg.state_dim,
-        num_state_tokens=cfg.num_state_tokens,
-        text_dropout=cfg.text_dropout,
-        fusion_dropout=cfg.fusion_dropout,
-        fusion_droppath=cfg.fusion_droppath,
-        sub_sentence_present=cfg.sub_sentence_present,
-        precision=cfg.precision,
-        dinov3_output_hidden_states=cfg.dinov3_output_hidden_states,
-    )
+    logging.info("Loading %s policy from %s", cfg.policy_kind, cfg.ckpt_path)
+    if cfg.policy_kind == "lite":
+        policy = TurboVLAPolicy(
+            ckpt_path=cfg.ckpt_path,
+            stats_path=cfg.stats_path,
+            stats_key=cfg.stats_key,
+            device=cfg.device,
+        )
+    else:
+        policy = TurboVLAPolicy(
+            ckpt_path=cfg.ckpt_path,
+            dinov3_path=cfg.dinov3_path,
+            bert_path=cfg.bert_path,
+            stats_path=cfg.stats_path,
+            stats_key=cfg.stats_key,
+            normalize_binary_gripper=cfg.normalize_binary_gripper,
+            allow_hf_download=cfg.allow_hf_download,
+            hidden_dim=cfg.hidden_dim,
+            nheads=cfg.nheads,
+            dim_feedforward=cfg.dim_feedforward,
+            max_text_len=cfg.max_text_len,
+            text_padding_length=cfg.text_padding_length,
+            vla_feature_enhancer_layers=cfg.vla_feature_enhancer_layers,
+            enhancer_inner_dim=cfg.enhancer_inner_dim,
+            action_dim=cfg.action_dim,
+            chunk_size=cfg.chunk_size,
+            state_dim=cfg.state_dim,
+            num_state_tokens=cfg.num_state_tokens,
+            text_dropout=cfg.text_dropout,
+            fusion_dropout=cfg.fusion_dropout,
+            fusion_droppath=cfg.fusion_droppath,
+            sub_sentence_present=cfg.sub_sentence_present,
+            precision=cfg.precision,
+            dinov3_output_hidden_states=cfg.dinov3_output_hidden_states,
+        )
 
     if cfg.dry_run_model_load:
         logging.info("dry_run_model_load=True; exiting before LIBERO rollout.")
@@ -357,12 +378,15 @@ def eval_libero(cfg: GenerateConfig) -> float:
 
     summary = {
         "script": "turbovla_libero_evaluation",
+        "policy_kind": cfg.policy_kind,
         "ckpt_path": cfg.ckpt_path,
+        "checkpoint_sha256": getattr(policy, "checkpoint_sha256", None),
         "task_suite_name": cfg.task_suite_name,
         "requested_task_ids": task_ids,
         "num_trials_per_task": cfg.num_trials_per_task,
         "num_open_loop_steps": cfg.num_open_loop_steps,
         "seed": cfg.seed,
+        "device": cfg.device if cfg.policy_kind == "lite" else None,
         "precision": cfg.precision,
         "dinov3_output_hidden_states": cfg.dinov3_output_hidden_states,
         "tasks": [],

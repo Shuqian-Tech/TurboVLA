@@ -9,6 +9,7 @@ from typing import Mapping
 
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 
 @dataclass(frozen=True)
@@ -75,8 +76,10 @@ class TurboVLALiteStudent(nn.Module):
         self.visual_projection = nn.Linear(config.conv_channels, config.hidden_dim)
         self.instruction_embedding = nn.Embedding(config.instruction_table_size, config.hidden_dim)
         self.fusion_visual = nn.ModuleList(nn.Linear(config.hidden_dim, config.hidden_dim) for _ in range(2))
-        self.fusion_language = nn.ModuleList(nn.Linear(config.hidden_dim, config.hidden_dim) for _ in range(2))
-        self.fusion_gate = nn.ModuleList(nn.Linear(config.hidden_dim, config.hidden_dim) for _ in range(2))
+        self.fusion_language = nn.ModuleList(
+            nn.Linear(config.hidden_dim, config.hidden_dim, bias=False) for _ in range(2)
+        )
+        self.fusion_gate = nn.ModuleList(nn.Linear(config.hidden_dim, config.hidden_dim, bias=False) for _ in range(2))
         self.state_projection = nn.Linear(config.state_dim, config.hidden_dim)
         self.action_input = nn.Linear(config.hidden_dim, config.action_hidden)
         self.action_output = nn.Linear(config.action_hidden, config.action_horizon * config.action_dim)
@@ -84,10 +87,21 @@ class TurboVLALiteStudent(nn.Module):
         self.quantizers = nn.ModuleDict(
             {name: SymmetricFakeQuant(float(scales[name])) for name in scales} if config.fake_quant else {}
         )
+        weight_scales = dict((quantization or {}).get("weights", {}))
+        self.weight_quantizers = nn.ModuleDict(
+            {name: SymmetricFakeQuant(float(weight_scales[name])) for name in weight_scales}
+            if config.fake_quant
+            else {}
+        )
 
     def _fake_quant(self, name: str, value: torch.Tensor) -> torch.Tensor:
         quantizer = self.quantizers[name] if name in self.quantizers else None
         return quantizer(value) if quantizer is not None else value
+
+    def _linear(self, module: nn.Linear, value: torch.Tensor, weight_name: str) -> torch.Tensor:
+        quantizer = self.weight_quantizers[weight_name] if weight_name in self.weight_quantizers else None
+        weight = quantizer(module.weight) if quantizer is not None else module.weight
+        return F.linear(value, weight, module.bias)
 
     def forward(
         self, image: torch.Tensor, state: torch.Tensor, instruction_id: torch.Tensor
@@ -105,29 +119,43 @@ class TurboVLALiteStudent(nn.Module):
         mean = normalized.new_tensor([0.485, 0.456, 0.406]).view(1, 1, 3, 1, 1)
         std = normalized.new_tensor([0.229, 0.224, 0.225]).view(1, 1, 3, 1, 1)
         normalized = self._fake_quant("image_normalized", (normalized - mean) / std)
-        conv = torch.relu(self.conv(normalized[:, 0]))
+        conv_weight = self.conv.weight
+        if "conv_weight" in self.weight_quantizers:
+            conv_weight = self.weight_quantizers["conv_weight"](conv_weight)
+        conv = torch.relu(F.conv2d(normalized[:, 0], conv_weight, self.conv.bias))
+        conv = self._fake_quant("visual_conv", conv)
         pooled = self.token_pool(conv).flatten(2).transpose(1, 2)
-        visual = torch.relu(self.visual_projection(pooled))
+        visual = torch.relu(self._linear(self.visual_projection, pooled, "visual_projection"))
         visual = self._fake_quant("visual_tokens", visual)
         language = self._fake_quant("language_embedding", self.instruction_embedding(instruction_id))
 
         fused = visual
         fusion_outputs: list[torch.Tensor] = []
         for layer in range(2):
-            candidate = self.fusion_visual[layer](fused) + self.fusion_language[layer](language).unsqueeze(1)
-            gate = torch.sigmoid(self.fusion_gate[layer](fused) + self.fusion_gate[layer](language).unsqueeze(1))
+            candidate = self._linear(self.fusion_visual[layer], fused, "fusion_visual")
+            candidate += self._linear(self.fusion_language[layer], language, "fusion_language").unsqueeze(1)
+            gate = torch.sigmoid(
+                self._linear(self.fusion_gate[layer], fused, "fusion_gate")
+                + self._linear(self.fusion_gate[layer], language, "fusion_gate").unsqueeze(1)
+            )
             fused = (1.0 - gate) * fused + gate * torch.tanh(candidate)
             fused = self._fake_quant(f"fusion_{layer}", fused)
             fusion_outputs.append(fused)
 
         state_float = state.float() * self.config.state_normalization
-        pooled_state = torch.relu(fused.mean(dim=1) + self.state_projection(state_float))
+        pooled_state = torch.relu(
+            fused.mean(dim=1) + self._linear(self.state_projection, state_float, "state_projection")
+        )
         pooled_state = self._fake_quant("state_projection", pooled_state)
-        hidden = torch.relu(self.action_input(pooled_state))
+        hidden = torch.relu(self._linear(self.action_input, pooled_state, "action_input"))
         hidden = self._fake_quant("action_hidden", hidden)
-        logits = self.action_output(hidden).view(-1, self.config.action_horizon, self.config.action_dim)
+        logits = self._linear(self.action_output, hidden, "action_output").view(
+            -1, self.config.action_horizon, self.config.action_dim
+        )
         action = torch.tanh(logits)
         return {
+            "image_normalized": normalized,
+            "visual_conv": conv,
             "visual_tokens": visual,
             "language_embedding": language,
             "fusion_0": fusion_outputs[0],

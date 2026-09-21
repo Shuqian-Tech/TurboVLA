@@ -1,6 +1,6 @@
 # T014：GPU TinyCNN 学习能力评估
 
-- 状态：`planned`
+- 状态：`in_progress`
 - Sprint：Sprint 1
 - 分支：`task/T014-gpu-tinycnn-evaluation`
 - PR：[Shuqian-Tech/TurboVLA#3](https://github.com/Shuqian-Tech/TurboVLA/pull/3)（Draft）
@@ -24,8 +24,45 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - PyTorch：2.14.0+cu130
 - CUDA runtime：13.0
 - `torch.cuda.is_available()`：`True`
-- 当前 student：固定 128x128 单视角、32 visual tokens、hidden 128、两层 gated fusion、12x7 action，约 148948 参数
-- 当前缺口：训练入口没有显式 CUDA device、验证集、多随机种子、学习曲线或 LIBERO rollout；现有 smoke 数据不能用于判断模型能力
+- 当前 student：固定 128x128 单视角、32 visual tokens、hidden 128、两层 gated fusion、12x7 action，共 148436 参数
+- 当前缺口：teacher action/feature 蒸馏和扩大闭环 episode 数尚未完成；当前 3 episodes/task 仅作为 pilot
+
+## 当前执行记录
+
+- 开始时间：2026-09-21
+- 当前阶段：无 teacher 行为克隆基线、FP32/PTQ/QAT 离线与闭环 pilot 已完成
+- 数据策略：官方 `libero_spatial` 10-task HDF5，按 demo 固定划分，流式生成固定 128x128 单视角训练样本
+- 硬件部署边界：本任务不修改 KR260 bitstream、PL runtime 或 PS/PL 分工
+
+## 2026-09-21 Pilot 证据
+
+- LIBERO source commit：`8f1084e3132a39270c3a13ebe37270a43ece2a01`
+- HDF5 revision：`e329580e402fb5f07ae3b1f18475fc3b63783b91`
+- 固定 split seed：`20260921`；train 51,109，validation 11,044
+- 3-seed FP32 validation MAE：`0.127903 +/- 0.000432`（population std）
+- 3-seed gripper sign accuracy：`0.925218 +/- 0.001191`
+- seed 20260921 离线 FP32/PTQ/QAT MAE：`0.127495 / 0.130040 / 0.128612`
+- 30-episode matched closed-loop pilot：FP32 `22/30`，PTQ `18/30`，QAT `19/30`
+- FP32 Wilson 95% interval：`[0.5555, 0.8582]`；量化区间与其重叠，暂不宣称显著差异
+- 当前数据只使用 ground-truth demonstration action；teacher action/feature 蒸馏尚未开始
+- 初步决策：`tune`，先做蒸馏与训练策略调整，不立即修改 FPGA 模型合同
+- 完整说明：[`docs/evaluation/t014_gpu_tinycnn_pilot.md`](../evaluation/t014_gpu_tinycnn_pilot.md)
+- 机器可读报告：`tests/data/lite_gpu_evaluation_report.json`、`tests/data/lite_rollout_pilot_report.json`
+
+## 当前验证记录
+
+- `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`：22 tests 通过
+- changed-file `ruff check`：通过；仓库全量 ruff 仍有 30 个与本任务无关的既有 finding
+- CUDA checkpoint load：通过，无 CPU fallback
+- LIBERO EGL offscreen rollout：通过，10/10 tasks 均产生明确 episode 分母
+- PTQ checkpoint SHA256：`65ff8cb5de0f294772af8dc0b5ba48d2df8ac7aa91b92da41c91323ff3bfe9af`
+
+## 剩余 gate
+
+- 接入 teacher action 与 visual feature 蒸馏，并记录 teacher/student 同协议对照
+- 扩大闭环 episode 数，缩窄总体和逐任务置信区间
+- 从最终 QAT checkpoint 生成 T004 参数包并执行软件/PL parity
+- 完成 `thermo-nuclear-code-quality-review` 后才能进入 `in_review`
 
 ## 任务范围
 

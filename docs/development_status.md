@@ -5,8 +5,8 @@
 - 更新时间：2026-09-21
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
-- 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)
-- 当前任务：[T012：最终 thermo-nuclear 审查与发布归档](tasks/T012-final-acceptance.md)（`in_progress`）；T013 已 `accepted`；下一任务 [T014：GPU TinyCNN 学习能力评估](tasks/T014-gpu-tinycnn-evaluation.md)（`planned`）
+- 当前 Sprint：[Sprint 1：模型与硬件契约](sprint/sprint-1-model-contract.md)（恢复执行模型能力 gate）
+- 当前任务：[T014：GPU TinyCNN 学习能力评估](tasks/T014-gpu-tinycnn-evaluation.md)（`in_progress`）；T012 保持 `in_progress` 并等待 T014 正式模型证据
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`amd-edf@192.168.68.123`（passwordless key；不在仓库保存凭据）
@@ -38,10 +38,7 @@
 - [ ] T011：完成机器人闭环与稳定性测试（`in_progress`）
 - [ ] T012：最终 thermo-nuclear 审查与发布归档（`in_progress`）
 - [x] T013：补齐 PL 推理链、PS Runtime 与端到端 action 数值对齐（`accepted`；PR #2 已合并到 PR #1，merge commit `2d69bc8`）
-
-## 已计划
-
-- [ ] T014：GPU TinyCNN 学习能力评估（`planned`；RTX 3070/CUDA 已确认可用，先测量精确硬件等价结构的 FP32/QAT/INT8 与 LIBERO 表现）
+- [ ] T014：GPU TinyCNN 学习能力评估（`in_progress`；3-seed 离线基线和 90-episode FP32/PTQ/QAT 闭环 pilot 已完成，初步结论 `tune`）
 
 ## 未开始
 
@@ -55,7 +52,7 @@
 - 尚未拥有训练 checkpoint；T002 当前使用确定性占位 instruction table，正式表待 T003/T004 生成。
 - T003 当前只有确定性 smoke checkpoint；真实 teacher checkpoint、LIBERO 蒸馏数据和正式成功率尚未生成。
 - T004 当前参数包来自 smoke checkpoint；正式 student checkpoint 替换前不宣称发布参数包。
-- T014 尚未执行：当前主机 RTX 3070 8 GiB、PyTorch 2.14.0+cu130 和 CUDA 13.0 可用；需要先补齐显式 CUDA 训练、固定数据划分、多 seed、FP32/QAT/INT8 对照和 LIBERO rollout，才能判断当前 TinyCNN 的真实能力上限。
+- T014 pilot 已完成：固定 split 的 3-seed FP32 validation MAE 为 `0.127903 +/- 0.000432`，gripper sign accuracy 为 `0.925218 +/- 0.001191`；同一批 30 episodes 的闭环 FP32/PTQ/QAT 为 `22/30`、`18/30`、`19/30`。当前为无 teacher 的行为克隆基线，初步结论 `tune`；teacher action/feature 蒸馏和扩大 rollout 仍是 gate，详见 `docs/evaluation/t014_gpu_tinycnn_pilot.md`。
 - Vivado v2025.1 当前 wrapper 指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado`；本机 GEMM/Conv RTL co-sim 通过。2026-09-20 原始双事务诊断运行完成第 1/2 事务后，XSIM 匿名 RSS 超过用户指定的 96 GiB 阈值并终止；随后加入 case 0/1 事务拆分和 `-wdb /dev/null` footprint 修复，并在扩容主机上完成完整流程：日志 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0/1 和 action MLP 均 `RTL Simulation : 1 / 1` 且 C post-check 通过。本机 31 GiB RAM 的这次构建只重复这两个 kernel 的 synthesis/IP export，不重跑其高内存 co-sim。
 - 已建立当前源码对应的 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，状态为 `current_source_verified`。
 - upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已合并到 `main`（merge commit `000f03d`），但 T001-T011 的独立任务 PR 仍缺失，发布流程 gate 尚未关闭。

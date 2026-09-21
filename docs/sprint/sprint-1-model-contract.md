@@ -15,9 +15,9 @@
 - [T004：生成 FPGA 参数包](../tasks/T004-export-fpga-parameters.md)
 - [T014：GPU TinyCNN 学习能力评估](../tasks/T014-gpu-tinycnn-evaluation.md)
 
-当前执行任务：[T004：生成 FPGA 参数包](../tasks/T004-export-fpga-parameters.md)
+当前执行任务：[T014：GPU TinyCNN 学习能力评估](../tasks/T014-gpu-tinycnn-evaluation.md)
 
-执行进度：T001 `in_review`（新 upstream 已配置，独立 PR 待创建）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）；T004 `in_progress`（参数包导出和 round-trip 已验证）；T014 `planned`（先用 CUDA 测量精确硬件等价 TinyCNN 的 FP32/QAT/INT8 学习能力，再继续正式 T003/T004 闭环）。
+执行进度：T001 `in_review`（新 upstream 已配置，独立 PR 待创建）；T002 `in_review`（reference、golden 和误差报告已生成）；T003 `in_progress`（模型、训练入口和 smoke checkpoint 已验证）；T004 `in_progress`（参数包导出和 round-trip 已验证）；T014 `in_progress`（3-seed 离线基线和 90-episode FP32/PTQ/QAT 闭环 pilot 已完成，初步结论 `tune`；teacher 蒸馏和扩大 rollout 待完成）。
 
 ## 进入条件
 
