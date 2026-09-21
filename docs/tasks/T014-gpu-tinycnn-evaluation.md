@@ -3,7 +3,7 @@
 - 状态：`planned`
 - Sprint：Sprint 1
 - 分支：`task/T014-gpu-tinycnn-evaluation`
-- PR：待创建
+- PR：[Shuqian-Tech/TurboVLA#3](https://github.com/Shuqian-Tech/TurboVLA/pull/3)（Draft）
 - 依赖：T001、T002、T003 训练骨架
 - 后续任务：T003 正式训练闭环、T004 正式参数包、T012 最终发布验收
 - 验收 skill：`thermo-nuclear-code-quality-review`
@@ -77,4 +77,3 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - 不引入 GPU/DPU/CPU 部署路径，PS/PL 边界保持不变；
 - thermo-nuclear review 覆盖数据边界、配置复杂度、重复训练逻辑、文件大小和决策证据；
 - PR 附带命令、日志、报告、checkpoint hash，以及每个 finding 的 disposition。
-
