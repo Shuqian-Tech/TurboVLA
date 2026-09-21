@@ -8,7 +8,6 @@ from pathlib import Path
 
 from turbovla.lite_hardware_pack import export_hardware_fixture
 
-
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "data" / "lite_hardware_e2e"
 

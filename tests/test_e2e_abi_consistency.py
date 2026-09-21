@@ -7,7 +7,6 @@ from pathlib import Path
 
 from turbovla.lite_hardware_pack import HEADER_BYTES, MODEL_BYTES, TENSOR_OFFSETS
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
