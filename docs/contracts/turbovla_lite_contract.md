@@ -7,7 +7,7 @@
 ```text
 image          uint8  [1, 1, 3, 128, 128]  N V C H W, RGB
 state          int16  [1, 8]
-instruction_id uint16 [1], 65535 保留为 invalid
+instruction_id uint16 [1], 有效范围 0..255，65535 保留为 invalid
 ```
 
 图像预处理在 PL 完成。PS 不得把已处理的视觉特征作为替代输入提交给推理 kernel，否则测试应失败。state 使用 `libero_state_v1` 归一化规则，具体统计值由参数包任务冻结。
@@ -31,17 +31,20 @@ action       float32 [1, 12, 7]
 
 PL 负责 action 的反量化，PS 只做机器人相关的限幅、急停和通信。action 范围是 `[-1, 1]`，反归一化统计属于 `libero_action_v1` 参数 metadata，不写死在 runtime 分支中。
 
-## DMA 和寄存器规则
+## Arena 和寄存器规则
 
-- 所有 DMA buffer 64-byte 对齐；
-- PS -> PL buffer 在启动 DMA 前 flush cache；
-- PL -> PS action buffer 在完成 interrupt 后 invalidate cache；
-- 64-bit DDR 地址拆成 low/high 两个 32-bit register；
-- `control.start` 只能在 `status.idle=1` 且上一帧 error 已清除时写入；
-- `status.done` 只表示 action buffer 已写完，不表示机器人已执行动作；
-- `error_code` 非零时，runtime 必须停止发起新帧，直到写 `error_clear` 并完成 reset/恢复流程；
-- `contract_version` 使用 `major_minor_patch_8_8_16` 编码；当前 `0.1.0` 对应 `0x00010000`；
-- `contract_version` 不匹配时，PS 必须拒绝启动 bitstream。
+Runtime ABI `0.2.0` 使用一个 64-byte 对齐、200320-byte 的连续 arena。header、image、state、model 和 action 都位于固定的 64-byte 对齐 offset；HLS top 通过一个 AXI4-MM master 访问它们，不再使用未连接的 AXI DMA。
+
+- 模型在初始化时写入 arena 并 flush 一次；每帧启动前分别 flush header、image 和 state；
+- 完成 interrupt 后 invalidate header 和 action，再读取 error、hardware version、completed sequence 和 84 个 action；
+- `0x10` 是 HLS `ap_return`；arena 的 64-bit DDR 物理地址写入 `0x18/0x1c` 的 low/high AXI-Lite register；
+- 控制采用 Vitis HLS 标准 `ap_ctrl_hs`，包括 start/done/idle/ready 和 GIE/IER/ISR；
+- `done` 只表示 action 和 completion header 已写完，不表示机器人已执行动作；
+- `ap_return` 或 arena header 的 `error_code` 非零时，runtime 不返回 action；
+- `contract_version` 使用 `major_minor_patch_8_8_16` 编码；当前 `0.2.0` 对应 `0x00020000`；
+- request version、model version 或 PL 写回的 hardware version 不匹配时，runtime 必须拒绝该结果。
+
+v0.2 取代 v0.1 中未与实际 HLS IP 相连的 15-register scheduler 模型。该变更不改变 image/state/instruction/action shape，只收敛真实的 DDR 和 AXI-Lite 边界。
 
 ## 不变量
 
@@ -50,7 +53,7 @@ PL 负责 action 的反量化，PS 只做机器人相关的限幅、急停和通
 3. action horizon 永远为 12，action dim 永远为 7；
 4. 所有硬件 kernel 的累加器至少为 INT32；
 5. 不允许隐式 reshape、隐式 dtype 转换或 CPU inference fallback；
-6. 任何 shape、layout、scale、register 或 error code 变更都必须提升 contract 版本并单独走任务验收。
+6. 任何 shape、layout、scale、register 或 error code 变更都必须提升 contract 版本并单独走任务验收；v0.2 变更由 T013 验收。
 
 ## 校验
 

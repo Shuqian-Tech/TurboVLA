@@ -1,0 +1,1 @@
+SUBSYSTEM=="uio", ATTR{name}=="turbovla-lite-e2e", GROUP="video", MODE="0660"

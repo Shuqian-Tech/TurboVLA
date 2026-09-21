@@ -1,0 +1,17 @@
+source_commit=dc312215adae2420909d6f9a25523c2c658c4281
+target_part=xck26-sfvc784-2LV-c
+tool=Vitis_HLS_2025.1_build_6135595
+remote_host=frank@192.168.68.119
+remote_worktree=/home/frank/TurboVLA-codex-T013
+entrypoint=tools/run_vitis_hls.sh hardware/hls/e2e/vitis_hls.tcl
+runner_exit_code=0
+remote_raw_log_sha256=20b2540f474c75ea865a94d526bcf66f778e489a3ddf2d1b056b9bb40d66e68d
+cosim_report_sha256=a3c4e329d10eedba8bb53d0c14a775bb3b91e935c36e08422f6eec45940f999b
+
+RTL Simulation : 1 / 2 [100.00%] @ "23067043000"
+RTL Simulation : 2 / 2 [100.00%] @ "23067703000"
+INFO: xsimkernel Simulation Memory Usage: 111802040 KB (Peak: 111802040 KB), Simulation CPU Usage: 6188590 ms
+INFO: [COSIM 212-316] Starting C post checking ...
+e2e action parity max_abs_error=1.86265e-09 mean_abs_error=4.14556e-10
+e2e invalid-instruction gate passed
+INFO: [vitis-run 60-791] Total elapsed time: 1h 46m 20s

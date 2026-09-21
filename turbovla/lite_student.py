@@ -13,7 +13,7 @@ from torch import nn
 
 @dataclass(frozen=True)
 class LiteStudentConfig:
-    contract_version: str = "0.1.0"
+    contract_version: str = "0.2.0"
     hidden_dim: int = 128
     visual_tokens: int = 32
     conv_channels: int = 16

@@ -36,6 +36,7 @@ def validate(contract: dict) -> None:
     language_input = contract["language"]["input"]
     assert language_input["dtype"] == "uint16"
     assert language_input["shape"] == [1]
+    assert language_input["valid_range"] == [0, 255]
     assert language_input["invalid_value"] == 65535
 
     assert contract["language"]["embedding"]["shape"] == [1, 128]
@@ -51,9 +52,13 @@ def validate(contract: dict) -> None:
             raise AssertionError(f"buffer {name} must be 64-byte aligned")
 
     _offsets_are_aligned(contract["registers"])
-    version_register = contract["registers"]["contract_version"]
-    assert version_register["encoding"] == "major_minor_patch_8_8_16"
-    assert version_register["value"] == "0x00010000"
+    assert contract["contract_version"] == "0.2.0"
+    version_header = contract["arena_header"]["contract_version"]
+    assert version_header["encoding"] == "major_minor_patch_8_8_16"
+    assert version_header["value"] == "0x00020000"
+    assert contract["arena_header"]["hardware_version"]["value"] == "0x00020000"
+    assert contract["buffers"]["arena"]["size_bytes"] == 200320
+    assert contract["buffers"]["action"]["size_bytes"] == 12 * 7 * 4
     assert contract["errors"]["contract_mismatch"] == 5
 
 

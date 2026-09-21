@@ -1,28 +1,23 @@
 {
   "platform": "kr260-k26",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "axi_lite_data_width": 32,
+  "control_protocol": "ap_ctrl_hs",
   "registers": {
-    "control": {"offset": "0x00", "access": "write", "fields": ["start", "soft_reset"]},
-    "status": {"offset": "0x04", "access": "read", "fields": ["idle", "busy", "done", "error"]},
-    "error_code": {"offset": "0x08", "access": "read"},
-    "contract_version": {"offset": "0x0C", "access": "read"},
-    "image_addr_lo": {"offset": "0x10", "access": "write"},
-    "image_addr_hi": {"offset": "0x14", "access": "write"},
-    "state_addr_lo": {"offset": "0x18", "access": "write"},
-    "state_addr_hi": {"offset": "0x1C", "access": "write"},
-    "instruction_addr_lo": {"offset": "0x20", "access": "write"},
-    "instruction_addr_hi": {"offset": "0x24", "access": "write"},
-    "action_addr_lo": {"offset": "0x28", "access": "write"},
-    "action_addr_hi": {"offset": "0x2C", "access": "write"},
-    "instruction_id": {"offset": "0x30", "access": "write"},
-    "frame_sequence": {"offset": "0x34", "access": "write"},
-    "error_clear": {"offset": "0x38", "access": "write"}
+    "control": {"offset": "0x00", "access": "read_write", "fields": ["start", "done", "idle", "ready", "auto_restart"]},
+    "global_interrupt_enable": {"offset": "0x04", "access": "read_write"},
+    "interrupt_enable": {"offset": "0x08", "access": "read_write"},
+    "interrupt_status": {"offset": "0x0C", "access": "read_write_clear"},
+    "kernel_return": {"offset": "0x10", "access": "read"},
+    "arena_addr_lo": {"offset": "0x18", "access": "write"},
+    "arena_addr_hi": {"offset": "0x1C", "access": "write"}
   },
   "buffers": {
-    "image": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
-    "state": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
-    "instruction_id": {"direction": "ps_to_pl", "alignment_bytes": 64, "cache": "flush_before_dma"},
-    "action": {"direction": "pl_to_ps", "alignment_bytes": 64, "cache": "invalidate_after_dma"}
+    "arena": {"direction": "bidirectional", "alignment_bytes": 64, "size_bytes": 200320},
+    "header": {"direction": "bidirectional", "alignment_bytes": 64, "offset": 0, "size_bytes": 64},
+    "image": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 64, "size_bytes": 49152},
+    "state": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 49216, "size_bytes": 16},
+    "model": {"direction": "ps_to_pl", "alignment_bytes": 64, "offset": 49280, "size_bytes": 150656},
+    "action": {"direction": "pl_to_ps", "alignment_bytes": 64, "offset": 199936, "size_bytes": 336}
   }
 }

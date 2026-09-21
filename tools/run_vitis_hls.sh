@@ -10,6 +10,7 @@ script_path=$(realpath "$1")
 vitis_root=${TURBOVLA_VITIS_ROOT:-${XILINX_HLS:-${XILINX_VITIS:-}}}
 if [[ -z "$vitis_root" ]]; then
   for candidate in \
+    /home/frank/AMD/vivado/2025.01/2025.1/Vitis \
     /home/frank/AMDDesignTools/2025.1/2025.1/Vitis \
     /tools/Xilinx/Vitis/2025.1 \
     /opt/Xilinx/Vitis/2025.1; do
