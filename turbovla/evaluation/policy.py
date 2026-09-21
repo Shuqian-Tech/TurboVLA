@@ -15,9 +15,8 @@ from types import SimpleNamespace
 from typing import Any, Iterable, Sequence
 
 import numpy as np
-from PIL import Image
 import torch
-
+from PIL import Image
 
 EXPECTED_IMAGE_SIZE = 256
 DINO_PATCH_SIZE = 16
@@ -252,12 +251,12 @@ def _checkpoint_state_dict(checkpoint: Any) -> dict[str, torch.Tensor]:
         raise TypeError(f"Unsupported checkpoint type: {type(checkpoint)}")
 
     ema_state = checkpoint.get("ema_model_state_dict")
-    if not isinstance(ema_state, dict):
-        raise KeyError(
-            "LIBERO evaluation requires `ema_model_state_dict` in the checkpoint; "
-            "the raw `model_state_dict` is not used"
-        )
-    return ema_state
+    if isinstance(ema_state, dict):
+        return ema_state
+    model_state = checkpoint.get("model_state_dict")
+    if isinstance(model_state, dict):
+        return model_state
+    raise KeyError("TurboVLA checkpoint must contain ema_model_state_dict or model_state_dict")
 
 
 def _strip_module_prefix(state_dict: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:

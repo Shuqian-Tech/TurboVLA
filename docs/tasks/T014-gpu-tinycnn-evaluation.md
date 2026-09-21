@@ -38,11 +38,14 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 
 - LIBERO source commit：`8f1084e3132a39270c3a13ebe37270a43ece2a01`
 - HDF5 revision：`e329580e402fb5f07ae3b1f18475fc3b63783b91`
+- TurboVLA teacher revision：`cb5300544693013164c4bb251a13036002a55c81`
+- Teacher checkpoint SHA256：`d031ad7be05a2f5d04afb3194ed26b0cb46083685edee7a5e145078a37d26bab`
 - 固定 split seed：`20260921`；train 51,109，validation 11,044
 - 3-seed FP32 validation MAE：`0.127903 +/- 0.000432`（population std）
 - 3-seed gripper sign accuracy：`0.925218 +/- 0.001191`
 - seed 20260921 离线 FP32/PTQ/QAT MAE：`0.127495 / 0.130040 / 0.128612`
 - 30-episode matched closed-loop pilot：FP32 `22/30`，PTQ `18/30`，QAT `19/30`
+- 同协议 TurboVLA teacher：`30/30`；相对 FP32 TinyCNN 高 26.67 percentage points
 - FP32 Wilson 95% interval：`[0.5555, 0.8582]`；量化区间与其重叠，暂不宣称显著差异
 - 当前数据只使用 ground-truth demonstration action；teacher action/feature 蒸馏尚未开始
 - 初步决策：`tune`，先做蒸馏与训练策略调整，不立即修改 FPGA 模型合同
@@ -55,6 +58,8 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - changed-file `ruff check`：通过；仓库全量 ruff 仍有 30 个与本任务无关的既有 finding
 - CUDA checkpoint load：通过，无 CPU fallback
 - LIBERO EGL offscreen rollout：通过，10/10 tasks 均产生明确 episode 分母
+- 官方 teacher 严格加载：672/672 tensors，216,073,239 parameters，BF16 CUDA rollout `30/30`
+- 官方 checkpoint loader 同时支持 `ema_model_state_dict` 和 release 使用的 `model_state_dict`
 - PTQ checkpoint SHA256：`65ff8cb5de0f294772af8dc0b5ba48d2df8ac7aa91b92da41c91323ff3bfe9af`
 
 ## 剩余 gate

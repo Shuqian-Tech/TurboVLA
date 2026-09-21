@@ -16,6 +16,8 @@ actions. They do not yet include teacher-action or teacher-feature distillation.
 - PyTorch: 2.14.0+cu130; CUDA runtime 13.0
 - LIBERO source: commit `8f1084e3132a39270c3a13ebe37270a43ece2a01`
 - `libero_spatial` HDF5 revision: `e329580e402fb5f07ae3b1f18475fc3b63783b91`
+- TurboVLA teacher revision: `cb5300544693013164c4bb251a13036002a55c81`
+- Teacher checkpoint SHA256: `d031ad7be05a2f5d04afb3194ed26b0cb46083685edee7a5e145078a37d26bab`
 - Split seed: `20260921`, split by demonstration to avoid trajectory leakage
 - Filtered samples: 51,109 train and 11,044 validation
 - Input/output: one 128x128 RGB view, 8-D state, instruction ID, 12x7 action chunk
@@ -59,11 +61,14 @@ states per task, seed 7, and 12 open-loop actions per prediction.
 | FP32 | 22/30 | 73.33% | 55.55%-85.82% | 0.00 pp |
 | PTQ fake INT8 | 18/30 | 60.00% | 42.32%-75.41% | -13.33 pp |
 | QAT fake INT8 | 19/30 | 63.33% | 45.51%-78.13% | -10.00 pp |
+| TurboVLA teacher BF16 | 30/30 | 100.00% | 88.65%-100.00% | +26.67 pp |
 
 The intervals overlap and three episodes per task are not enough to claim a
 statistically reliable quantization delta. The pilot does establish that the
 current TinyCNN completes closed-loop tasks and that quantized behavior remains
 functional. It does not establish real-robot transfer or KR260 model parity.
+The teacher's 30/30 result confirms a material student-training gap under the
+same task and initial-state protocol.
 
 Machine-readable task-level results and intervals are in
 [`tests/data/lite_rollout_pilot_report.json`](../../tests/data/lite_rollout_pilot_report.json).
@@ -75,6 +80,8 @@ The preliminary decision is `tune`:
 - Keep the current hardware-equivalent network as the measured baseline.
 - Add teacher action and visual-feature distillation before considering a model
   contract expansion.
+- Treat the matched 26.67 percentage-point teacher gap as the optimization
+  target; do not attribute it to quantization alone.
 - Retain QAT; it recovered one matched pilot success over PTQ, but larger
   rollouts are required before attributing a reliable benefit.
 - Increase closed-loop episode count after distillation and use the same fixed

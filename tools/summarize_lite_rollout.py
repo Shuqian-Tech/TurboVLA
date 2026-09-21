@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -25,6 +26,20 @@ def _parse_result(value: str) -> tuple[str, Path]:
     if not separator or not label or not path:
         raise argparse.ArgumentTypeError("--result must use LABEL=PATH")
     return label, Path(path)
+
+
+def _checkpoint_sha256(payload: dict) -> str | None:
+    recorded = payload.get("checkpoint_sha256")
+    if recorded:
+        return str(recorded)
+    path = Path(payload["ckpt_path"])
+    if not path.is_file():
+        return None
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def main() -> int:
@@ -65,7 +80,7 @@ def main() -> int:
                 "label": label,
                 "source": str(path),
                 "checkpoint": payload["ckpt_path"],
-                "checkpoint_sha256": payload.get("checkpoint_sha256"),
+                "checkpoint_sha256": _checkpoint_sha256(payload),
                 "successes": payload["total_successes"],
                 "episodes": payload["total_episodes"],
                 "success_rate": rate,
