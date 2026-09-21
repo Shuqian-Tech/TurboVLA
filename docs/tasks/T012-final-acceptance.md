@@ -13,8 +13,8 @@
 - 当前分支：`task/T012-final-acceptance`
 - 发布 manifest：`docs/release/turbovla_lite_release_manifest.json`
 - 审查报告：`docs/release/turbovla_lite_acceptance.md`
-- 当前结果：`blocked_by_acceptance_gates`
-- 硬件 bring-up：SSH reachability check passed；bitstream load、Hardware Manager/JTAG、hardware inference：`not_run`
+- 当前结果：`blocked_by_acceptance_gates`（T013 端到端 gate 已闭合；最终发布仍受独立任务 PR、正式 teacher/LIBERO 数据和 release timing closure 约束）
+- 硬件 bring-up：T013 已提供 compatible `.bit.bin`/DTBO、Hardware Manager/JTAG、完整 PL inference 和 30 分钟稳定性证据；本任务保留独立发布 gate，不把 T013 证据扩写成正式机器人成功率或发布 timing closure。
 
 ## 验证记录
 
@@ -34,6 +34,7 @@
 - gated-fusion 跳过后的 action MLP 独立 synthesis、IP export 和 RTL co-sim：通过；历史日志 `/tmp/turbovla-fusion-skip-gated.log`，`RTL Simulation : 1 / 1`，`COSIM 212-1000 PASS`；完整流程中的 action MLP 结果见 `/tmp/turbovla-fusion-cosim-upgraded.log`
 - 本机当前 FPGA artifact：`hardware/vivado_kr260/build/turbovla_kr260.bit`（SHA256 `c31f375d5f604d3fb57c890c986665e6a05f1f5d2c3749140f8f90dde9e2a2c6`）、`hardware/vivado_kr260/build/turbovla_kr260.xsa`（SHA256 `7566e039aa4776f43d41509c34def2129338026d93a9caf48b40aeae13282438`）；二者尚未转换为板端所需的 `.bit.bin/.dtbo`，且不能作为完整模型上板推理证据
 - 板端只读探测记录：`hardware/vivado_kr260/reports/kr260_bringup_probe.md`；SSH 和 `/dev/fpga0` 可达，但活动 PL 是 `k26-starter-kits.bin`，未发现 TurboVLA device-tree 节点；本机 Hardware Manager 使用带 Vivado cable libraries 的 `hw_server` 仍返回 0 targets；bitstream download、PL DMA、hardware inference 和 30-minute stability 保持 `not_run`
+- T013 merge update (2026-09-21)：PR #2 已通过 thermo-nuclear review 并合并到本分支（merge commit `2d69bc8`）；KR260 board evidence、30-minute parity stability 和 12-sample live power/temperature/rail capture 已归档于 `hardware/vivado_kr260/reports/t013_board_bringup.md`、`t013_board_live_sample.md` 和 `.csv`。上述旧 probe 行仅描述 T012 合并前的历史状态，不覆盖 T013 的新证据。
 
 ## 首次 FPGA 测试准备状态
 

@@ -1,8 +1,8 @@
 # T013: PL inference chain and PS runtime end-to-end alignment
 
-- Status: `in_review`
+- Status: `accepted`
 - Branch: `task/T013-pl-runtime-e2e`
-- Pull request: [#2](https://github.com/Shuqian-Tech/TurboVLA/pull/2) (`ready for review`)
+- Pull request: [#2](https://github.com/Shuqian-Tech/TurboVLA/pull/2) (merged into T012 via merge commit `2d69bc8`)
 - Platform: AMD Kria KR260/K26 (`xck26-sfvc784-2LV-c`)
 - Hardware bring-up: `passed_30_min` (17,019 complete 84-value parity iterations)
 - Started: 2026-09-20
@@ -56,7 +56,7 @@ Complete the fixed-shape image/state/instruction-to-action inference path in PL,
 
 - Review date: 2026-09-21.
 - Reviewer/agent: Codex.
-- Review result: `PASS`; no blocking finding remains. The task is `in_review` pending PR review/merge and is not marked `done`.
+- Review result: `PASS`; no blocking finding remains. PR #2 merged into PR #1 on 2026-09-21 via `2d69bc8`; task is `accepted` and remains separate from T012 final release completion.
 - PR scope: 39 changed files against `task/T012-final-acceptance`; 2,307 insertions and 219 deletions before final evidence. No source file crosses 1,000 lines; the new HLS top is 344 lines and the board runtime is 275 lines.
 - Structural/code-judo result: one canonical aligned arena, one end-to-end HLS top, and one AXI-Lite/AXI4-MM path replace the disconnected DMA and multi-kernel composition. `RegisterIo` and `CacheMaintenance` keep host tests and board I/O behind explicit boundaries without duplicating inference or adding a CPU fallback.
 - Abstraction/branching/boundary result: no alternate board target, DPU path, silent CPU inference, scattered platform branch, cast-heavy generic layer, or >1k-line file was introduced. PS code remains limited to XRT buffer ownership, cache synchronization, UIO MMIO, polling, validation, and action readback. Cross-language ABI duplication is guarded by contract consistency tests.
