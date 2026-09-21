@@ -30,7 +30,7 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 ## 当前执行记录
 
 - 开始时间：2026-09-21
-- 当前阶段：行为克隆 baseline、teacher action/feature 蒸馏和 FP32/PTQ/QAT 100-episode 扩大评测已完成
+- 当前阶段：行为克隆 baseline、teacher action/feature 蒸馏、100-episode 扩大评测和 depthwise 容量消融已完成
 - 数据策略：官方 `libero_spatial` 10-task HDF5，按 demo 固定划分，流式生成固定 128x128 单视角训练样本
 - 硬件部署边界：本任务不修改 KR260 bitstream、PL runtime 或 PS/PL 分工
 
@@ -54,13 +54,14 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 
 ## 当前验证记录
 
-- `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`：27 tests 通过
+- `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`：30 tests 通过
 - changed-file `ruff check`：通过；仓库全量 ruff 仍有 30 个与本任务无关的既有 finding
 - CUDA checkpoint load：通过，无 CPU fallback
 - LIBERO EGL offscreen rollout：通过，10/10 tasks 均产生明确 episode 分母
 - 官方 teacher 严格加载：672/672 tensors，216,073,239 parameters，BF16 CUDA rollout `30/30`
 - 官方 checkpoint loader 同时支持 `ema_model_state_dict` 和 release 使用的 `model_state_dict`
 - PTQ checkpoint SHA256：`65ff8cb5de0f294772af8dc0b5ba48d2df8ac7aa91b92da41c91323ff3bfe9af`
+- depthwise FP32 热启动、校准、PTQ checkpoint 和 1-step QAT smoke：通过；当前 FPGA 参数包导出拒绝实验 encoder
 
 ## 2026-09-21 Distillation Pilot
 
@@ -88,11 +89,24 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - 三个 student 区间高度重叠；当前证据不支持 PTQ/QAT 优于 FP32，只支持“未观察到总体量化退化”
 - student 的主要失败集中在 task 8/9：FP32 均为 `4/10`；task 8 的 PTQ/QAT 均为 `4/10`，task 9 均为 `5/10`；teacher 为 `9/10`、`10/10`
 - 机器可读报告：`tests/data/lite_distillation_expanded_report.json`
-- 决策保持 `tune`：先对 FPGA-friendly `3x3 depthwise + 1x1 pointwise` 视觉 encoder 做 CUDA 消融；只有成功率提升足够覆盖 HLS/时序成本时才更新硬件合同
+- 决策保持 `tune`：CUDA depthwise 消融结果见下节；未达到更新 HLS/硬件合同的收益门槛
+
+## 2026-09-21 Depthwise Capacity Ablation
+
+- 候选结构：保留原 `1x1` stem，在 `16x16` 中间特征上增加两个残差式 `3x3 depthwise + 1x1 pointwise` block，再池化回固定 `4x8` tokens
+- 默认 pointwise 参数量保持 `148436`；depthwise 候选为 `149300`，增加 864 个参数
+- 候选 pointwise projection 零初始化；从蒸馏 FP32 checkpoint 热启动时，初始 action 与默认结构数值误差不超过 `2e-6`
+- 严格匹配 continuation control：两组都从同一蒸馏 FP32 checkpoint 开始，使用相同 seed、teacher cache、batch 128、学习率 `5e-4` 和 2,000 update steps
+- pointwise/depthwise validation action MAE：`0.12505893 / 0.12505184`；差值仅 `0.00000709`
+- pointwise/depthwise teacher-action MAE：`0.07460589 / 0.07460894`
+- pointwise/depthwise feature relation MSE：`0.00507810 / 0.00490191`；depthwise 改善约 3.5%，但未转化为动作收益
+- matched task 8/9 rollout：两者均为 task 8 `5/10`、task 9 `4/10`，总计 `9/20`
+- checkpoint SHA256：pointwise control `e28084f0ea4b5abae6352a43a89443ff4a6bdf14de3bc3b3824f87e6fc04b059`；depthwise `c02d1118e2ce933ceccf6d1151d10c616bec0522bc377fe1b67fedd0dac5135f`
+- 机器可读闭环报告：`tests/data/lite_depthwise_ablation_report.json`
+- 决策：`keep_pointwise`。不为该候选运行完整 100 episodes，不更新 FPGA 合同；实验 checkpoint 的参数包导出会 fail-fast
 
 ## 剩余 gate
 
-- 对 `3x3 depthwise + 1x1 pointwise` 视觉 encoder 做独立 CUDA 容量消融并与当前 100-episode 结果比较
 - 从最终 QAT checkpoint 生成 T004 参数包并执行软件/PL parity
 - 完成 `thermo-nuclear-code-quality-review` 后才能进入 `in_review`
 

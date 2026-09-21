@@ -1,0 +1,102 @@
+{
+  "decision_status": "keep_pointwise",
+  "deployment_claim": "none",
+  "limitations": [
+    "10 episodes per task still yield wide task-level confidence intervals",
+    "the same fixed initial states are used for matched FP32 and quantized comparisons",
+    "simulation success does not establish real-robot transfer or KR260 deployment accuracy"
+  ],
+  "protocol": {
+    "episodes_per_task": [
+      10,
+      10
+    ],
+    "open_loop_steps": 12,
+    "seed": 7,
+    "suite": "libero_spatial",
+    "task_ids": [
+      8,
+      9
+    ]
+  },
+  "runs": [
+    {
+      "absolute_delta_from_baseline": 0.0,
+      "checkpoint": "build/lite/t014_spatial_control_continue_fp32_seed20260921.pt",
+      "checkpoint_sha256": "e28084f0ea4b5abae6352a43a89443ff4a6bdf14de3bc3b3824f87e6fc04b059",
+      "episodes": 20,
+      "label": "pointwise_control",
+      "source": "build/lite/t014_rollout_control_continue_fp32_tasks8_9_10x2.json",
+      "success_rate": 0.45,
+      "successes": 9,
+      "tasks": [
+        {
+          "episodes": 10,
+          "success_rate": 0.5,
+          "successes": 5,
+          "task_description": "pick up the black bowl next to the plate and place it on the plate",
+          "task_id": 8,
+          "wilson_95_interval": [
+            0.236593090512564,
+            0.7634069094874361
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.4,
+          "successes": 4,
+          "task_description": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "task_id": 9,
+          "wilson_95_interval": [
+            0.16818032970623614,
+            0.6873262302663417
+          ]
+        }
+      ],
+      "wilson_95_interval": [
+        0.2581978582556243,
+        0.6579146575496577
+      ]
+    },
+    {
+      "absolute_delta_from_baseline": 0.0,
+      "checkpoint": "build/lite/t014_spatial_depthwise_fp32_seed20260921.pt",
+      "checkpoint_sha256": "c02d1118e2ce933ceccf6d1151d10c616bec0522bc377fe1b67fedd0dac5135f",
+      "episodes": 20,
+      "label": "depthwise_separable",
+      "source": "build/lite/t014_rollout_depthwise_fp32_tasks8_9_10x2.json",
+      "success_rate": 0.45,
+      "successes": 9,
+      "tasks": [
+        {
+          "episodes": 10,
+          "success_rate": 0.5,
+          "successes": 5,
+          "task_description": "pick up the black bowl next to the plate and place it on the plate",
+          "task_id": 8,
+          "wilson_95_interval": [
+            0.236593090512564,
+            0.7634069094874361
+          ]
+        },
+        {
+          "episodes": 10,
+          "success_rate": 0.4,
+          "successes": 4,
+          "task_description": "pick up the black bowl on the wooden cabinet and place it on the plate",
+          "task_id": 9,
+          "wilson_95_interval": [
+            0.16818032970623614,
+            0.6873262302663417
+          ]
+        }
+      ],
+      "wilson_95_interval": [
+        0.2581978582556243,
+        0.6579146575496577
+      ]
+    }
+  ],
+  "schema_version": "1.0.0",
+  "scope": "libero_spatial_depthwise_capacity_ablation"
+}

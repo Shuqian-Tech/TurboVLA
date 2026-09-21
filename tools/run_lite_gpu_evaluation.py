@@ -40,6 +40,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--stats-key", default="libero_all4_no_noops")
     parser.add_argument("--calibration", type=Path, default=DEFAULT_CALIBRATION)
     parser.add_argument("--mode", choices=("fp32", "qat"), default="fp32")
+    parser.add_argument("--visual-encoder", choices=("pointwise", "depthwise_separable"))
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--steps", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=128)
@@ -270,18 +271,43 @@ def main() -> int:
 
     contract = load_contract()
     calibration = json.loads(args.calibration.read_text(encoding="utf-8"))
+    saved = None
+    saved_config = None
+    if args.resume is not None:
+        saved = torch.load(args.resume, map_location="cpu", weights_only=False)
+        saved_config = LiteStudentConfig(**saved["config"])
+    visual_encoder = args.visual_encoder or (
+        saved_config.visual_encoder if saved_config is not None else "pointwise"
+    )
+    if args.mode == "qat" and visual_encoder == "depthwise_separable":
+        required_activations = {"spatial_0", "spatial_1"}
+        required_weights = {"spatial_depthwise", "spatial_pointwise"}
+        if not required_activations.issubset(calibration["activations"]) or not required_weights.issubset(
+            calibration["weights"]
+        ):
+            raise ValueError("depthwise-separable QAT requires calibration for its spatial blocks")
     config = replace(
         LiteStudentConfig.from_contract(contract, args.calibration),
         fake_quant=args.mode == "qat",
         action_loss_weight=args.action_loss_weight,
         teacher_action_loss_weight=args.teacher_action_loss_weight,
         feature_loss_weight=args.feature_loss_weight,
+        visual_encoder=visual_encoder,
     )
     model = TurboVLALiteStudent(config, calibration if args.mode == "qat" else None).to(device)
-    if args.resume is not None:
-        saved = torch.load(args.resume, map_location="cpu", weights_only=False)
+    if saved is not None:
         incompatible = model.load_state_dict(saved["state_dict"], strict=False)
-        invalid_missing = [name for name in incompatible.missing_keys if not name.endswith(".scale")]
+        allowed_new_spatial = (
+            saved_config is not None
+            and saved_config.visual_encoder == "pointwise"
+            and config.visual_encoder == "depthwise_separable"
+        )
+        invalid_missing = [
+            name
+            for name in incompatible.missing_keys
+            if not name.endswith(".scale")
+            and not (allowed_new_spatial and name.startswith(("spatial_depthwise.", "spatial_pointwise.")))
+        ]
         invalid_unexpected = [name for name in incompatible.unexpected_keys if not name.endswith(".scale")]
         if invalid_missing or invalid_unexpected:
             raise RuntimeError(
@@ -368,6 +394,7 @@ def main() -> int:
     report = {
         "contract_version": contract["contract_version"],
         "mode": args.mode,
+        "visual_encoder": config.visual_encoder,
         "seed": args.seed,
         "split_seed": args.split_seed,
         "device_requested": args.device,

@@ -30,6 +30,7 @@ class LiteStudentConfig:
     action_loss_weight: float = 1.0
     teacher_action_loss_weight: float = 1.0
     feature_loss_weight: float = 0.1
+    visual_encoder: str = "pointwise"
 
     @classmethod
     def from_contract(cls, contract: Mapping, calibration_path: Path | None = None) -> "LiteStudentConfig":
@@ -72,8 +73,29 @@ class TurboVLALiteStudent(nn.Module):
 
     def __init__(self, config: LiteStudentConfig = LiteStudentConfig(), quantization: Mapping | None = None) -> None:
         super().__init__()
+        if config.visual_encoder not in {"pointwise", "depthwise_separable"}:
+            raise ValueError(f"unsupported visual encoder {config.visual_encoder!r}")
         self.config = config
         self.conv = nn.Conv2d(3, config.conv_channels, kernel_size=1, bias=True)
+        self.spatial_pool = nn.AdaptiveAvgPool2d((16, 16))
+        self.spatial_depthwise = nn.ModuleList()
+        self.spatial_pointwise = nn.ModuleList()
+        if config.visual_encoder == "depthwise_separable":
+            for _ in range(2):
+                self.spatial_depthwise.append(
+                    nn.Conv2d(
+                        config.conv_channels,
+                        config.conv_channels,
+                        kernel_size=3,
+                        padding=1,
+                        groups=config.conv_channels,
+                        bias=True,
+                    )
+                )
+                pointwise = nn.Conv2d(config.conv_channels, config.conv_channels, kernel_size=1, bias=True)
+                nn.init.zeros_(pointwise.weight)
+                nn.init.zeros_(pointwise.bias)
+                self.spatial_pointwise.append(pointwise)
         self.token_pool = nn.AdaptiveAvgPool2d((4, 8))
         self.visual_projection = nn.Linear(config.conv_channels, config.hidden_dim)
         self.instruction_embedding = nn.Embedding(config.instruction_table_size, config.hidden_dim)
@@ -105,6 +127,24 @@ class TurboVLALiteStudent(nn.Module):
         weight = quantizer(module.weight) if quantizer is not None else module.weight
         return F.linear(value, weight, module.bias)
 
+    def _conv2d(
+        self,
+        module: nn.Conv2d,
+        value: torch.Tensor,
+        weight_name: str,
+    ) -> torch.Tensor:
+        quantizer = self.weight_quantizers[weight_name] if weight_name in self.weight_quantizers else None
+        weight = quantizer(module.weight) if quantizer is not None else module.weight
+        return F.conv2d(
+            value,
+            weight,
+            module.bias,
+            stride=module.stride,
+            padding=module.padding,
+            dilation=module.dilation,
+            groups=module.groups,
+        )
+
     def forward(
         self, image: torch.Tensor, state: torch.Tensor, instruction_id: torch.Tensor
     ) -> dict[str, torch.Tensor]:
@@ -126,7 +166,19 @@ class TurboVLALiteStudent(nn.Module):
             conv_weight = self.weight_quantizers["conv_weight"](conv_weight)
         conv = torch.relu(F.conv2d(normalized[:, 0], conv_weight, self.conv.bias))
         conv = self._fake_quant("visual_conv", conv)
-        pooled = self.token_pool(conv).flatten(2).transpose(1, 2)
+        spatial_outputs: list[torch.Tensor] = []
+        visual_map = conv
+        if self.config.visual_encoder == "depthwise_separable":
+            visual_map = self.spatial_pool(visual_map)
+            for layer, (depthwise, pointwise) in enumerate(
+                zip(self.spatial_depthwise, self.spatial_pointwise, strict=True)
+            ):
+                spatial = torch.relu(self._conv2d(depthwise, visual_map, "spatial_depthwise"))
+                spatial = self._conv2d(pointwise, spatial, "spatial_pointwise")
+                visual_map = torch.relu(visual_map + spatial)
+                visual_map = self._fake_quant(f"spatial_{layer}", visual_map)
+                spatial_outputs.append(visual_map)
+        pooled = self.token_pool(visual_map).flatten(2).transpose(1, 2)
         visual = torch.relu(self._linear(self.visual_projection, pooled, "visual_projection"))
         visual = self._fake_quant("visual_tokens", visual)
         language = self._fake_quant("language_embedding", self.instruction_embedding(instruction_id))
@@ -155,7 +207,7 @@ class TurboVLALiteStudent(nn.Module):
             -1, self.config.action_horizon, self.config.action_dim
         )
         action = torch.tanh(logits)
-        return {
+        outputs = {
             "image_normalized": normalized,
             "visual_conv": conv,
             "visual_tokens": visual,
@@ -166,6 +218,8 @@ class TurboVLALiteStudent(nn.Module):
             "action_hidden": hidden,
             "action": action,
         }
+        outputs.update({f"spatial_{layer}": value for layer, value in enumerate(spatial_outputs)})
+        return outputs
 
 
 def lite_distillation_loss(

@@ -66,10 +66,15 @@ def main() -> int:
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA calibration requested but CUDA is unavailable")
 
-    contract = load_contract()
-    config = replace(LiteStudentConfig.from_contract(contract), fake_quant=False)
-    model = TurboVLALiteStudent(config).to(device)
     saved = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
+    contract = load_contract()
+    saved_config = LiteStudentConfig(**saved["config"])
+    contract_config = LiteStudentConfig.from_contract(contract)
+    for field in ("hidden_dim", "visual_tokens", "state_dim", "action_horizon", "action_dim"):
+        if getattr(saved_config, field) != getattr(contract_config, field):
+            raise ValueError(f"checkpoint {field} does not match the Lite contract")
+    config = replace(saved_config, fake_quant=False)
+    model = TurboVLALiteStudent(config).to(device)
     incompatible = model.load_state_dict(saved["state_dict"], strict=False)
     unexpected = [name for name in incompatible.unexpected_keys if not name.endswith(".scale")]
     if incompatible.missing_keys or unexpected:
@@ -94,7 +99,10 @@ def main() -> int:
         pin_memory=device.type == "cuda",
         persistent_workers=args.num_workers > 0,
     )
-    maxima = {name: 0.0 for name in ACTIVATION_NAMES}
+    activation_names = list(ACTIVATION_NAMES)
+    if config.visual_encoder == "depthwise_separable":
+        activation_names.extend(("spatial_0", "spatial_1"))
+    maxima = {name: 0.0 for name in activation_names}
     state_maximum = 0.0
     samples = 0
     with torch.no_grad():
@@ -105,7 +113,7 @@ def main() -> int:
             state = batch["state"].to(device, non_blocking=True)
             instruction_id = batch["instruction_id"].to(device, non_blocking=True)
             outputs = model(image, state, instruction_id)
-            for name in ACTIVATION_NAMES:
+            for name in activation_names:
                 maxima[name] = max(maxima[name], float(outputs[name].abs().max().cpu()))
             state_maximum = max(
                 state_maximum,
@@ -127,6 +135,13 @@ def main() -> int:
         "action_input": _module_scale(model.action_input),
         "action_output": _module_scale(model.action_output),
     }
+    if config.visual_encoder == "depthwise_separable":
+        weights.update(
+            {
+                "spatial_depthwise": _module_scale(model.spatial_depthwise),
+                "spatial_pointwise": _module_scale(model.spatial_pointwise),
+            }
+        )
     payload = {
         "activations": activation_scales,
         "weights": weights,

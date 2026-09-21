@@ -38,7 +38,7 @@
 - [ ] T011：完成机器人闭环与稳定性测试（`in_progress`）
 - [ ] T012：最终 thermo-nuclear 审查与发布归档（`in_progress`）
 - [x] T013：补齐 PL 推理链、PS Runtime 与端到端 action 数值对齐（`accepted`；PR #2 已合并到 PR #1，merge commit `2d69bc8`）
-- [ ] T014：GPU TinyCNN 学习能力评估（`in_progress`；100-episode 蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`，结论保持 `tune`）
+- [ ] T014：GPU TinyCNN 学习能力评估（`in_progress`；100-episode 蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`；depthwise 消融无闭环收益，决策 `keep_pointwise`）
 
 ## 未开始
 
@@ -52,7 +52,7 @@
 - 尚未拥有训练 checkpoint；T002 当前使用确定性占位 instruction table，正式表待 T003/T004 生成。
 - T003 当前只有确定性 smoke checkpoint；真实 teacher checkpoint、LIBERO 蒸馏数据和正式成功率尚未生成。
 - T004 当前参数包来自 smoke checkpoint；正式 student checkpoint 替换前不宣称发布参数包。
-- T014 baseline、蒸馏和扩大评测已完成：固定 split 的 3-seed FP32 validation MAE 为 `0.127903 +/- 0.000432`，gripper sign accuracy 为 `0.925218 +/- 0.001191`；同一批 100 episodes 的蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher 为 `95/100`。三种 student 的 Wilson 区间重叠，未观察到总体量化退化；student 在 task 8/9 均仅 `4/10`、`4-5/10`，teacher 为 `9/10`、`10/10`，20 pp 总体差距主要是模型/训练容量而非 INT8。结论保持 `tune`，下一步先做 `3x3 depthwise + 1x1 pointwise` CUDA 消融，再决定是否更新合同并生成最终 FPGA 参数包，详见 `docs/evaluation/t014_gpu_tinycnn_pilot.md`。
+- T014 baseline、蒸馏、扩大评测和 depthwise 容量消融已完成：固定 split 的 3-seed FP32 validation MAE 为 `0.127903 +/- 0.000432`；同一批 100 episodes 的蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher 为 `95/100`。新增两个 `3x3 depthwise + 1x1 pointwise` block 后，匹配续训 action MAE 为 `0.12505184`，对照为 `0.12505893`；task 8/9 闭环两者均为 `9/20`，没有结构收益。决策为 `keep_pointwise`，不更新 FPGA 合同；下一步生成最终 QAT 参数包并执行软件/PL parity，详见 `docs/evaluation/t014_gpu_tinycnn_pilot.md`。
 - Vivado v2025.1 当前 wrapper 指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado`；本机 GEMM/Conv RTL co-sim 通过。2026-09-20 原始双事务诊断运行完成第 1/2 事务后，XSIM 匿名 RSS 超过用户指定的 96 GiB 阈值并终止；随后加入 case 0/1 事务拆分和 `-wdb /dev/null` footprint 修复，并在扩容主机上完成完整流程：日志 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0/1 和 action MLP 均 `RTL Simulation : 1 / 1` 且 C post-check 通过。本机 31 GiB RAM 的这次构建只重复这两个 kernel 的 synthesis/IP export，不重跑其高内存 co-sim。
 - 已建立当前源码对应的 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，状态为 `current_source_verified`。
 - upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已合并到 `main`（merge commit `000f03d`），但 T001-T011 的独立任务 PR 仍缺失，发布流程 gate 尚未关闭。

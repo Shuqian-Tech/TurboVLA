@@ -131,6 +131,38 @@ The expanded machine-readable report, including per-task Wilson intervals and
 checkpoint hashes, is in
 [`tests/data/lite_distillation_expanded_report.json`](../../tests/data/lite_distillation_expanded_report.json).
 
+## Depthwise capacity ablation
+
+The CUDA-only candidate retains the deployed 1x1 stem and inserts two residual
+`3x3` depthwise plus `1x1` pointwise blocks on a 16x16 intermediate feature
+map before the fixed 4x8 token pool. It adds 864 parameters, from 148,436 to
+149,300. Zero-initialized pointwise projections make the candidate functionally
+equivalent to the pointwise checkpoint at initialization within `2e-6` action
+error.
+
+Both the pointwise continuation control and depthwise candidate resumed the
+same distilled FP32 checkpoint for 2,000 updates with identical data, seed,
+batch size, learning rate, and loss weights.
+
+| Metric | Pointwise control | Depthwise candidate |
+|---|---:|---:|
+| Validation action MAE | 0.12505893 | 0.12505184 |
+| Validation teacher-action MAE | 0.07460589 | 0.07460894 |
+| Validation feature relation MSE | 0.00507810 | 0.00490191 |
+| Task 8 success | 5/10 | 5/10 |
+| Task 9 success | 4/10 | 4/10 |
+| Targeted total | 9/20 | 9/20 |
+
+The feature relation improves by about 3.5%, but action MAE changes by only
+`0.00000709` and targeted closed-loop behavior is identical. The learned
+pointwise block weights are nonzero, so this is not a dead-module result. The
+decision is `keep_pointwise`: do not spend a full 100-episode run or change the
+FPGA contract for this candidate. Parameter-pack export explicitly rejects the
+experimental encoder under the current contract.
+
+Machine-readable targeted rollout evidence is in
+[`tests/data/lite_depthwise_ablation_report.json`](../../tests/data/lite_depthwise_ablation_report.json).
+
 ## Decision
 
 The preliminary decision is `tune`:
@@ -140,17 +172,16 @@ The preliminary decision is `tune`:
   matched FP32, PTQ, and QAT closed-loop results without changing the contract.
 - Treat the remaining 20 percentage-point distilled-FP32 teacher gap as the
   optimization target; do not attribute it to quantization alone.
-- Retain QAT; it recovered one matched pilot success over PTQ, but larger
-  and expanded-rollout success over PTQ, but the overlapping intervals do not
-  establish a reliable QAT advantage.
-- Run a CUDA-only capacity ablation with a small `3x3` depthwise-separable
-  visual encoder, focused on tasks 8 and 9. Do not change the FPGA contract
-  unless the success-rate gain justifies new HLS, parameter-pack, parity, and
-  timing work.
+- Retain QAT; it recovered one success over PTQ in both the matched pilot and
+  expanded rollout, but the overlapping intervals do not establish a reliable
+  QAT advantage.
+- Keep the current pointwise visual encoder. The matched depthwise capacity
+  ablation did not improve action MAE materially or change task 8/9 success,
+  so it does not justify new HLS, parameter-pack, parity, or timing work.
 
-T014 remains `in_progress`. Final acceptance still requires the capacity
-ablation decision, recorded final parameter artifacts, and the mandated
-thermo-nuclear review.
+T014 remains `in_progress`. Final acceptance still requires recorded final QAT
+parameter artifacts, software/PL parity, and the mandated thermo-nuclear
+review.
 
 ## Reproduction commands
 
@@ -176,7 +207,16 @@ PYTHONPATH=. .venv/bin/python tools/run_lite_gpu_evaluation.py \
   --dataset-dir data/libero/original/libero_spatial --device cuda \
   --teacher-cache-dir build/lite/t014_teacher_cache \
   --resume build/lite/t014_spatial_fp32_seed20260921.pt \
+  --visual-encoder depthwise_separable \
   --steps 2000 --batch-size 128 --learning-rate 5e-4 \
   --action-loss-weight 1 --teacher-action-loss-weight 1 \
   --feature-loss-weight 0.1
+
+LIBERO_CONFIG_PATH=data/libero/config \
+PYTHONPATH=.:third_party/vla_adapter:data/libero/LIBERO \
+data/libero/.venv/bin/python -m vla_adapter.rollout \
+  --policy-kind lite --ckpt-path <ablation-checkpoint> --device cuda \
+  --task-suite-name libero_spatial --task-ids 8,9 \
+  --num-trials-per-task 10 --env-img-res 128 --num-open-loop-steps 12 \
+  --seed 7 --mujoco-gl egl --pyopengl-platform egl
 ```

@@ -49,9 +49,14 @@ def _quantize_weight(value: np.ndarray) -> tuple[np.ndarray, float]:
 
 
 def _checkpoint_arrays(checkpoint: Mapping[str, object]) -> dict[str, np.ndarray]:
+    config = checkpoint.get("config")
+    if isinstance(config, Mapping) and config.get("visual_encoder", "pointwise") != "pointwise":
+        raise ValueError("experimental visual encoders cannot be exported with the current FPGA contract")
     state_dict = checkpoint.get("state_dict")
     if not isinstance(state_dict, Mapping):
         raise ValueError("checkpoint must contain a state_dict mapping")
+    if any(name.startswith(("spatial_depthwise.", "spatial_pointwise.")) for name in state_dict):
+        raise ValueError("experimental visual encoder weights cannot be exported with the current FPGA contract")
 
     def array(name: str) -> np.ndarray:
         value = state_dict[name]

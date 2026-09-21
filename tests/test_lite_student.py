@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 
 import torch
 
@@ -59,6 +60,34 @@ class LiteStudentTest(unittest.TestCase):
             torch.zeros((1,), dtype=torch.long),
         )
         self.assertTrue(torch.isfinite(outputs["action"]).all())
+
+    def test_depthwise_ablation_starts_from_the_pointwise_function(self) -> None:
+        pointwise = TurboVLALiteStudent(self.config, quantization=None).eval()
+        depthwise_config = replace(self.config, visual_encoder="depthwise_separable")
+        depthwise = TurboVLALiteStudent(depthwise_config, quantization=None).eval()
+        incompatible = depthwise.load_state_dict(pointwise.state_dict(), strict=False)
+        self.assertFalse(incompatible.unexpected_keys)
+        self.assertTrue(incompatible.missing_keys)
+        self.assertTrue(
+            all(name.startswith(("spatial_depthwise.", "spatial_pointwise.")) for name in incompatible.missing_keys)
+        )
+        self.assertEqual(sum(parameter.numel() for parameter in pointwise.parameters()), 148436)
+        self.assertEqual(sum(parameter.numel() for parameter in depthwise.parameters()), 149300)
+
+        image = torch.randint(0, 256, (2, 1, 3, 128, 128), dtype=torch.uint8)
+        state = torch.zeros((2, 8), dtype=torch.int16)
+        instruction = torch.zeros((2,), dtype=torch.long)
+        with torch.no_grad():
+            expected = pointwise(image, state, instruction)
+            actual = depthwise(image, state, instruction)
+        self.assertEqual(tuple(actual["spatial_0"].shape), (2, 16, 16, 16))
+        self.assertEqual(tuple(actual["spatial_1"].shape), (2, 16, 16, 16))
+        torch.testing.assert_close(actual["visual_tokens"], expected["visual_tokens"], atol=1.0e-6, rtol=1.0e-6)
+        torch.testing.assert_close(actual["action"], expected["action"], atol=2.0e-6, rtol=1.0e-4)
+
+    def test_rejects_unknown_visual_encoder(self) -> None:
+        with self.assertRaisesRegex(ValueError, "unsupported visual encoder"):
+            TurboVLALiteStudent(replace(self.config, visual_encoder="unknown"))
 
 
 if __name__ == "__main__":
