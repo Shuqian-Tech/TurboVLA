@@ -7,7 +7,7 @@
 ```text
 image          uint8  [1, 1, 3, 128, 128]  N V C H W, RGB
 state          int16  [1, 8]
-instruction_id uint16 [1], 65535 保留为 invalid
+instruction_id uint16 [1], 有效范围 0..255，65535 保留为 invalid
 ```
 
 图像预处理在 PL 完成。PS 不得把已处理的视觉特征作为替代输入提交给推理 kernel，否则测试应失败。state 使用 `libero_state_v1` 归一化规则，具体统计值由参数包任务冻结。

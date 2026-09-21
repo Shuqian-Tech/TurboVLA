@@ -100,6 +100,10 @@ int main(int argc, char** argv) {
     const float actual =
         read_float(arena_bytes + turbovla::hls::e2e::kActionOffset + index * sizeof(float));
     const float expected = read_float(expected_bytes.data() + index * sizeof(float));
+    if (!std::isfinite(actual) || !std::isfinite(expected)) {
+      std::cerr << "non-finite action at index " << index << '\n';
+      return 5;
+    }
     const float error = std::abs(actual - expected);
     max_error = std::max(max_error, error);
     total_error += error;
@@ -107,12 +111,12 @@ int main(int argc, char** argv) {
   const float mean_error = total_error / static_cast<float>(turbovla::hls::e2e::kActionValues);
   std::cout << "e2e action parity max_abs_error=" << max_error << " mean_abs_error=" << mean_error << '\n';
   if (max_error > 1.0e-5f || mean_error > 1.0e-6f) {
-    return 5;
+    return 6;
   }
 
-  write_u16(arena_bytes, turbovla::hls::e2e::kHeaderInstructionId, 65535);
+  write_u16(arena_bytes, turbovla::hls::e2e::kHeaderInstructionId, 256);
   if (turbovla_lite_e2e(arena.data()) != static_cast<int>(turbovla::hls::e2e::ErrorCode::kInvalidInstructionId)) {
-    return 6;
+    return 7;
   }
   std::cout << "e2e invalid-instruction gate passed\n";
   return 0;

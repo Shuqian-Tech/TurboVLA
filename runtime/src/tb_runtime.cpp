@@ -87,8 +87,16 @@ int main() {
   turbovla::runtime::ArenaBuffer buffer{arena.data(), 0x0000001080000000ULL, arena.size()};
   turbovla::runtime::PlArenaExecutor device(buffer, registers, cache);
   const auto model = valid_model();
-  if (device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
+
+  turbovla::runtime::PlArenaExecutor invalid_device(
+      {arena.data(), 0, arena.size()}, registers, cache);
+  if (invalid_device.load_model(model.data(), model.size()) !=
+      turbovla::runtime::ErrorCode::kInvalidBuffer) {
     return 1;
+  }
+
+  if (device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
+    return 2;
   }
   turbovla::runtime::TurboVlaRuntime runtime(
       {}, [&device](const auto& input, auto& output, std::uint32_t timeout) {
@@ -99,19 +107,19 @@ int main() {
   input.instruction_id = 7;
   turbovla::runtime::ActionOutput output;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kNone || output.action[83] != 0.83f) {
-    return 2;
+    return 3;
   }
   if (registers.registers_[turbovla::runtime::kArenaAddressLowOffset / 4U] != 0x80000000U ||
       registers.registers_[turbovla::runtime::kArenaAddressHighOffset / 4U] != 0x10U) {
-    return 3;
+    return 4;
   }
   if (cache.flushes.size() != 4 || cache.invalidates.size() != 2) {
-    return 4;
+    return 5;
   }
 
   input.instruction_id = 256;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kInvalidInstructionId) {
-    return 5;
+    return 6;
   }
 
   alignas(64) std::array<std::uint8_t, kArenaBytes> timeout_arena{};
@@ -121,11 +129,11 @@ int main() {
   turbovla::runtime::PlArenaExecutor timeout_device(
       {timeout_arena.data(), 0x90000000ULL, timeout_arena.size()}, timeout_registers, timeout_cache);
   if (timeout_device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
-    return 6;
+    return 7;
   }
   input.instruction_id = 0;
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kDmaTimeout) {
-    return 7;
+    return 8;
   }
 
   std::cout << "runtime arena/MMIO/cache path passed\n";

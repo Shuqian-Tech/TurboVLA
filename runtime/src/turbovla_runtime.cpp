@@ -59,7 +59,10 @@ PlArenaExecutor::PlArenaExecutor(ArenaBuffer arena, RegisterIo& registers, Cache
     : arena_(arena), registers_(registers), cache_(cache) {}
 
 ErrorCode PlArenaExecutor::load_model(const std::uint8_t* model, std::size_t bytes) {
-  if (!valid_arena(arena_) || model == nullptr || bytes != kModelBytes || read_u32(model, 0) != kModelMagic ||
+  if (!valid_arena(arena_) || model == nullptr) {
+    return ErrorCode::kInvalidBuffer;
+  }
+  if (bytes != kModelBytes || read_u32(model, 0) != kModelMagic ||
       read_u32(model, 4) != kContractVersion || read_u32(model, 8) != kModelBytes) {
     return ErrorCode::kContractMismatch;
   }

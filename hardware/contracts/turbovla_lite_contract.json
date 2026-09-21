@@ -22,7 +22,7 @@
       "name": "instruction_id",
       "dtype": "uint16",
       "shape": [1],
-      "valid_range": [0, 65534],
+      "valid_range": [0, 255],
       "invalid_value": 65535
     },
     "embedding": {

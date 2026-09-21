@@ -36,6 +36,7 @@ def validate(contract: dict) -> None:
     language_input = contract["language"]["input"]
     assert language_input["dtype"] == "uint16"
     assert language_input["shape"] == [1]
+    assert language_input["valid_range"] == [0, 255]
     assert language_input["invalid_value"] == 65535
 
     assert contract["language"]["embedding"]["shape"] == [1, 128]
