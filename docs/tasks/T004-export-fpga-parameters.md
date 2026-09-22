@@ -3,7 +3,7 @@
 - 状态：`done`
 - Sprint：Sprint 1
 - 分支：`task/T004-export-fpga-parameters`
-- PR：[Shuqian-Tech/TurboVLA#6](https://github.com/Shuqian-Tech/TurboVLA/pull/6)（待合并）
+- PR：[Shuqian-Tech/TurboVLA#6](https://github.com/Shuqian-Tech/TurboVLA/pull/6)（merged，merge commit `2c7f597057bb85ff2c9bf826505b3ba30ed79bf1`）
 - 依赖：T002、T003
 - 验收 skill：`thermo-nuclear-code-quality-review`
 
