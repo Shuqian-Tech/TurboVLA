@@ -1,9 +1,9 @@
 # T015：升级 state INT8 scale 合同
 
-- 状态：`in_review`
+- 状态：`done`
 - Sprint：Sprint 1（跨 Sprint 2/3 验证）
 - 分支：`task/T015-state-scale-contract`
-- PR：[Shuqian-Tech/TurboVLA#4](https://github.com/Shuqian-Tech/TurboVLA/pull/4)（Draft）
+- PR：[Shuqian-Tech/TurboVLA#4](https://github.com/Shuqian-Tech/TurboVLA/pull/4)（merged，merge commit `ff97126dd4a495ca36116cb75b65f9952c556a0c`）
 - 依赖：T001、T013、T014
 - 后续任务：T004 正式参数包、T014 最终验收
 - 验收 skill：`thermo-nuclear-code-quality-review`
@@ -83,7 +83,7 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - 验证命令：`PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`；`python3 tools/run_runtime_csim.py`；`python3 tools/run_e2e_csim.py --fixture-dir tests/data/lite_parameter_pack_qat`；`python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.json`。
 - 远程 HLS/Vivado 命令、工具版本、原始日志、报告和 checksum：`hardware/vivado_kr260/reports/t015/README.md` 及同目录文件。
 - package 运行命令：`PATH=/home/frank/AMD/vivado/2025.01/2025.1/Vivado/bin:$PATH python3 tools/package_kr260.py hardware/vivado_kr260/build/turbovla_kr260.xsa build/package_kr260_t015`。
-- task branch：`task/T015-state-scale-contract`；PR #4 等待转 Ready 并合并，未满足 `done` 所需的合并条件。
+- task branch：`task/T015-state-scale-contract`；PR #4 已转 Ready 并合并，merge commit `ff97126dd4a495ca36116cb75b65f9952c556a0c`。
 
 ## Thermo-nuclear review
 
@@ -101,4 +101,12 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - review 范围：当前分支至 `bc0be18`，包括新增 100-sample board evidence、sensor CSV、scheduler summary 和三处状态文档；无新增实现代码。
 - 结果：`PASS_WITH_DEVICE_AND_PR_GATES`；35/35 Python tests、Vivado baseline validation、JSON/diff checks 和 100/100 board jobs 通过。
 - 结构检查：证据为独立 machine-readable report/CSV，未向 runtime 添加 validation-only 分支、CPU fallback、第二硬件目标或共享执行状态。
-- 处置：无新的 blocking finding；PR merge 仍是唯一未闭合 gate。
+- 处置：无新的 blocking finding；该 review 在 PR merge 前记录，merge gate 已随后关闭。
+
+### Final acceptance
+
+- 状态：`done`（2026-09-22）。
+- PR gate：已合并到 `task/T014-gpu-tinycnn-evaluation`，merge commit
+  `ff97126dd4a495ca36116cb75b65f9952c556a0c`。
+- 最终 review：`PASS`；所有代码、软件 Vivado/HLS、KR260 bring-up、100-sample
+  validation 和文档状态 gate 均有记录，无未处置 blocking finding。
