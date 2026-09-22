@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)（已进入）
-- 当前任务：[T010：实现数据回放与数值对齐测试](tasks/T010-replay-validation.md)（`in_progress`）；T009 已验收，PR #9 待合并
+- 当前任务：[T010：实现数据回放与数值对齐测试](tasks/T010-replay-validation.md)（`in_progress`）；T009 已完成并合并 PR #9
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`amd-edf@192.168.68.120`（passwordless key；不在仓库保存凭据）
@@ -33,7 +33,7 @@
 - [ ] T006：实现 Fusion 与 Action MLP IP（`in_review`）
 - [ ] T007：搭建 KR260 Vivado Block Design（`in_progress`）
 - [ ] T008：完成综合、布局布线和报告基线（`in_progress`）
-- [x] T009：实现 PS DMA/AXI-Lite Runtime（`accepted`；PR #9，host recovery 与 KR260 5/5 runtime bring-up 通过）
+- [x] T009：实现 PS DMA/AXI-Lite Runtime（`done`；PR #9 merged，commit `737e964`）
 - [ ] T010：实现数据回放与数值对齐测试（`in_progress`）
 - [ ] T011：完成机器人闭环与稳定性测试（`in_progress`）
 - [ ] T012：最终 thermo-nuclear 审查与发布归档（`in_progress`）
@@ -59,7 +59,7 @@
 - T015 软件与板端证据、thermo-nuclear review 已归档于 `hardware/vivado_kr260/reports/t015/`；review 结果 `PASS_WITH_DEVICE_AND_PR_GATES`，`.119` XRT headers 和 Draft PR 仍是外部 gate。
 - Vivado v2025.1 当前 wrapper 指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado`；本机 GEMM/Conv RTL co-sim 通过。2026-09-20 原始双事务诊断运行完成第 1/2 事务后，XSIM 匿名 RSS 超过用户指定的 96 GiB 阈值并终止；随后加入 case 0/1 事务拆分和 `-wdb /dev/null` footprint 修复，并在扩容主机上完成完整流程：日志 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0/1 和 action MLP 均 `RTL Simulation : 1 / 1` 且 C post-check 通过。本机 31 GiB RAM 的这次构建只重复这两个 kernel 的 synthesis/IP export，不重跑其高内存 co-sim。
 - 已建立当前源码对应的 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，状态为 `current_source_verified`。
-- upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已合并到 `main`（merge commit `000f03d`），T009 已创建独立 PR #9；T001-T008/T010-T011 的独立任务 PR 仍缺失，发布流程 gate 尚未关闭。
+- upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已合并到 `main`（merge commit `000f03d`），T009 PR #9 已合并（merge commit `737e964`）；T001-T008/T010-T011 的独立任务 PR 仍缺失，发布流程 gate 尚未关闭。
 - Kria device package 已由 `/home/frank/WholeFile/FPGAs_AdaptiveSoCs_Unified_SDI_2025.1_0530_0145` 的离线 2025.1 installer 非交互 Add 到现有 Vivado；Tcl 验证 `xck26-sfvc784-2LV-c` 与 `xilinx.com:kr260_som:part0:1.0/1.1` 可见。完整源码 Vivado 重建已完成；认证信息不写入仓库。
 
 ## T002 软件 reference 证据
