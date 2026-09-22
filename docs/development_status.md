@@ -6,7 +6,7 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 1：模型与硬件契约](sprint/sprint-1-model-contract.md)（恢复执行模型能力 gate）
-- 当前任务：[T015：升级 state INT8 scale 合同](tasks/T015-state-scale-contract.md)（`in_progress`）；T014/T004 等待 v0.3 参数包与 PL parity
+- 当前任务：[T015：升级 state INT8 scale 合同](tasks/T015-state-scale-contract.md)（`in_review`）；T014/T004 等待 v0.3 参数包与 PL parity
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`amd-edf@192.168.68.123`（passwordless key；不在仓库保存凭据）
@@ -39,7 +39,7 @@
 - [ ] T012：最终 thermo-nuclear 审查与发布归档（`in_progress`）
 - [x] T013：补齐 PL 推理链、PS Runtime 与端到端 action 数值对齐（`accepted`；PR #2 已合并到 PR #1，merge commit `2d69bc8`）
 - [ ] T014：GPU TinyCNN 学习能力评估（`in_progress`；100-episode 蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`；depthwise 消融无闭环收益，决策 `keep_pointwise`）
-- [ ] T015：升级 state INT8 scale 合同（`in_progress`；模型不变，v0.3 model header 增加 checkpoint-calibrated state scale）
+- [ ] T015：升级 state INT8 scale 合同（`in_review`；模型不变，v0.3 model header 增加 checkpoint-calibrated state scale；100-sample KR260 validation sweep 已通过，等待 PR 合并）
 
 ## 未开始
 

@@ -1,6 +1,6 @@
 # T015：升级 state INT8 scale 合同
 
-- 状态：`in_progress`
+- 状态：`in_review`
 - Sprint：Sprint 1（跨 Sprint 2/3 验证）
 - 分支：`task/T015-state-scale-contract`
 - PR：[Shuqian-Tech/TurboVLA#4](https://github.com/Shuqian-Tech/TurboVLA/pull/4)（Draft）
@@ -83,7 +83,7 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - 验证命令：`PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`；`python3 tools/run_runtime_csim.py`；`python3 tools/run_e2e_csim.py --fixture-dir tests/data/lite_parameter_pack_qat`；`python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.json`。
 - 远程 HLS/Vivado 命令、工具版本、原始日志、报告和 checksum：`hardware/vivado_kr260/reports/t015/README.md` 及同目录文件。
 - package 运行命令：`PATH=/home/frank/AMD/vivado/2025.01/2025.1/Vivado/bin:$PATH python3 tools/package_kr260.py hardware/vivado_kr260/build/turbovla_kr260.xsa build/package_kr260_t015`。
-- task branch：`task/T015-state-scale-contract`；PR #4 仍为 Draft，未满足 `done` 所需的合并条件。
+- task branch：`task/T015-state-scale-contract`；PR #4 等待转 Ready 并合并，未满足 `done` 所需的合并条件。
 
 ## Thermo-nuclear review
 
@@ -94,3 +94,11 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - 分支/边界检查：v0.2 rejection、非法 scale 和 instruction gate 均 fail-fast；没有 CPU inference fallback、替代 FPGA target 或 DPU 路径
 - 发现处置：`.119` 无 XRT headers 和 PR 仍为 Draft 是外部 gate；板端 `.120` action parity 已通过，未通过代码改动规避环境问题
 - 证据：本目录 HLS/Vivado 日志、`timing_summary.rpt`、`utilization.rpt`、`power.rpt`、`cdc.rpt`、`turbovla_lite_e2e_csynth.rpt`、package manifest；功能日志 checksum 见 README 上文
+
+### 100-sample validation review addendum
+
+- review 日期：2026-09-22；reviewer：Codex
+- review 范围：当前分支至 `bc0be18`，包括新增 100-sample board evidence、sensor CSV、scheduler summary 和三处状态文档；无新增实现代码。
+- 结果：`PASS_WITH_DEVICE_AND_PR_GATES`；35/35 Python tests、Vivado baseline validation、JSON/diff checks 和 100/100 board jobs 通过。
+- 结构检查：证据为独立 machine-readable report/CSV，未向 runtime 添加 validation-only 分支、CPU fallback、第二硬件目标或共享执行状态。
+- 处置：无新的 blocking finding；PR merge 仍是唯一未闭合 gate。
