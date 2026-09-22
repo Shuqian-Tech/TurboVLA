@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -15,6 +16,7 @@ using turbovla::runtime::kActionValues;
 using turbovla::runtime::kArenaBytes;
 using turbovla::runtime::kContractVersion;
 using turbovla::runtime::kControlOffset;
+using turbovla::runtime::kInterruptStatusOffset;
 using turbovla::runtime::kModelBytes;
 using turbovla::runtime::kModelMagic;
 using turbovla::runtime::kModelStateInputScaleOffset;
@@ -48,17 +50,24 @@ class FakeRegisters final : public turbovla::runtime::RegisterIo {
   }
 
   void write32(std::uint32_t offset, std::uint32_t value) override {
-    registers_[offset / 4U] = value;
+    if (offset == kInterruptStatusOffset) {
+      registers_[offset / 4U] &= ~value;
+    } else {
+      registers_[offset / 4U] = value;
+    }
     if (offset == kControlOffset && (value & 1U) != 0U) {
       start_seen_ = true;
       if (completes) {
+        registers_[kInterruptStatusOffset / 4U] = 1;
         std::uint32_t sequence = 0;
         std::memcpy(&sequence, arena_ + 8, sizeof(sequence));
         write_u32(arena_, 16, sequence);
         write_u32(arena_, 20, kernel_error);
         write_u32(arena_, 24, hardware_version);
         for (std::size_t index = 0; index < kActionValues; ++index) {
-          const float value_out = static_cast<float>(index) / 100.0f;
+          const float value_out = nonfinite_action && index == 0
+                                      ? std::numeric_limits<float>::quiet_NaN()
+                                      : static_cast<float>(index) / 100.0f;
           std::memcpy(arena_ + kActionOffset + index * sizeof(float), &value_out, sizeof(value_out));
         }
       }
@@ -68,6 +77,7 @@ class FakeRegisters final : public turbovla::runtime::RegisterIo {
   bool completes = true;
   std::uint32_t kernel_error = 0;
   std::uint32_t hardware_version = kContractVersion;
+  bool nonfinite_action = false;
   std::array<std::uint32_t, 16> registers_{};
 
  private:
@@ -143,10 +153,15 @@ int main() {
   if (cache.flushes.size() != 4 || cache.invalidates.size() != 2) {
     return 8;
   }
+  if (registers.registers_[turbovla::runtime::kGlobalInterruptOffset / 4U] != 1U ||
+      registers.registers_[turbovla::runtime::kInterruptEnableOffset / 4U] != 1U ||
+      registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 1U) {
+    return 9;
+  }
 
   input.instruction_id = 256;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kInvalidInstructionId) {
-    return 9;
+    return 10;
   }
 
   alignas(64) std::array<std::uint8_t, kArenaBytes> timeout_arena{};
@@ -156,11 +171,34 @@ int main() {
   turbovla::runtime::PlArenaExecutor timeout_device(
       {timeout_arena.data(), 0x90000000ULL, timeout_arena.size()}, timeout_registers, timeout_cache);
   if (timeout_device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
-    return 10;
+    return 11;
   }
   input.instruction_id = 0;
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kDmaTimeout) {
-    return 11;
+    return 12;
+  }
+  if (timeout_device.reset() != turbovla::runtime::ErrorCode::kNone ||
+      timeout_registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
+    return 13;
+  }
+  timeout_registers.completes = true;
+  if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kNone) {
+    return 14;
+  }
+
+  registers.kernel_error = static_cast<std::uint32_t>(turbovla::runtime::ErrorCode::kKernelFault);
+  if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
+    return 15;
+  }
+  registers.kernel_error = 0;
+  registers.nonfinite_action = true;
+  if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
+    return 16;
+  }
+  registers.nonfinite_action = false;
+  registers.registers_[turbovla::runtime::kKernelReturnOffset / 4U] = 0xFFFFFFFFU;
+  if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
+    return 17;
   }
 
   std::cout << "runtime arena/MMIO/cache path passed\n";

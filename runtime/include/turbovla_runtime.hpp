@@ -92,6 +92,9 @@ class PlArenaExecutor {
 
   ErrorCode load_model(const std::uint8_t* model, std::size_t bytes);
   ErrorCode run(const FrameInput& input, ActionOutput& output, std::uint32_t timeout_ticks);
+  // Clear a stale ap_ctrl_hs transaction and acknowledge pending interrupts.
+  // The platform reset controller owns the actual PL reset line.
+  ErrorCode reset();
 
  private:
   ArenaBuffer arena_;
