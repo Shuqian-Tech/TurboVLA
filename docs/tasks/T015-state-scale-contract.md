@@ -52,7 +52,7 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - 开始时间：2026-09-21
 - 当前分支：`task/T015-state-scale-contract`
 - PR：[Shuqian-Tech/TurboVLA#4](https://github.com/Shuqian-Tech/TurboVLA/pull/4)（Draft）
-- hardware bring-up：`not_run`（2026-09-22；板端 `192.168.68.123` 从本地和 `.119` 均为 `No route to host`，未加载 package）
+- hardware bring-up：`passed`（2026-09-22；正确板端为 `192.168.68.120`，T015 package 已加载，probe、PL action parity 和 12 次 live invocation 通过）
 - 触发证据：T014 state-scale audit；固定 v0.2 scale QAT 为 `20/30`
 - v0.3 contract、runtime、HLS 和正式 checkpoint exporter 已实现；精确 commit `2b88e7f` 已完成 RTL/Vivado/package gate，板端 gate 仍待板端网络恢复
 
@@ -72,7 +72,7 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - Vivado synthesis/implementation/post-route、bitstream/XSA：通过；post-route WNS `+0.01316635683178902 ns`，TNS `0`，WHS `+0.010 ns`，THS `0`
 - package：`hardware/vivado_kr260/reports/t015/manifest.json`，control base `0xa0000000`；bit `c0f1e8a7548b7309ff63d63342f2e378c06bbe7c15c62c108be843eea7d80622`，bit.bin `bbb0b7f71029ca11165d2e1401b2b3af82267f0b0818f42381884b5ea9c072ca`，dtbo `a4fe03cd15e4078a3c4d1eeb4b1d6b5a7e89af8e0e2eefbc57e0bf844bad1bc9`
 - Hardware Manager 非破坏性枚举：target `127.0.0.1:3121/xilinx_tcf/Xilinx/XFL13WUMT00XA`，devices `xck26_0 arm_dap_1`
-- KR260 action parity：`not_run`；board runtime 在 `.119` 因缺少 `xrt/xrt_bo.h` 未能编译，不能作为板端证据
+- KR260 action parity：通过；`.120` probe passed，full PL inference action `max_abs_error=1.19209e-07`、`mean_abs_error=1.98128e-08`，12/12 live invocations passed；`.119` 缺少 `xrt/xrt_bo.h` 仅影响 host-side compile，不影响板端运行
 
 ## 变更与证据索引
 
@@ -89,5 +89,5 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - 结果：`PASS_WITH_DEVICE_AND_PR_GATES`; 未发现新的代码结构 blocking finding
 - 结构检查：无因 T015 新增而超过 1,000 行的源码文件；state-scale 逻辑保持在 model contract/HLS/runtime canonical boundary；独立 co-sim case 由 runner 进程隔离，未增加共享全局状态或 one-off 分支
 - 分支/边界检查：v0.2 rejection、非法 scale 和 instruction gate 均 fail-fast；没有 CPU inference fallback、替代 FPGA target 或 DPU 路径
-- 发现处置：板端网络不可达、`.119` 无 XRT headers、PR 仍为 Draft 均为外部验收 gate，已记录为阻塞，不通过代码改动规避
+- 发现处置：`.119` 无 XRT headers 和 PR 仍为 Draft 是外部 gate；板端 `.120` action parity 已通过，未通过代码改动规避环境问题
 - 证据：本目录 HLS/Vivado 日志、`timing_summary.rpt`、`utilization.rpt`、`power.rpt`、`cdc.rpt`、`turbovla_lite_e2e_csynth.rpt`、package manifest；功能日志 checksum 见 README 上文

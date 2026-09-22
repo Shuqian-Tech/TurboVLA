@@ -41,13 +41,29 @@ Vivado Hardware Manager connected non-destructively to
 `127.0.0.1:3121/xilinx_tcf/Xilinx/XFL13WUMT00XA` and enumerated
 `xck26_0 arm_dap_1`.
 
-The board endpoint `amd-edf@192.168.68.123` returned `No route to host` from
-both the local host and the build host on 2026-09-22. No package was loaded,
-no UIO/XRT probe was run, and no action parity claim is made. Hardware
-bring-up therefore remains `not_run`.
+The correct board endpoint is `amd-edf@192.168.68.120`. The earlier
+`192.168.68.123` address was incorrect and is not a T015 result.
 
-The board runtime compile was attempted on the build host and stopped because
-that host has no XRT development headers (`xrt/xrt_bo.h`); this is an
-environment limitation, not a board result. The runtime must be compiled in
-the board's XRT-enabled environment before full parity testing.
+On 2026-09-22, `.120` reported FPGA manager `operating`, XRT `2.23.0`
+(2026.1), and the starter overlay was unloaded. The T015 package was loaded
+with `fpgautil -b ...turbovla_kr260.bit.bin -o ...turbovla_kr260.dtbo -f Full
+-n full`. Loading `uio_pdrv_genirq` exposed `uio4=turbovla-lite-e2e`.
 
+The board runtime was built on the board from the public GitHub branch at
+commit `1bb98922f947d91778897da5d2f46ff0df9d182c`; binary SHA256 is
+`75ad2ecf84d23d0938a84dd467debcca534141d24d3bbd79317dc13f7c16828f`.
+Probe-only passed with control `0x4` and XRT arena address `0x4b1c0000`.
+Full PL inference passed with action parity
+`max_abs_error=1.19209e-07`, `mean_abs_error=1.98128e-08`.
+
+Twelve independent live board invocations passed with the same parity and
+`KR260_T015_LIVE_SAMPLES_PASS count=12`. No CPU inference fallback was used.
+
+The board is therefore `action_parity=passed` for this vector. This is a
+single-vector parity gate, not a replacement for the existing long-duration
+stability evidence from T013.
+
+The `.119` build host remains without XRT development headers. It is only a
+software build host; do not copy the board's aarch64 XRT libraries to its
+x86_64 filesystem. Use the matching x86_64 Ubuntu 22.04 XRT 2025.1 package or
+build XRT from the matching source tag when host-side compilation is needed.
