@@ -3,9 +3,9 @@
 - Date: 2026-09-22
 - Target: AMD Kria KR260/K26
 - Board: `amd-edf@192.168.68.120`
-- Source commit: `a711ce51e6201c0b2f346f7bd929584ef540dffc`
+- Source commit: `281d7d45c42a09eaba902c1da436a063800f7b12`
 - Board worktree: `/home/amd-edf/TurboVLA-codex-T009`
-- Runtime SHA256: `8d85a6a06783ae3183235a9249fb6f88364941c9bf7269d6718a27363355a144`
+- Runtime SHA256: `1e04a7f447783f01a29733544ae723e71a5ddf17006ef1503a93b455f8028e15`
 - Active UIO device: `turbovla-lite-e2e`
 - FPGA manager after validation: `operating`
 
@@ -20,15 +20,15 @@ cache flush, 64-bit arena address programming, AXI-Lite start/poll, PL
 inference, device-to-host cache invalidation, header/version/sequence checks,
 interrupt state, and all 84 action values.
 
-| Fixture | PL elapsed (ms) | Max absolute error | Mean absolute error | GIE/IER/ISR |
+| Fixture | PL elapsed (ms) | Max absolute error | Mean absolute error | Observed ISR / final GIE/IER/ISR |
 | --- | ---: | ---: | ---: | --- |
-| 000 | 75.987 | 5.96046e-08 | 1.54167e-08 | 1/1/1 |
-| 025 | 76.081 | 5.96046e-08 | 1.30579e-08 | 1/1/1 |
-| 050 | 76.107 | 5.96046e-08 | 1.16859e-08 | 1/1/1 |
-| 075 | 76.048 | 8.94070e-08 | 1.21515e-08 | 1/1/1 |
-| 099 | 76.082 | 5.96046e-08 | 7.41455e-09 | 1/1/1 |
+| 000 | 76.131 | 5.96046e-08 | 1.54167e-08 | 1 / 0/0/0 |
+| 025 | 76.020 | 5.96046e-08 | 1.30579e-08 | 1 / 0/0/0 |
+| 050 | 76.112 | 5.96046e-08 | 1.16859e-08 | 1 / 0/0/0 |
+| 075 | 76.076 | 8.94070e-08 | 1.21515e-08 | 1 / 0/0/0 |
+| 099 | 76.094 | 5.96046e-08 | 7.41455e-09 | 1 / 0/0/0 |
 
-Result: `5/5` passed. Mean PL runtime call latency was `76.061 ms`; worst
+Result: `5/5` passed. Mean PL runtime call latency was `76.087 ms`; worst
 action max absolute error was `8.94070e-08`. The time includes XRT cache sync,
 MMIO programming, polling, and action validation and is not a kernel-only
 latency claim.
@@ -45,7 +45,10 @@ The review found that the generated HLS ISR at offset `0x0c` is `Read/TOW`,
 not conventional write-one-to-clear. The first implementation wrote all bits,
 which could assert a clear status bit. Commit `a711ce5` fixes recovery by
 reading the two pending bits and writing back only the asserted mask. The fake
-MMIO model uses the same toggle-on-write behavior. This finding is resolved.
+MMIO model uses the same toggle-on-write behavior. Commit `65c57c7` also
+captures the asserted completion status, then disables and acknowledges the
+interrupt before returning, leaving `GIE/IER/ISR=0/0/0`. This finding is
+resolved.
 
 ## Commands
 
