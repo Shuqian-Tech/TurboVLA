@@ -16,9 +16,9 @@
 - [T014：GPU TinyCNN 学习能力评估](../tasks/T014-gpu-tinycnn-evaluation.md)
 - [T015：升级 state INT8 scale 合同](../tasks/T015-state-scale-contract.md)
 
-当前执行任务：[T014：GPU TinyCNN 学习能力评估](../tasks/T014-gpu-tinycnn-evaluation.md)
+当前执行任务：已转入 [Sprint 3：Runtime、闭环与发布验收](sprint-3-runtime-acceptance.md)
 
-执行进度：T001 `in_review`；T002 `in_review`；T003 `in_progress`；T004 `in_progress`；T014 `in_progress`（蒸馏 FP32/PTQ/fake-QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`，depthwise 决策 `keep_pointwise`）；T015 `done`（v0.3 RTL/Vivado/package gate、正确板端 `192.168.68.120` action parity、100-sample validation sweep 和 PR #4 merge 已完成，模型和权重不变）。
+执行进度：T001 `in_review`；T002 `in_review`；T003 `in_progress`；T004 `done`（正式 QAT/v0.3 参数包、35 tests、PL parity、Vivado 和 KR260 bring-up，PR #6 待合并）；T014 `done`（蒸馏 FP32/PTQ/fake-QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`，depthwise 决策 `keep_pointwise`，PR #3 已合并）；T015 `done`（v0.3 RTL/Vivado/package gate、正确板端 `192.168.68.120` action parity、100-sample validation sweep 和 PR #4 merge 已完成，模型和权重不变）。
 
 ## 进入条件
 
