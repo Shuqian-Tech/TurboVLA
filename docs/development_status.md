@@ -5,8 +5,8 @@
 - 更新时间：2026-09-22
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
-- 当前 Sprint：[Sprint 1：模型与硬件契约](sprint/sprint-1-model-contract.md)（恢复执行模型能力 gate）
-- 当前任务：[T014：GPU TinyCNN 学习能力评估](tasks/T014-gpu-tinycnn-evaluation.md)（`in_progress`）；T015 已完成并合并，T004/T014 后续 gate 继续执行
+- 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)（已进入）
+- 当前任务：[T009：实现 PS DMA/AXI-Lite Runtime](tasks/T009-ps-runtime.md)（`in_progress`）；T004、T014、T015 的模型与参数 gate 已完成
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`amd-edf@192.168.68.123`（passwordless key；不在仓库保存凭据）
@@ -28,7 +28,7 @@
 - [ ] T001：冻结 MVP 模型与接口契约（`in_review`）
 - [ ] T002：建立 FP32/INT8 软件 reference（`in_review`）
 - [ ] T003：训练 TurboVLA-Lite student（`in_progress`）
-- [ ] T004：生成 FPGA 参数包（`in_progress`）
+- [x] T004：生成 FPGA 参数包（`done`；正式 QAT/v0.3 参数包、PL parity、Vivado 和 KR260 bring-up 已通过）
 - [ ] T005：实现 INT8 GEMM/Conv IP（`in_review`）
 - [ ] T006：实现 Fusion 与 Action MLP IP（`in_review`）
 - [ ] T007：搭建 KR260 Vivado Block Design（`in_progress`）
@@ -38,7 +38,7 @@
 - [ ] T011：完成机器人闭环与稳定性测试（`in_progress`）
 - [ ] T012：最终 thermo-nuclear 审查与发布归档（`in_progress`）
 - [x] T013：补齐 PL 推理链、PS Runtime 与端到端 action 数值对齐（`accepted`；PR #2 已合并到 PR #1，merge commit `2d69bc8`）
-- [ ] T014：GPU TinyCNN 学习能力评估（`in_progress`；100-episode 蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`；depthwise 消融无闭环收益，决策 `keep_pointwise`）
+- [x] T014：GPU TinyCNN 学习能力评估（`done`；100-episode 蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`；depthwise 消融无闭环收益，决策 `keep_pointwise`；PR #3 已合并）
 - [x] T015：升级 state INT8 scale 合同（`done`；模型不变，v0.3 model header 增加 checkpoint-calibrated state scale；100-sample KR260 validation sweep 已通过；PR #4 已合并，merge commit `ff97126dd4a495ca36116cb75b65f9952c556a0c`）
 
 ## 未开始
@@ -51,8 +51,8 @@
 - Vivado v2025.1 已识别 `xck26-sfvc784-2LV-c`；当前机器已从本地 HLS IP 完成 block design validation、synthesis、implementation、post-route timing、bitstream 和 XSA，日志 `/tmp/turbovla-current-build.3zY7TN/vivado-current.log`，本地 `build/` 产物可复核。
 - 初始只读 probe 的 starter-kit 状态已被 T013 实机结果取代：TurboVLA overlay 已加载，PL0 clock 自动启用，完整 PL inference 和 30 分钟稳定性通过。旧 probe 仍保留为加载前历史记录。
 - T002 的历史 golden 仍使用确定性参数；正式 teacher cache、student checkpoint 和闭环成绩已由 T014 生成，但 T003/T004 自身的独立 PR/验收记录仍需补齐。
-- T004 当前已实现 smoke 参数包；T015 已从选定 QAT checkpoint 生成 v0.3 candidate 正式参数包，并在精确 commit `2b88e7f` 通过软件 exact INT8、HLS/RTL、Vivado、KR260 package 和 `.120` 板端 action parity gate。
-- T014 baseline、蒸馏、扩大评测和 depthwise 容量消融已完成：固定 split 的 3-seed FP32 validation MAE 为 `0.127903 +/- 0.000432`；同一批 100 episodes 的蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher 为 `95/100`。新增两个 `3x3 depthwise + 1x1 pointwise` block 后，匹配续训 action MAE 为 `0.12505184`，对照为 `0.12505893`；task 8/9 闭环两者均为 `9/20`，没有结构收益。决策为 `keep_pointwise`，不更新 FPGA 合同；下一步生成最终 QAT 参数包并执行软件/PL parity，详见 `docs/evaluation/t014_gpu_tinycnn_pilot.md`。
+- T004 已从选定 QAT checkpoint 生成 v0.3 正式参数包，并在精确 commit `2b88e7f` 通过软件 exact INT8、HLS/RTL、Vivado、KR260 package 和 `.120` 板端 action parity gate；T004 PR #6 待合并。
+- T014 baseline、蒸馏、扩大评测和 depthwise 容量消融已完成：固定 split 的 3-seed FP32 validation MAE 为 `0.127903 +/- 0.000432`；同一批 100 episodes 的蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher 为 `95/100`。新增两个 `3x3 depthwise + 1x1 pointwise` block 后，匹配续训 action MAE 为 `0.12505184`，对照为 `0.12505893`；task 8/9 闭环两者均为 `9/20`，没有结构收益。决策为 `keep_pointwise`，不更新 FPGA 合同；T014 PR #3 已合并，正式 QAT 参数包和 PL parity 已由 T004/T015 关闭。
 - T015 state-scale audit 发现正式 QAT 的 `state_input_scale=0.0254367618`，而 v0.2 PL 硬编码 `1/127`；验证 state 最大绝对值 `3.23046875`。保持旧 ABI 重做 QAT 仅 `20/30`，因此 owner 决定升级合同而不修改模型。v0.3 使用现有 model header 保留区传递 scale。
 - T015 精确 commit `2b88e7f` 已通过 35 tests、runtime C-sim、正式 QAT pack 的 HLS C-sim、6 个独立 RTL co-sim case、Vivado 全量重建、package 和 `.120` 板端 parity；`model.bin` SHA256 为 `6df32b27eb8a730027c6f37af8c8bd33058700293941a44eae6ade0697fa3886`，正式 replay action max error 为 `5.96046e-08`。case 0 XSIM peak `111802256 KB`，不宣称低于 96 GiB；板端 action parity `max_abs_error=1.19209e-07`，12/12 live invocations 和追加 10 个 validation 样本均通过。追加样本中 QAT 到 exact INT8 action MAE 增加 `0.0003444`，gripper sign accuracy 下降 `0.917 pp`；FPGA 到 exact INT8 的误差仍低于 `1.8e-07`。
 - T015 `.120` 实机性能：PL0 实际 `199.998 MHz`；20 次正式 replay `executor.run()` 平均 `77.162 ms`，整体推理频率 `12.960 Hz`，端到端时间包含 cache/MMIO/polling 开销。HLS 最大 `3,817,800 cycles` 在该频率下为 `19.089 ms`（理想 kernel 上限 `52.386 Hz`），不把它冒充实测端到端 latency。随后对固定 validation split 的 100 个不同样本完成全程监控的真实 sweep：`100/100` 成功，mean/p95 latency `77.449/78.440 ms`，整体 `12.9118 Hz`，FPGA 对 exported exact INT8 worst max/mean error `1.78814e-07/2.39594e-08`；整板功耗 `3.64..4.09 W`（均值 `3.731 W`）、PL 温度 `25.024..28.490 C`（均值 `26.878 C`）、Linux load1 `1.02..2.06`、可用 RAM `3481.7..3497.9 MiB`。原始证据在 `hardware/vivado_kr260/reports/t015/validation100_board_sweep.json`、`validation100_board_run_summary.csv` 和 `validation100_board_sensors.csv`。旧的同一 fixture 100 次仅保留为先前 sanity check，不再作为 validation 负载结论。
