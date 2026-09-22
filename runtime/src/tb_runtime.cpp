@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -15,6 +16,7 @@ using turbovla::runtime::kActionValues;
 using turbovla::runtime::kArenaBytes;
 using turbovla::runtime::kContractVersion;
 using turbovla::runtime::kControlOffset;
+using turbovla::runtime::kInterruptStatusOffset;
 using turbovla::runtime::kModelBytes;
 using turbovla::runtime::kModelMagic;
 using turbovla::runtime::kModelStateInputScaleOffset;
@@ -48,17 +50,31 @@ class FakeRegisters final : public turbovla::runtime::RegisterIo {
   }
 
   void write32(std::uint32_t offset, std::uint32_t value) override {
-    registers_[offset / 4U] = value;
+    if (offset == kInterruptStatusOffset) {
+      registers_[offset / 4U] ^= value & 0x3U;
+      interrupt_acknowledged = interrupt_acknowledged || (value & 0x3U) != 0U;
+    } else {
+      registers_[offset / 4U] = value;
+    }
+    if (offset == turbovla::runtime::kGlobalInterruptOffset && value == 1U) {
+      global_interrupt_enabled = true;
+    }
+    if (offset == turbovla::runtime::kInterruptEnableOffset && value == 1U) {
+      completion_interrupt_enabled = true;
+    }
     if (offset == kControlOffset && (value & 1U) != 0U) {
       start_seen_ = true;
       if (completes) {
+        registers_[kInterruptStatusOffset / 4U] = 1;
         std::uint32_t sequence = 0;
         std::memcpy(&sequence, arena_ + 8, sizeof(sequence));
         write_u32(arena_, 16, sequence);
         write_u32(arena_, 20, kernel_error);
         write_u32(arena_, 24, hardware_version);
         for (std::size_t index = 0; index < kActionValues; ++index) {
-          const float value_out = static_cast<float>(index) / 100.0f;
+          const float value_out = nonfinite_action && index == 0
+                                      ? std::numeric_limits<float>::quiet_NaN()
+                                      : static_cast<float>(index) / 100.0f;
           std::memcpy(arena_ + kActionOffset + index * sizeof(float), &value_out, sizeof(value_out));
         }
       }
@@ -68,6 +84,10 @@ class FakeRegisters final : public turbovla::runtime::RegisterIo {
   bool completes = true;
   std::uint32_t kernel_error = 0;
   std::uint32_t hardware_version = kContractVersion;
+  bool nonfinite_action = false;
+  bool global_interrupt_enabled = false;
+  bool completion_interrupt_enabled = false;
+  bool interrupt_acknowledged = false;
   std::array<std::uint32_t, 16> registers_{};
 
  private:
@@ -125,28 +145,51 @@ int main() {
   if (device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
     return 5;
   }
+  if (device.load_model(v2_model.data(), v2_model.size()) !=
+      turbovla::runtime::ErrorCode::kContractMismatch) {
+    return 6;
+  }
+  turbovla::runtime::FrameInput input;
+  turbovla::runtime::ActionOutput output;
+  if (device.run(input, output, 1) != turbovla::runtime::ErrorCode::kInvalidBuffer) {
+    return 7;
+  }
+  if (device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
+    return 8;
+  }
+  cache.flushes.clear();
+  cache.invalidates.clear();
   turbovla::runtime::TurboVlaRuntime runtime(
       {}, [&device](const auto& input, auto& output, std::uint32_t timeout) {
         return device.run(input, output, timeout);
       });
-  turbovla::runtime::FrameInput input;
   input.state[0] = -123;
   input.instruction_id = 7;
-  turbovla::runtime::ActionOutput output;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kNone || output.action[83] != 0.83f) {
-    return 6;
+    return 9;
   }
   if (registers.registers_[turbovla::runtime::kArenaAddressLowOffset / 4U] != 0x80000000U ||
       registers.registers_[turbovla::runtime::kArenaAddressHighOffset / 4U] != 0x10U) {
-    return 7;
+    return 10;
   }
-  if (cache.flushes.size() != 4 || cache.invalidates.size() != 2) {
-    return 8;
+  if (cache.flushes.size() != 3 || cache.invalidates.size() != 2) {
+    return 11;
+  }
+  if (!registers.global_interrupt_enabled || !registers.completion_interrupt_enabled ||
+      !registers.interrupt_acknowledged || device.last_interrupt_status() != 1U ||
+      registers.registers_[turbovla::runtime::kGlobalInterruptOffset / 4U] != 0U ||
+      registers.registers_[turbovla::runtime::kInterruptEnableOffset / 4U] != 0U ||
+      registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
+    return 12;
+  }
+  if (device.reset_control() != turbovla::runtime::ErrorCode::kNone ||
+      registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
+    return 13;
   }
 
   input.instruction_id = 256;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kInvalidInstructionId) {
-    return 9;
+    return 14;
   }
 
   alignas(64) std::array<std::uint8_t, kArenaBytes> timeout_arena{};
@@ -156,11 +199,34 @@ int main() {
   turbovla::runtime::PlArenaExecutor timeout_device(
       {timeout_arena.data(), 0x90000000ULL, timeout_arena.size()}, timeout_registers, timeout_cache);
   if (timeout_device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
-    return 10;
+    return 15;
   }
   input.instruction_id = 0;
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kDmaTimeout) {
-    return 11;
+    return 16;
+  }
+  if (timeout_device.reset_control() != turbovla::runtime::ErrorCode::kNone ||
+      timeout_registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
+    return 17;
+  }
+  timeout_registers.completes = true;
+  if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kNone) {
+    return 18;
+  }
+
+  registers.kernel_error = static_cast<std::uint32_t>(turbovla::runtime::ErrorCode::kKernelFault);
+  if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
+    return 19;
+  }
+  registers.kernel_error = 0;
+  registers.nonfinite_action = true;
+  if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
+    return 20;
+  }
+  registers.nonfinite_action = false;
+  registers.registers_[turbovla::runtime::kKernelReturnOffset / 4U] = 0xFFFFFFFFU;
+  if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
+    return 21;
   }
 
   std::cout << "runtime arena/MMIO/cache path passed\n";

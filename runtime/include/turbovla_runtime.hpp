@@ -92,12 +92,15 @@ class PlArenaExecutor {
 
   ErrorCode load_model(const std::uint8_t* model, std::size_t bytes);
   ErrorCode run(const FrameInput& input, ActionOutput& output, std::uint32_t timeout_ticks);
+  ErrorCode reset_control();
+  std::uint32_t last_interrupt_status() const { return last_interrupt_status_; }
 
  private:
   ArenaBuffer arena_;
   RegisterIo& registers_;
   CacheMaintenance& cache_;
   std::uint32_t frame_sequence_ = 0;
+  std::uint32_t last_interrupt_status_ = 0;
   bool model_loaded_ = false;
 };
 

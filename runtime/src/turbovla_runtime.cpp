@@ -16,6 +16,8 @@ constexpr std::size_t kHeaderErrorCode = 20;
 constexpr std::size_t kHeaderHardwareVersion = 24;
 constexpr std::uint32_t kStart = 1U << 0U;
 constexpr std::uint32_t kDone = 1U << 1U;
+constexpr std::uint32_t kInterruptEnable = 1U;
+constexpr std::uint32_t kInterruptStatusMask = 0x3U;
 
 std::uint32_t read_u32(const std::uint8_t* data, std::size_t offset) {
   std::uint32_t value = 0;
@@ -42,6 +44,13 @@ bool valid_arena(const ArenaBuffer& arena) {
          reinterpret_cast<std::uintptr_t>(arena.data) % 64U == 0U && arena.physical_address % 64U == 0U;
 }
 
+ErrorCode decode_error(std::uint32_t value) {
+  if (value <= static_cast<std::uint32_t>(ErrorCode::kContractMismatch)) {
+    return static_cast<ErrorCode>(value);
+  }
+  return ErrorCode::kKernelFault;
+}
+
 }  // namespace
 
 VolatileRegisterIo::VolatileRegisterIo(volatile std::uint32_t* registers, std::size_t register_words)
@@ -66,6 +75,7 @@ PlArenaExecutor::PlArenaExecutor(ArenaBuffer arena, RegisterIo& registers, Cache
     : arena_(arena), registers_(registers), cache_(cache) {}
 
 ErrorCode PlArenaExecutor::load_model(const std::uint8_t* model, std::size_t bytes) {
+  model_loaded_ = false;
   if (!valid_arena(arena_) || model == nullptr) {
     return ErrorCode::kInvalidBuffer;
   }
@@ -81,10 +91,31 @@ ErrorCode PlArenaExecutor::load_model(const std::uint8_t* model, std::size_t byt
   return ErrorCode::kNone;
 }
 
+ErrorCode PlArenaExecutor::reset_control() {
+  if (!valid_arena(arena_)) {
+    return ErrorCode::kInvalidBuffer;
+  }
+  registers_.write32(kControlOffset, 0);
+  registers_.write32(kInterruptEnableOffset, 0);
+  registers_.write32(kGlobalInterruptOffset, 0);
+  const std::uint32_t pending = registers_.read32(kInterruptStatusOffset) & kInterruptStatusMask;
+  if (pending != 0U) {
+    registers_.write32(kInterruptStatusOffset, pending);
+  }
+  return ErrorCode::kNone;
+}
+
 ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, std::uint32_t timeout_ticks) {
   if (!valid_arena(arena_) || !model_loaded_) {
     return ErrorCode::kInvalidBuffer;
   }
+  if (timeout_ticks == 0) {
+    return ErrorCode::kDmaTimeout;
+  }
+  if (reset_control() != ErrorCode::kNone) {
+    return ErrorCode::kInvalidBuffer;
+  }
+  last_interrupt_status_ = 0;
   ++frame_sequence_;
   write_u32(arena_.data, kHeaderMagic, kArenaMagic);
   write_u32(arena_.data, kHeaderContractVersion, kContractVersion);
@@ -101,6 +132,8 @@ ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, st
   cache_.flush(kStateOffset, kStateValues * sizeof(std::int16_t));
   registers_.write32(kArenaAddressLowOffset, static_cast<std::uint32_t>(arena_.physical_address));
   registers_.write32(kArenaAddressHighOffset, static_cast<std::uint32_t>(arena_.physical_address >> 32U));
+  registers_.write32(kGlobalInterruptOffset, kInterruptEnable);
+  registers_.write32(kInterruptEnableOffset, kInterruptEnable);
   registers_.write32(kControlOffset, kStart);
 
   bool completed = false;
@@ -112,13 +145,16 @@ ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, st
     }
   }
   if (!completed) {
+    reset_control();
     return ErrorCode::kDmaTimeout;
   }
+  last_interrupt_status_ = registers_.read32(kInterruptStatusOffset) & kInterruptStatusMask;
+  reset_control();
   cache_.invalidate(kHeaderOffset, 64);
   cache_.invalidate(kActionOffset, kActionValues * sizeof(float));
 
-  const auto error = static_cast<ErrorCode>(read_u32(arena_.data, kHeaderErrorCode));
-  const auto kernel_return = static_cast<ErrorCode>(registers_.read32(kKernelReturnOffset));
+  const auto error = decode_error(read_u32(arena_.data, kHeaderErrorCode));
+  const auto kernel_return = decode_error(registers_.read32(kKernelReturnOffset));
   if (error != ErrorCode::kNone) {
     return error;
   }
@@ -128,10 +164,21 @@ ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, st
   if (read_u32(arena_.data, kHeaderHardwareVersion) != kContractVersion) {
     return ErrorCode::kContractMismatch;
   }
+  if (read_u32(arena_.data, kHeaderMagic) != kArenaMagic ||
+      read_u32(arena_.data, kHeaderContractVersion) != kContractVersion) {
+    return ErrorCode::kKernelFault;
+  }
   if (read_u32(arena_.data, kHeaderCompletedSequence) != frame_sequence_) {
     return ErrorCode::kKernelFault;
   }
-  std::memcpy(output.action.data(), arena_.data + kActionOffset, kActionValues * sizeof(float));
+  ActionOutput candidate;
+  std::memcpy(candidate.action.data(), arena_.data + kActionOffset, kActionValues * sizeof(float));
+  for (const float value : candidate.action) {
+    if (!std::isfinite(value)) {
+      return ErrorCode::kKernelFault;
+    }
+  }
+  output = candidate;
   return ErrorCode::kNone;
 }
 
