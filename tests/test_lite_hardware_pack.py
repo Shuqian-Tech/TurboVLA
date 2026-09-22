@@ -11,6 +11,7 @@ import numpy as np
 
 from turbovla.lite_hardware_pack import (
     ACTIVATION_NAMES,
+    ACTIVATION_SCALES_OFFSET,
     CONTRACT_VERSION,
     FIXTURE_STATE_INPUT_SCALE,
     HEADER_BYTES,
@@ -61,6 +62,29 @@ class LiteHardwarePackTest(unittest.TestCase):
             (pack_dir / "model.bin").write_bytes(model)
             (pack_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "state_input scale"):
+                load_hardware_reference(pack_dir)
+
+    def test_loader_rejects_manifest_binary_abi_disagreement(self) -> None:
+        manifest = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
+        model = bytearray((FIXTURE / "model.bin").read_bytes())
+        encoded_scale = struct.unpack_from("<f", model, ACTIVATION_SCALES_OFFSET)[0]
+        struct.pack_into("<f", model, ACTIVATION_SCALES_OFFSET, encoded_scale * 2.0)
+        manifest["files"]["model.bin"] = hashlib.sha256(model).hexdigest()
+
+        with tempfile.TemporaryDirectory() as directory:
+            pack_dir = Path(directory)
+            (pack_dir / "model.bin").write_bytes(model)
+            (pack_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "activation_scales"):
+                load_hardware_reference(pack_dir)
+
+        manifest = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
+        manifest["tensors"][0]["offset"] += 1
+        with tempfile.TemporaryDirectory() as directory:
+            pack_dir = Path(directory)
+            (pack_dir / "model.bin").write_bytes((FIXTURE / "model.bin").read_bytes())
+            (pack_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "fixed Lite PL layout"):
                 load_hardware_reference(pack_dir)
 
     def test_trained_checkpoint_round_trip_preserves_exact_int8_output(self) -> None:

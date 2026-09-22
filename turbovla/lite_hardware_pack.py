@@ -26,6 +26,8 @@ HEADER_BYTES = 128
 MODEL_BYTES = 150656
 STATE_INPUT_SCALE_OFFSET = 80
 FIXTURE_STATE_INPUT_SCALE = 0.025
+ACTIVATION_SCALES_OFFSET = 16
+WEIGHT_SCALES_OFFSET = 48
 
 TENSOR_OFFSETS = {
     "conv_weight": 0,
@@ -106,6 +108,26 @@ def _hardware_quantization(quantization: LiteQuantization) -> LiteQuantization:
 
 def _quantize(value: np.ndarray, scale: float) -> np.ndarray:
     return np.clip(np.rint(value / scale), -128, 127).astype(np.int8)
+
+
+def _read_header_scales(
+    blob: bytes,
+    manifest: Mapping[str, object],
+    field: str,
+    names: tuple[str, ...],
+    offset: int,
+) -> dict[str, float]:
+    encoded = struct.unpack_from(f"<{len(names)}f", blob, offset)
+    manifest_values = manifest[field]
+    if not isinstance(manifest_values, Mapping):
+        raise ValueError(f"manifest {field} must be a mapping")
+    scales: dict[str, float] = {}
+    for name, header_scale in zip(names, encoded, strict=True):
+        manifest_scale = float(np.float32(manifest_values[name]))
+        if not np.isfinite(header_scale) or header_scale <= 0.0 or header_scale != manifest_scale:
+            raise ValueError(f"model header {field}.{name} does not match the manifest")
+        scales[name] = header_scale
+    return scales
 
 
 def _write_tensor(blob: bytearray, name: str, value: np.ndarray) -> dict:
@@ -398,19 +420,31 @@ def load_hardware_reference(pack_dir: Path) -> TurboVLALiteReference:
         raise ValueError("model.bin header does not match the Lite PL contract")
 
     entries = {entry["name"]: entry for entry in manifest["tensors"]}
+    if len(entries) != len(TENSOR_SHAPES) or set(entries) != set(TENSOR_SHAPES):
+        raise ValueError("manifest tensors do not match the fixed Lite PL layout")
     arrays: dict[str, np.ndarray] = {}
     for name, shape in TENSOR_SHAPES.items():
         entry = entries[name]
-        if tuple(entry["shape"]) != shape:
-            raise ValueError(f"manifest tensor {name} has an invalid shape")
-        dtype = {"int8": np.dtype("<i1"), "float32": np.dtype("<f4")}[entry["dtype"]]
+        dtype_name = "float32" if "bias" in name else "int8"
+        dtype = {"int8": np.dtype("<i1"), "float32": np.dtype("<f4")}[dtype_name]
+        expected_nbytes = int(np.prod(shape)) * dtype.itemsize
+        expected_layout = {
+            "dtype": dtype_name,
+            "nbytes": expected_nbytes,
+            "offset": HEADER_BYTES + TENSOR_OFFSETS[name],
+            "shape": list(shape),
+        }
+        if any(entry[field] != value for field, value in expected_layout.items()):
+            raise ValueError(f"manifest tensor {name} does not match the fixed Lite PL layout")
         payload = blob[entry["offset"] : entry["offset"] + entry["nbytes"]]
         if hashlib.sha256(payload).hexdigest() != entry["sha256"]:
             raise ValueError(f"model tensor {name} checksum does not match manifest")
         arrays[name] = np.frombuffer(payload, dtype=dtype).reshape(shape)
 
-    activation_scales = {name: float(manifest["activation_scales"][name]) for name in ACTIVATION_NAMES}
-    weight_scales = {name: float(manifest["weight_scales"][name]) for name in WEIGHT_NAMES}
+    activation_scales = _read_header_scales(
+        blob, manifest, "activation_scales", ACTIVATION_NAMES, ACTIVATION_SCALES_OFFSET
+    )
+    weight_scales = _read_header_scales(blob, manifest, "weight_scales", WEIGHT_NAMES, WEIGHT_SCALES_OFFSET)
     header_state_scale = struct.unpack_from("<f", blob, STATE_INPUT_SCALE_OFFSET)[0]
     if (
         not np.isfinite(header_state_scale)
