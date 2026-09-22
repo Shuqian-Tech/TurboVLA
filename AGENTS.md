@@ -46,6 +46,16 @@ The agent must use the latest development status, Sprint status, task status, de
 - The build host is not the KR260 target. Results from `.119` are software Vivado/HLS evidence and must not be reported as on-board execution.
 - Preserved pre-existing remote T012 changes are on GitHub branch `archive/remote-t012-wip-20260920`; do not merge that branch wholesale because its reports predate the accepted T012 commits.
 
+## RTL Co-Simulation Process Isolation
+
+- Treat XSIM memory as process-lifetime state. Do not assume memory allocated by one HLS RTL co-simulation transaction is released before the next transaction in the same simulator process.
+- Run every independent RTL co-simulation case in its own XSIM process when any case performs a full model inference, has previously shown large memory growth, or can approach the build host memory limit.
+- Never combine a full inference/action-parity case with fail-fast contract, version, shape, instruction, or invalid-value gates in one XSIM process. Split them into individually selectable cases even when the gates are computationally small.
+- A multi-case Tcl runner must launch and wait for a fresh XSIM process per case, record an explicit case start/pass marker, and stop immediately on the first failure. Confirm the prior XSIM process exited before starting the next case.
+- Preserve successful expensive-case evidence so a later gate failure can be rerun by case selection without repeating the full inference. The runner must support selecting an explicit case subset.
+- Report each split case as its own `1 / 1` result and record peak memory for the expensive case. Do not summarize split results as a single passing transaction unless every required case has its own recorded pass marker.
+- Combining multiple cases in one XSIM process is allowed only after recorded evidence shows that all cases are low-memory and simulator RSS does not accumulate across their transaction boundaries. Convenience or shorter Tcl is not sufficient justification.
+
 ## Task, Branch, and PR Policy
 
 - Every task is represented by its own file under `docs/tasks/`.

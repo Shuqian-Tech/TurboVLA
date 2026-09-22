@@ -1,0 +1,164 @@
+{
+  "action_dimension_mae": [
+    {
+      "max": 0.16376756197489334,
+      "mean": 0.16233733027564015,
+      "min": 0.16160820117685848,
+      "population_std": 0.0010113912550915186
+    },
+    {
+      "max": 0.1202757137368929,
+      "mean": 0.11855867630266526,
+      "min": 0.11633844534924645,
+      "population_std": 0.0016462934889030776
+    },
+    {
+      "max": 0.1856198226531313,
+      "mean": 0.185020733713569,
+      "min": 0.18414969027033926,
+      "population_std": 0.0006302336840581244
+    },
+    {
+      "max": 0.07341469706384494,
+      "mean": 0.07277350261516673,
+      "min": 0.07194870950040143,
+      "population_std": 0.0006124057678176446
+    },
+    {
+      "max": 0.11616818344079866,
+      "mean": 0.1145598718188674,
+      "min": 0.1134173990926336,
+      "population_std": 0.0011703156383602812
+    },
+    {
+      "max": 0.08483224392516443,
+      "mean": 0.08470958623585782,
+      "min": 0.08451241357574768,
+      "population_std": 0.00014080062442427832
+    },
+    {
+      "max": 0.15937638611859936,
+      "mean": 0.15735998727809705,
+      "min": 0.1539767122117486,
+      "population_std": 0.00240698740305092
+    }
+  ],
+  "action_mae": {
+    "max": 0.128500304887077,
+    "mean": 0.12790281321389585,
+    "min": 0.12749534700514892,
+    "population_std": 0.00043171544946676296
+  },
+  "dataset_revision": "e329580e402fb5f07ae3b1f18475fc3b63783b91",
+  "decision_status": "preliminary_tune",
+  "deployment_claim": "none",
+  "gripper_sign_accuracy": {
+    "max": 0.9268925591153597,
+    "mean": 0.9252178211053796,
+    "min": 0.9242266496300854,
+    "population_std": 0.00119085844426773
+  },
+  "limitations": [
+    "offline action error does not establish LIBERO rollout success",
+    "the official raw HDF5 suite is filtered offline and is not the replay-regenerated RLDS release",
+    "teacher-action and teacher-feature distillation are not included in these runs"
+  ],
+  "mode": "fp32",
+  "per_task_action_mae": {
+    "pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate": {
+      "max": 0.15751415220173923,
+      "mean": 0.1556858101911078,
+      "min": 0.15474781125601952,
+      "population_std": 0.0012929794149217565
+    },
+    "pick_up_the_black_bowl_from_table_center_and_place_it_on_the_plate": {
+      "max": 0.10713606588428014,
+      "mean": 0.10563481782209672,
+      "min": 0.10470831939541433,
+      "population_std": 0.001071211498314404
+    },
+    "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate": {
+      "max": 0.11677871059456332,
+      "mean": 0.11555375079548547,
+      "min": 0.1131981896106795,
+      "population_std": 0.001666078679427804
+    },
+    "pick_up_the_black_bowl_next_to_the_cookie_box_and_place_it_on_the_plate": {
+      "max": 0.13119153084506735,
+      "mean": 0.12611159961700805,
+      "min": 0.12202404037233808,
+      "population_std": 0.003807827202570825
+    },
+    "pick_up_the_black_bowl_next_to_the_plate_and_place_it_on_the_plate": {
+      "max": 0.13988790944203414,
+      "mean": 0.1390362363454534,
+      "min": 0.13747973717269663,
+      "population_std": 0.0011022426435665417
+    },
+    "pick_up_the_black_bowl_next_to_the_ramekin_and_place_it_on_the_plate": {
+      "max": 0.14889106683919273,
+      "mean": 0.1468523519646355,
+      "min": 0.14342682627735806,
+      "population_std": 0.0024367894727979076
+    },
+    "pick_up_the_black_bowl_on_the_cookie_box_and_place_it_on_the_plate": {
+      "max": 0.12005394960473868,
+      "mean": 0.11846040380665389,
+      "min": 0.11732249068691193,
+      "population_std": 0.0011607232825912859
+    },
+    "pick_up_the_black_bowl_on_the_ramekin_and_place_it_on_the_plate": {
+      "max": 0.15000930740948645,
+      "mean": 0.14788010269323346,
+      "min": 0.146389236942895,
+      "population_std": 0.0015452799147351035
+    },
+    "pick_up_the_black_bowl_on_the_stove_and_place_it_on_the_plate": {
+      "max": 0.11642011413903249,
+      "mean": 0.1149659457566592,
+      "min": 0.11382676640193932,
+      "population_std": 0.001081904705300824
+    },
+    "pick_up_the_black_bowl_on_the_wooden_cabinet_and_place_it_on_the_plate": {
+      "max": 0.12223097612323214,
+      "mean": 0.11746162347221074,
+      "min": 0.11353364180254885,
+      "population_std": 0.0036001698957724426
+    }
+  },
+  "runs": [
+    {
+      "action_mae": 0.12749534700514892,
+      "checkpoint": "build/lite/t014_spatial_fp32_seed20260921.pt",
+      "checkpoint_sha256": "6e8ae4c592037e6cb08e4c17f67e5d87a175d0daca7c20091f0287414cbec04c",
+      "gripper_sign_accuracy": 0.9245342545706939,
+      "report": "build/lite/t014_spatial_fp32_seed20260921_fixedsplit_eval.json",
+      "seed": 20260921
+    },
+    {
+      "action_mae": 0.1277127877494616,
+      "checkpoint": "build/lite/t014_spatial_fp32_seed20260922_fixedsplit.pt",
+      "checkpoint_sha256": "4eb654799ef01c2aefd938ed1fc11674f2756b44339f2d19d5682a062c5d5967",
+      "gripper_sign_accuracy": 0.9268925591153597,
+      "report": "build/lite/t014_spatial_fp32_seed20260922_fixedsplit.json",
+      "seed": 20260922
+    },
+    {
+      "action_mae": 0.128500304887077,
+      "checkpoint": "build/lite/t014_spatial_fp32_seed20260923.pt",
+      "checkpoint_sha256": "5b95a211f2a4e9bed9e8fb928c340387be87dde051d9d8e9928cc0b78b3af20d",
+      "gripper_sign_accuracy": 0.9242266496300854,
+      "report": "build/lite/t014_spatial_fp32_seed20260923.json",
+      "seed": 20260923
+    }
+  ],
+  "schema_version": "1.0.0",
+  "scope": "offline_libero_spatial_demonstration_validation",
+  "seeds": [
+    20260921,
+    20260922,
+    20260923
+  ],
+  "split_seed": 20260921,
+  "validation_samples": 11044
+}

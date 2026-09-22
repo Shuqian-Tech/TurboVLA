@@ -1,0 +1,329 @@
+{
+  "action_shape": [
+    1,
+    12,
+    7
+  ],
+  "activation_scales": {
+    "action_hidden": 0.03515903279185295,
+    "fusion_0": 0.016043800860643387,
+    "fusion_1": 0.01578012853860855,
+    "image_normalized": 0.020787402987480164,
+    "language_embedding": 0.029288390651345253,
+    "state_projection": 0.024766433984041214,
+    "visual_conv": 0.021497776731848717,
+    "visual_tokens": 0.016065750271081924
+  },
+  "checkpoint_fake_quant_parity": {
+    "max_abs_error": 0.022713571786880493,
+    "mean_abs_error": 0.005374108906835318
+  },
+  "contract_version": "0.3.0",
+  "contract_version_encoded": 196608,
+  "endianness": "little",
+  "files": {
+    "action.bin": "f97b261605e1b5208cb74265bf83b16a4875b68b0f86734b490e7fc6c65b8a5a",
+    "image.bin": "f1bf7a9ab84aa43cabe8c17493daa6e67bd18326342f1aafb1d0c3f33ed79ba2",
+    "instruction_id.bin": "a2c4aed1cf757cd9a509734a267ffc7b1166b55f4c8f9c3e3550c56e743328fc",
+    "model.bin": "6df32b27eb8a730027c6f37af8c8bd33058700293941a44eae6ade0697fa3886",
+    "state.bin": "6ac07e2bb73fabc3b797c267d6ae80c7f98042dd6a28b391296772ae7383758c"
+  },
+  "instruction_id": 9,
+  "instructions": [
+    {
+      "instruction_id": 0,
+      "text": "pick up the black bowl between the plate and the ramekin and place it on the plate"
+    },
+    {
+      "instruction_id": 1,
+      "text": "pick up the black bowl from table center and place it on the plate"
+    },
+    {
+      "instruction_id": 2,
+      "text": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate"
+    },
+    {
+      "instruction_id": 3,
+      "text": "pick up the black bowl next to the cookie box and place it on the plate"
+    },
+    {
+      "instruction_id": 4,
+      "text": "pick up the black bowl next to the plate and place it on the plate"
+    },
+    {
+      "instruction_id": 5,
+      "text": "pick up the black bowl next to the ramekin and place it on the plate"
+    },
+    {
+      "instruction_id": 6,
+      "text": "pick up the black bowl on the cookie box and place it on the plate"
+    },
+    {
+      "instruction_id": 7,
+      "text": "pick up the black bowl on the ramekin and place it on the plate"
+    },
+    {
+      "instruction_id": 8,
+      "text": "pick up the black bowl on the stove and place it on the plate"
+    },
+    {
+      "instruction_id": 9,
+      "text": "pick up the black bowl on the wooden cabinet and place it on the plate"
+    }
+  ],
+  "model_bytes": 150656,
+  "model_magic": 1414942020,
+  "pack_version": "1.0.0",
+  "sample": {
+    "dataset_index_sha256": "c059e5112e3ddef6fe9b124382f0efd0ebb66bf39244e187cbd8e28fdea3441e",
+    "dataset_samples": 11044,
+    "index": 10281,
+    "instruction": "pick up the black bowl on the wooden cabinet and place it on the plate",
+    "normalized_state_max_abs": 3.23046875,
+    "split": "validation",
+    "split_seed": 20260921,
+    "task_name": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_place_it_on_the_plate"
+  },
+  "source": {
+    "checkpoint_sha256": "7209a40065aa72628bd1a2b3b92d92a205ac97a4bb1a4577c1e4eda3d5d5dc1a",
+    "dataset_revision": "e329580e402fb5f07ae3b1f18475fc3b63783b91",
+    "mode": "qat",
+    "seed": 20260921
+  },
+  "state_input_scale": 0.02543676272034645,
+  "state_normalization": 0.0009765625,
+  "tensors": [
+    {
+      "dtype": "int8",
+      "name": "conv_weight",
+      "nbytes": 48,
+      "offset": 128,
+      "scale": 0.0046175094321370125,
+      "sha256": "7a5770b6ea13bcc0585651ed66770f72aeed3289f2a85c74d0ad9978b294d5dd",
+      "shape": [
+        16,
+        3
+      ]
+    },
+    {
+      "dtype": "float32",
+      "name": "conv_bias",
+      "nbytes": 64,
+      "offset": 192,
+      "scale": null,
+      "sha256": "7b3b744749ff5c01893bfe80e73cf113686ae2b58ad3697f6931c3bb11f2b29a",
+      "shape": [
+        16
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "visual_projection",
+      "nbytes": 2048,
+      "offset": 256,
+      "scale": 0.004296226892620325,
+      "sha256": "9263ad7ba842fdc88f84979a5a64bb5c21639335676c69e9917775ab61537bdd",
+      "shape": [
+        16,
+        128
+      ]
+    },
+    {
+      "dtype": "float32",
+      "name": "visual_bias",
+      "nbytes": 512,
+      "offset": 2304,
+      "scale": null,
+      "sha256": "e222712fcc010551dae6b6bc03f0b5f32e7a5e4353f929dd304e5970d1cc1c5e",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "instruction_table",
+      "nbytes": 32768,
+      "offset": 2816,
+      "scale": 0.029288390651345253,
+      "sha256": "c949dd645e217bd403c3868c99c28e39b02e3bbcfb6f3b7042d648b3e0ffaab4",
+      "shape": [
+        256,
+        128
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "state_projection",
+      "nbytes": 1024,
+      "offset": 35584,
+      "scale": 0.008986534550786018,
+      "sha256": "a6679752e4eee3285dbf834e691993c904d9f025f8d76a4f6457bff604c9db61",
+      "shape": [
+        8,
+        128
+      ]
+    },
+    {
+      "dtype": "float32",
+      "name": "state_bias",
+      "nbytes": 512,
+      "offset": 36608,
+      "scale": null,
+      "sha256": "4d2509bc46eba901cf67396f714df1a2c3c579e78a0629bc9bc6a07c98f5a727",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "action_input",
+      "nbytes": 8192,
+      "offset": 37120,
+      "scale": 0.008861701935529709,
+      "sha256": "3a365973b643aa4f12f19d905be8bddb615fc1d6d0bf76cba315c6748a5cd509",
+      "shape": [
+        128,
+        64
+      ]
+    },
+    {
+      "dtype": "float32",
+      "name": "action_input_bias",
+      "nbytes": 256,
+      "offset": 45312,
+      "scale": null,
+      "sha256": "9d04e640207a00eb1fc140b52e4636aa2333be4d8abb11598476b9429abe45f9",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "action_output",
+      "nbytes": 5376,
+      "offset": 45568,
+      "scale": 0.021753529086709023,
+      "sha256": "a66b91eb5f2ff528587e8ddcad1d9179f058d03093667cf992c45ab5987f76d1",
+      "shape": [
+        64,
+        84
+      ]
+    },
+    {
+      "dtype": "float32",
+      "name": "action_output_bias",
+      "nbytes": 336,
+      "offset": 50944,
+      "scale": null,
+      "sha256": "73e3ec431c79ca6a211f3135fd52a7dd76ba872fd132a1c929c7cd42879802cf",
+      "shape": [
+        84
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "fusion_visual_0",
+      "nbytes": 16384,
+      "offset": 51328,
+      "scale": 0.008003618568181992,
+      "sha256": "a18cfdac89f32722bc3afd3b1f0c9a4a31b432c280efb5448ce29e48c6316f37",
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "fusion_language_0",
+      "nbytes": 16384,
+      "offset": 67712,
+      "scale": 0.0019460644107311964,
+      "sha256": "32eec13c06e4dd342e75209aa7f57f8c2f0895aad950c8d0da81ce607e0275ba",
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "fusion_gate_0",
+      "nbytes": 16384,
+      "offset": 84096,
+      "scale": 0.0035178668331354856,
+      "sha256": "976b200a2d543cc7dc6fa62c4d7d845304459d2f57eba5b58b5715cea50eb0a3",
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "dtype": "float32",
+      "name": "fusion_bias_0",
+      "nbytes": 512,
+      "offset": 100480,
+      "scale": null,
+      "sha256": "5af628945fe0d17954a755434e632c10e22fd88b49a14fb0ddf8299617ff845a",
+      "shape": [
+        128
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "fusion_visual_1",
+      "nbytes": 16384,
+      "offset": 100992,
+      "scale": 0.008003618568181992,
+      "sha256": "d8c8560c4db9a76ef90e057c107185f1f559eaf33a26906c4d992423226be105",
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "fusion_language_1",
+      "nbytes": 16384,
+      "offset": 117376,
+      "scale": 0.0019460644107311964,
+      "sha256": "ff578bad176db55aaef53fd6a981912f630e857ef19cc1caecbe5544b8aa5597",
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "dtype": "int8",
+      "name": "fusion_gate_1",
+      "nbytes": 16384,
+      "offset": 133760,
+      "scale": 0.0035178668331354856,
+      "sha256": "b342af69c2eb0bb9ad41e519293fed8c45117d567951a9df27d3099294097aee",
+      "shape": [
+        128,
+        128
+      ]
+    },
+    {
+      "dtype": "float32",
+      "name": "fusion_bias_1",
+      "nbytes": 512,
+      "offset": 150144,
+      "scale": null,
+      "sha256": "9ea0b434f50b96332aaa9c57dc4577c204e8eea659e454e4d18cd6561d3295bd",
+      "shape": [
+        128
+      ]
+    }
+  ],
+  "weight_scales": {
+    "action_input": 0.008861701935529709,
+    "action_output": 0.021753529086709023,
+    "conv_weight": 0.0046175094321370125,
+    "fusion_gate": 0.0035178668331354856,
+    "fusion_language": 0.0019460644107311964,
+    "fusion_visual": 0.008003618568181992,
+    "state_projection": 0.008986534550786018,
+    "visual_projection": 0.004296226892620325
+  },
+  "zero_point": 0
+}

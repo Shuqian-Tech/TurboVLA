@@ -1,6 +1,6 @@
 {
   "platform": "kr260-k26",
-  "contract_version": "0.2.0",
+  "contract_version": "0.3.0",
   "axi_lite_data_width": 32,
   "control_protocol": "ap_ctrl_hs",
   "registers": {

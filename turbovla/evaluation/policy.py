@@ -15,9 +15,10 @@ from types import SimpleNamespace
 from typing import Any, Iterable, Sequence
 
 import numpy as np
-from PIL import Image
 import torch
+from PIL import Image
 
+from ..distillation import pool_spatial_tokens, token_relation_matrix
 
 EXPECTED_IMAGE_SIZE = 256
 DINO_PATCH_SIZE = 16
@@ -252,12 +253,12 @@ def _checkpoint_state_dict(checkpoint: Any) -> dict[str, torch.Tensor]:
         raise TypeError(f"Unsupported checkpoint type: {type(checkpoint)}")
 
     ema_state = checkpoint.get("ema_model_state_dict")
-    if not isinstance(ema_state, dict):
-        raise KeyError(
-            "LIBERO evaluation requires `ema_model_state_dict` in the checkpoint; "
-            "the raw `model_state_dict` is not used"
-        )
-    return ema_state
+    if isinstance(ema_state, dict):
+        return ema_state
+    model_state = checkpoint.get("model_state_dict")
+    if isinstance(model_state, dict):
+        return model_state
+    raise KeyError("TurboVLA checkpoint must contain ema_model_state_dict or model_state_dict")
 
 
 def _strip_module_prefix(state_dict: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
@@ -518,6 +519,37 @@ class TurboVLAPolicy:
                 f"precision={self.precision} expected forward output dtype {self.model_dtype}, got {pred.dtype}"
             )
         return sanitize_pred_chunk(pred.detach().float().cpu().numpy()[0])
+
+    def predict_distillation_targets_batch(
+        self,
+        primary_images: Sequence[np.ndarray],
+        wrist_images: Sequence[np.ndarray],
+        instructions: Sequence[str],
+        states: Sequence[np.ndarray],
+    ) -> dict[str, np.ndarray]:
+        """Return normalized actions and task-conditioned primary-view relations."""
+
+        batch_size = len(primary_images)
+        if not batch_size or not (
+            len(wrist_images) == len(instructions) == len(states) == batch_size
+        ):
+            raise ValueError("distillation target inputs must have the same non-zero batch size")
+        samples, state_tensors = self._build_batch(primary_images, wrist_images, states)
+        samples, state_tensors = self._prepare_model_inputs(samples, state_tensors)
+        with torch.inference_mode():
+            condition = self.model.encode_condition(instructions, samples)
+            action_dtype = self.model.action_head.decoder.action_queries.weight.dtype
+            action = self.model.action_head(
+                condition.to(dtype=action_dtype),
+                state_tensors.to(dtype=action_dtype),
+            )
+            primary_tokens = condition[:, : self.model.vision_encoder.num_patches]
+            pooled = pool_spatial_tokens(primary_tokens)
+            relation = token_relation_matrix(pooled)
+        return {
+            "teacher_action": action.detach().float().cpu().numpy(),
+            "teacher_visual_relation": relation.detach().float().cpu().numpy(),
+        }
 
     def predict_env_action_chunk(
         self,

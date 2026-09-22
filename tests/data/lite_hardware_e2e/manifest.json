@@ -5,34 +5,38 @@
     7
   ],
   "activation_scales": {
-    "action_hidden": 0.0006993977924970191,
-    "fusion_0": 0.0002847308014321515,
-    "fusion_1": 0.0003235507316476717,
-    "image_normalized": 0.020787402400820273,
-    "language_embedding": 0.0011643466987009124,
-    "state_projection": 0.00210668651137765,
-    "visual_conv": 0.0035782646475814458,
-    "visual_tokens": 0.0003356530265075954
+    "action_hidden": 0.0006993978167884052,
+    "fusion_0": 0.0002847308060154319,
+    "fusion_1": 0.0003235507174395025,
+    "image_normalized": 0.020787402987480164,
+    "language_embedding": 0.0011643467005342245,
+    "state_projection": 0.0021066865883767605,
+    "visual_conv": 0.003578264731913805,
+    "visual_tokens": 0.00033565302146598697
   },
-  "contract_version": "0.2.0",
-  "contract_version_encoded": 131072,
+  "contract_version": "0.3.0",
+  "contract_version_encoded": 196608,
+  "endianness": "little",
   "files": {
-    "action.bin": "d09f0716b25c0fb5fd38f7fda2d9499ac97d4f61b0bbc3aa4829eea011ae2df8",
+    "action.bin": "22d10b2020c0bebef2b44771fd32ead59155c3f3f682a3715f1ddd204761a152",
     "image.bin": "6259f97552040ac666675d880bc70bdc04df7df57e521a3ed24a34c4f740448b",
     "instruction_id.bin": "0a6361b3a802f55cd5ae06101c88a1e216320fe11cc0cfe1d791eed08a1200fd",
-    "model.bin": "c4ed0e916f218b01bfb0df70ed3e8e290741a42a8f6f8a050ac93aae4906e559",
+    "model.bin": "142b8182435875301ef8d95f83e04f125707a74d7dbaf3390d950ec548e92ee9",
     "state.bin": "5364c09c050cc114fd131f412b45a343c4ec3af4b2a054cd6cd555922cf6f186"
   },
   "instruction_id": 7,
   "model_bytes": 150656,
   "model_magic": 1414942020,
+  "pack_version": "1.0.0",
   "parameter_seed": 20260919,
+  "state_input_scale": 0.02500000037252903,
   "tensors": [
     {
       "dtype": "int8",
       "name": "conv_weight",
       "nbytes": 48,
       "offset": 128,
+      "scale": 0.0011308671673759818,
       "sha256": "508e44e741a4be01b8c6ef8c89714f5e9ac71a83f0610dded973684ebe3054e7",
       "shape": [
         16,
@@ -44,6 +48,7 @@
       "name": "conv_bias",
       "nbytes": 64,
       "offset": 192,
+      "scale": null,
       "sha256": "f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b",
       "shape": [
         16
@@ -54,6 +59,7 @@
       "name": "visual_projection",
       "nbytes": 2048,
       "offset": 256,
+      "scale": 0.0015391904162243009,
       "sha256": "1a1b17cfbcb1a5eb0fcffdb3955645af3d43fd03f8cbe0210068e92e233546c1",
       "shape": [
         16,
@@ -65,6 +71,7 @@
       "name": "visual_bias",
       "nbytes": 512,
       "offset": 2304,
+      "scale": null,
       "sha256": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
       "shape": [
         128
@@ -75,6 +82,7 @@
       "name": "instruction_table",
       "nbytes": 32768,
       "offset": 2816,
+      "scale": 0.0011643467005342245,
       "sha256": "0a1f74cf37ec565f9c4d1ad1cad34ee368987b7a95770c1acd0988981b09a4d5",
       "shape": [
         256,
@@ -86,6 +94,7 @@
       "name": "state_projection",
       "nbytes": 1024,
       "offset": 35584,
+      "scale": 0.0015444890595972538,
       "sha256": "85f6f6ec45175fa4a6bb63aa912f11383c9c1eab29fd8a8d59c6bd1cd71fb7cd",
       "shape": [
         8,
@@ -97,6 +106,7 @@
       "name": "state_bias",
       "nbytes": 512,
       "offset": 36608,
+      "scale": null,
       "sha256": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
       "shape": [
         128
@@ -107,6 +117,7 @@
       "name": "action_input",
       "nbytes": 8192,
       "offset": 37120,
+      "scale": 0.001592032378539443,
       "sha256": "32f43cd3ff05b043705dbe2686ba676277402f20150a288f85371993da3f1c48",
       "shape": [
         128,
@@ -118,6 +129,7 @@
       "name": "action_input_bias",
       "nbytes": 256,
       "offset": 45312,
+      "scale": null,
       "sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
       "shape": [
         64
@@ -128,6 +140,7 @@
       "name": "action_output",
       "nbytes": 5376,
       "offset": 45568,
+      "scale": 0.0014264682540670037,
       "sha256": "41563b4dc6f2613c4c3c02f9fc9606395d067e8a447a09f99a9f88f77e9befdd",
       "shape": [
         64,
@@ -139,6 +152,7 @@
       "name": "action_output_bias",
       "nbytes": 336,
       "offset": 50944,
+      "scale": null,
       "sha256": "52a3e0804d93dc525ec3c67ef8ac5b01756ecf0513e36f3c19435e4c82cb5d29",
       "shape": [
         84
@@ -149,6 +163,7 @@
       "name": "fusion_visual_0",
       "nbytes": 16384,
       "offset": 51328,
+      "scale": 0.0017267484217882156,
       "sha256": "41acd03de80230ca0eb129054dacad0d03bcee97f37f1354f0d9d256307eb7fb",
       "shape": [
         128,
@@ -160,6 +175,7 @@
       "name": "fusion_language_0",
       "nbytes": 16384,
       "offset": 67712,
+      "scale": 0.0015288720605894923,
       "sha256": "6325551d3f2bd609f1f345f52ff21acddf10e5371f57b8ebfb94c1f67242c6cb",
       "shape": [
         128,
@@ -171,6 +187,7 @@
       "name": "fusion_gate_0",
       "nbytes": 16384,
       "offset": 84096,
+      "scale": 0.0015862714499235153,
       "sha256": "9b5210e1f84e1507f5ddc52da3f320b0820de16dffe4e99d458c082691b83839",
       "shape": [
         128,
@@ -182,6 +199,7 @@
       "name": "fusion_bias_0",
       "nbytes": 512,
       "offset": 100480,
+      "scale": null,
       "sha256": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
       "shape": [
         128
@@ -192,6 +210,7 @@
       "name": "fusion_visual_1",
       "nbytes": 16384,
       "offset": 100992,
+      "scale": 0.0017267484217882156,
       "sha256": "1a3310fb3916d78d1aafbc33b1400b0ad116542deb943274b1b2ce5c9df8dc39",
       "shape": [
         128,
@@ -203,6 +222,7 @@
       "name": "fusion_language_1",
       "nbytes": 16384,
       "offset": 117376,
+      "scale": 0.0015288720605894923,
       "sha256": "8a44301cdf705ed26927e9aeffd9f6cfdd382227bc29a14de307a49755348f23",
       "shape": [
         128,
@@ -214,6 +234,7 @@
       "name": "fusion_gate_1",
       "nbytes": 16384,
       "offset": 133760,
+      "scale": 0.0015862714499235153,
       "sha256": "c42e482721d33efe6c89d661989e561277a8bdaff60f7425f51cd9085ef59805",
       "shape": [
         128,
@@ -225,6 +246,7 @@
       "name": "fusion_bias_1",
       "nbytes": 512,
       "offset": 150144,
+      "scale": null,
       "sha256": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
       "shape": [
         128
@@ -232,13 +254,14 @@
     }
   ],
   "weight_scales": {
-    "action_input": 0.0015920324353721198,
-    "action_output": 0.0014264682146507923,
-    "conv_weight": 0.0011308671921256958,
-    "fusion_gate": 0.0015862714352570181,
-    "fusion_language": 0.001528872045006339,
-    "fusion_visual": 0.0017267484364547128,
-    "state_projection": 0.001544489048597381,
-    "visual_projection": 0.0015391904538072001
-  }
+    "action_input": 0.001592032378539443,
+    "action_output": 0.0014264682540670037,
+    "conv_weight": 0.0011308671673759818,
+    "fusion_gate": 0.0015862714499235153,
+    "fusion_language": 0.0015288720605894923,
+    "fusion_visual": 0.0017267484217882156,
+    "state_projection": 0.0015444890595972538,
+    "visual_projection": 0.0015391904162243009
+  },
+  "zero_point": 0
 }

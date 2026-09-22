@@ -9,7 +9,7 @@ namespace turbovla::runtime {
 
 constexpr std::uint32_t kArenaMagic = 0x54564c41U;
 constexpr std::uint32_t kModelMagic = 0x54564d44U;
-constexpr std::uint32_t kContractVersion = 0x00020000U;
+constexpr std::uint32_t kContractVersion = 0x00030000U;
 constexpr std::size_t kImageBytes = 3U * 128U * 128U;
 constexpr std::size_t kStateValues = 8U;
 constexpr std::size_t kActionValues = 12U * 7U;
@@ -18,6 +18,7 @@ constexpr std::size_t kImageOffset = 64;
 constexpr std::size_t kStateOffset = 49216;
 constexpr std::size_t kModelOffset = 49280;
 constexpr std::size_t kModelBytes = 150656;
+constexpr std::size_t kModelStateInputScaleOffset = 80;
 constexpr std::size_t kActionOffset = 199936;
 constexpr std::size_t kArenaBytes = 200320;
 

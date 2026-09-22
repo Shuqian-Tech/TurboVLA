@@ -28,6 +28,7 @@ constexpr std::size_t kFusionGateWeightScale = 64;
 constexpr std::size_t kStateWeightScale = 68;
 constexpr std::size_t kActionInputWeightScale = 72;
 constexpr std::size_t kActionOutputWeightScale = 76;
+constexpr std::size_t kStateInputScale = 80;
 
 constexpr std::size_t kTensorBase = 128;
 constexpr std::size_t kConvWeight = kTensorBase + 0;

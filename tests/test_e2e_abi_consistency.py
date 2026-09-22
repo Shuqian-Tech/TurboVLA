@@ -5,7 +5,12 @@ import re
 import unittest
 from pathlib import Path
 
-from turbovla.lite_hardware_pack import HEADER_BYTES, MODEL_BYTES, TENSOR_OFFSETS
+from turbovla.lite_hardware_pack import (
+    HEADER_BYTES,
+    MODEL_BYTES,
+    STATE_INPUT_SCALE_OFFSET,
+    TENSOR_OFFSETS,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -54,6 +59,10 @@ class E2eAbiConsistencyTest(unittest.TestCase):
     def test_model_tensor_offsets_match_hls_header(self) -> None:
         header = (ROOT / "hardware/hls/e2e/model_layout.h").read_text(encoding="utf-8")
         self.assertEqual(MODEL_BYTES, 150656)
+        self.assertEqual(
+            _constant(ROOT / "hardware/hls/e2e/model_layout.h", "kStateInputScale"),
+            STATE_INPUT_SCALE_OFFSET,
+        )
         for tensor, offset in TENSOR_OFFSETS.items():
             cpp_name = "k" + "".join(part.title() for part in tensor.split("_"))
             match = re.search(rf"constexpr std::size_t {cpp_name} = kTensorBase \+ ([0-9]+);", header)

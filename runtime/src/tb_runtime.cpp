@@ -17,8 +17,13 @@ using turbovla::runtime::kContractVersion;
 using turbovla::runtime::kControlOffset;
 using turbovla::runtime::kModelBytes;
 using turbovla::runtime::kModelMagic;
+using turbovla::runtime::kModelStateInputScaleOffset;
 
 void write_u32(std::uint8_t* data, std::size_t offset, std::uint32_t value) {
+  std::memcpy(data + offset, &value, sizeof(value));
+}
+
+void write_float(std::uint8_t* data, std::size_t offset, float value) {
   std::memcpy(data + offset, &value, sizeof(value));
 }
 
@@ -75,6 +80,7 @@ std::vector<std::uint8_t> valid_model() {
   write_u32(model.data(), 0, kModelMagic);
   write_u32(model.data(), 4, kContractVersion);
   write_u32(model.data(), 8, kModelBytes);
+  write_float(model.data(), kModelStateInputScaleOffset, 0.025f);
   return model;
 }
 
@@ -95,8 +101,29 @@ int main() {
     return 1;
   }
 
-  if (device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
+  auto v2_model = model;
+  write_u32(v2_model.data(), 4, 0x00020000U);
+  if (device.load_model(v2_model.data(), v2_model.size()) !=
+      turbovla::runtime::ErrorCode::kContractMismatch) {
     return 2;
+  }
+
+  auto invalid_scale_model = model;
+  write_float(invalid_scale_model.data(), kModelStateInputScaleOffset, 0.0f);
+  if (device.load_model(invalid_scale_model.data(), invalid_scale_model.size()) !=
+      turbovla::runtime::ErrorCode::kContractMismatch) {
+    return 3;
+  }
+
+  auto nonfinite_scale_model = model;
+  write_u32(nonfinite_scale_model.data(), kModelStateInputScaleOffset, 0x7f800000U);
+  if (device.load_model(nonfinite_scale_model.data(), nonfinite_scale_model.size()) !=
+      turbovla::runtime::ErrorCode::kContractMismatch) {
+    return 4;
+  }
+
+  if (device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
+    return 5;
   }
   turbovla::runtime::TurboVlaRuntime runtime(
       {}, [&device](const auto& input, auto& output, std::uint32_t timeout) {
@@ -107,19 +134,19 @@ int main() {
   input.instruction_id = 7;
   turbovla::runtime::ActionOutput output;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kNone || output.action[83] != 0.83f) {
-    return 3;
+    return 6;
   }
   if (registers.registers_[turbovla::runtime::kArenaAddressLowOffset / 4U] != 0x80000000U ||
       registers.registers_[turbovla::runtime::kArenaAddressHighOffset / 4U] != 0x10U) {
-    return 4;
+    return 7;
   }
   if (cache.flushes.size() != 4 || cache.invalidates.size() != 2) {
-    return 5;
+    return 8;
   }
 
   input.instruction_id = 256;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kInvalidInstructionId) {
-    return 6;
+    return 9;
   }
 
   alignas(64) std::array<std::uint8_t, kArenaBytes> timeout_arena{};
@@ -129,11 +156,11 @@ int main() {
   turbovla::runtime::PlArenaExecutor timeout_device(
       {timeout_arena.data(), 0x90000000ULL, timeout_arena.size()}, timeout_registers, timeout_cache);
   if (timeout_device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
-    return 7;
+    return 10;
   }
   input.instruction_id = 0;
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kDmaTimeout) {
-    return 8;
+    return 11;
   }
 
   std::cout << "runtime arena/MMIO/cache path passed\n";

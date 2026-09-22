@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -218,7 +219,11 @@ int run(const fs::path& fixture, const std::string& uio_name, bool probe_only) {
 
   ActionOutput output;
   std::cout << "KR260 board stage=start_pl" << std::endl;
+  const auto start_time = std::chrono::steady_clock::now();
   const auto result = executor.run(input, output, kBoardTimeoutPolls);
+  const auto end_time = std::chrono::steady_clock::now();
+  const auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+  std::cout << "KR260 board pl_elapsed_us=" << elapsed_us << std::endl;
   std::cout << "KR260 board stage=pl_return result=" << static_cast<std::uint32_t>(result)
             << std::endl;
   if (result != ErrorCode::kNone) {

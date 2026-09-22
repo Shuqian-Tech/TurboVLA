@@ -9,7 +9,7 @@ namespace e2e {
 
 constexpr std::uint32_t kArenaMagic = 0x54564c41U;
 constexpr std::uint32_t kModelMagic = 0x54564d44U;
-constexpr std::uint32_t kContractVersion = 0x00020000U;
+constexpr std::uint32_t kContractVersion = 0x00030000U;
 
 constexpr std::size_t kHeaderOffset = 0;
 constexpr std::size_t kImageOffset = 64;

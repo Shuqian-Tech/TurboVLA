@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from turbovla.distillation import token_relation_matrix
 from turbovla.lite_reference import TurboVLALiteReference, deterministic_sample, load_contract
 from turbovla.lite_student import LiteStudentConfig, TurboVLALiteStudent, lite_distillation_loss
 
@@ -29,7 +30,8 @@ def _smoke_batch(model: TurboVLALiteReference, count: int) -> dict[str, np.ndarr
     states[:, 0] += np.arange(count, dtype=np.int16) * 8
     teacher = model.run(images[:1], states[:1], ids[:1])
     teacher_action = np.repeat(teacher["action"], count, axis=0)
-    teacher_visual = np.repeat(teacher["visual_tokens"], count, axis=0)
+    teacher_visual = torch.from_numpy(np.repeat(teacher["visual_tokens"], count, axis=0))
+    teacher_relation = token_relation_matrix(teacher_visual).numpy()
     action_target = np.clip(teacher_action + (np.arange(count)[:, None, None] % 3 - 1) * 0.01, -1.0, 1.0)
     return {
         "image": images,
@@ -37,24 +39,39 @@ def _smoke_batch(model: TurboVLALiteReference, count: int) -> dict[str, np.ndarr
         "instruction_id": ids,
         "action_target": action_target.astype(np.float32),
         "teacher_action": teacher_action.astype(np.float32),
-        "teacher_visual_tokens": teacher_visual.astype(np.float32),
+        "teacher_visual_relation": teacher_relation.astype(np.float32),
     }
 
 
 def _load_dataset(path: Path, contract: dict) -> dict[str, np.ndarray]:
     with np.load(path) as data:
-        required = {"image", "state", "instruction_id", "action_target", "teacher_action", "teacher_visual_tokens"}
+        required = {
+            "image",
+            "state",
+            "instruction_id",
+            "action_target",
+            "teacher_action",
+        }
         missing = sorted(required - set(data.files))
         if missing:
             raise ValueError(f"student dataset is missing required arrays: {missing}")
         arrays = {name: np.asarray(data[name]) for name in required}
+        if "teacher_visual_relation" in data.files:
+            arrays["teacher_visual_relation"] = np.asarray(data["teacher_visual_relation"])
+        elif "teacher_visual_tokens" in data.files:
+            tokens = torch.from_numpy(np.asarray(data["teacher_visual_tokens"]))
+            arrays["teacher_visual_relation"] = token_relation_matrix(tokens).numpy()
+        else:
+            raise ValueError(
+                "student dataset must contain teacher_visual_relation or legacy teacher_visual_tokens"
+            )
     expected = {
         "image": (1, 1, 3, 128, 128),
         "state": (1, 8),
         "instruction_id": (1,),
         "action_target": (1, 12, 7),
         "teacher_action": (1, 12, 7),
-        "teacher_visual_tokens": (1, 32, 128),
+        "teacher_visual_relation": (1, 32, 32),
     }
     for name, suffix in expected.items():
         if arrays[name].ndim != len(suffix) or tuple(arrays[name].shape[1:]) != suffix[1:]:
@@ -99,7 +116,7 @@ def main() -> int:
         torch.from_numpy(arrays["instruction_id"].astype(np.int64)),
         torch.from_numpy(arrays["action_target"]),
         torch.from_numpy(arrays["teacher_action"]),
-        torch.from_numpy(arrays["teacher_visual_tokens"]),
+        torch.from_numpy(arrays["teacher_visual_relation"]),
     ]
     loader = DataLoader(TensorDataset(*tensors), batch_size=args.batch_size, shuffle=False)
     first_metrics: dict[str, float] | None = None

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 
 import torch
 
+from turbovla.distillation import token_relation_matrix
 from turbovla.lite_reference import load_contract
 from turbovla.lite_student import LiteStudentConfig, TurboVLALiteStudent, lite_distillation_loss
 
@@ -29,12 +31,64 @@ class LiteStudentTest(unittest.TestCase):
             torch.zeros((2,), dtype=torch.long),
         )
         targets = torch.zeros((2, 12, 7))
-        features = torch.zeros((2, 32, 128))
+        features = token_relation_matrix(torch.zeros((2, 32, 256)))
         loss, metrics = lite_distillation_loss(outputs, targets, targets, features, self.config)
         self.assertTrue(torch.isfinite(loss))
         self.assertIn("teacher_action_l1", metrics)
+        self.assertIn("feature_relation_mse", metrics)
+
+    def test_qat_forward_quantizes_hardware_weights_without_extra_fusion_biases(self) -> None:
+        calibration = {
+            "activations": {"image_normalized": 0.02, "visual_conv": 0.01},
+            "weights": {
+                "conv_weight": 0.01,
+                "visual_projection": 0.01,
+                "fusion_visual": 0.01,
+                "fusion_language": 0.01,
+                "fusion_gate": 0.01,
+                "state_projection": 0.01,
+                "action_input": 0.01,
+                "action_output": 0.01,
+            },
+        }
+        model = TurboVLALiteStudent(self.config, calibration)
+        self.assertIsNone(model.fusion_language[0].bias)
+        self.assertIsNone(model.fusion_gate[0].bias)
+        outputs = model(
+            torch.zeros((1, 1, 3, 128, 128), dtype=torch.uint8),
+            torch.zeros((1, 8), dtype=torch.int16),
+            torch.zeros((1,), dtype=torch.long),
+        )
+        self.assertTrue(torch.isfinite(outputs["action"]).all())
+
+    def test_depthwise_ablation_starts_from_the_pointwise_function(self) -> None:
+        pointwise = TurboVLALiteStudent(self.config, quantization=None).eval()
+        depthwise_config = replace(self.config, visual_encoder="depthwise_separable")
+        depthwise = TurboVLALiteStudent(depthwise_config, quantization=None).eval()
+        incompatible = depthwise.load_state_dict(pointwise.state_dict(), strict=False)
+        self.assertFalse(incompatible.unexpected_keys)
+        self.assertTrue(incompatible.missing_keys)
+        self.assertTrue(
+            all(name.startswith(("spatial_depthwise.", "spatial_pointwise.")) for name in incompatible.missing_keys)
+        )
+        self.assertEqual(sum(parameter.numel() for parameter in pointwise.parameters()), 148436)
+        self.assertEqual(sum(parameter.numel() for parameter in depthwise.parameters()), 149300)
+
+        image = torch.randint(0, 256, (2, 1, 3, 128, 128), dtype=torch.uint8)
+        state = torch.zeros((2, 8), dtype=torch.int16)
+        instruction = torch.zeros((2,), dtype=torch.long)
+        with torch.no_grad():
+            expected = pointwise(image, state, instruction)
+            actual = depthwise(image, state, instruction)
+        self.assertEqual(tuple(actual["spatial_0"].shape), (2, 16, 16, 16))
+        self.assertEqual(tuple(actual["spatial_1"].shape), (2, 16, 16, 16))
+        torch.testing.assert_close(actual["visual_tokens"], expected["visual_tokens"], atol=1.0e-6, rtol=1.0e-6)
+        torch.testing.assert_close(actual["action"], expected["action"], atol=2.0e-6, rtol=1.0e-4)
+
+    def test_rejects_unknown_visual_encoder(self) -> None:
+        with self.assertRaisesRegex(ValueError, "unsupported visual encoder"):
+            TurboVLALiteStudent(replace(self.config, visual_encoder="unknown"))
 
 
 if __name__ == "__main__":
     unittest.main()
-
