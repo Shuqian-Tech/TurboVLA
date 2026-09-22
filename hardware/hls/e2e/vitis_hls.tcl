@@ -2,6 +2,9 @@ set source_dir [file normalize [file dirname [info script]]]
 set repo_root [file normalize [file join $source_dir ../../..]]
 set project_dir [file normalize [file join $repo_root build/hls/e2e]]
 set fixture_dir [file normalize [file join $repo_root tests/data/lite_hardware_e2e]]
+if {[info exists ::env(TURBOVLA_E2E_FIXTURE_DIR)]} {
+  set fixture_dir [file normalize $::env(TURBOVLA_E2E_FIXTURE_DIR)]
+}
 
 open_project -reset $project_dir
 set_top turbovla_lite_e2e
