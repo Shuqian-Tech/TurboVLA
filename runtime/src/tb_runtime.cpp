@@ -52,8 +52,15 @@ class FakeRegisters final : public turbovla::runtime::RegisterIo {
   void write32(std::uint32_t offset, std::uint32_t value) override {
     if (offset == kInterruptStatusOffset) {
       registers_[offset / 4U] ^= value & 0x3U;
+      interrupt_acknowledged = interrupt_acknowledged || (value & 0x3U) != 0U;
     } else {
       registers_[offset / 4U] = value;
+    }
+    if (offset == turbovla::runtime::kGlobalInterruptOffset && value == 1U) {
+      global_interrupt_enabled = true;
+    }
+    if (offset == turbovla::runtime::kInterruptEnableOffset && value == 1U) {
+      completion_interrupt_enabled = true;
     }
     if (offset == kControlOffset && (value & 1U) != 0U) {
       start_seen_ = true;
@@ -78,6 +85,9 @@ class FakeRegisters final : public turbovla::runtime::RegisterIo {
   std::uint32_t kernel_error = 0;
   std::uint32_t hardware_version = kContractVersion;
   bool nonfinite_action = false;
+  bool global_interrupt_enabled = false;
+  bool completion_interrupt_enabled = false;
+  bool interrupt_acknowledged = false;
   std::array<std::uint32_t, 16> registers_{};
 
  private:
@@ -153,12 +163,14 @@ int main() {
   if (cache.flushes.size() != 4 || cache.invalidates.size() != 2) {
     return 8;
   }
-  if (registers.registers_[turbovla::runtime::kGlobalInterruptOffset / 4U] != 1U ||
-      registers.registers_[turbovla::runtime::kInterruptEnableOffset / 4U] != 1U ||
-      registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 1U) {
+  if (!registers.global_interrupt_enabled || !registers.completion_interrupt_enabled ||
+      !registers.interrupt_acknowledged || device.last_interrupt_status() != 1U ||
+      registers.registers_[turbovla::runtime::kGlobalInterruptOffset / 4U] != 0U ||
+      registers.registers_[turbovla::runtime::kInterruptEnableOffset / 4U] != 0U ||
+      registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
     return 9;
   }
-  if (device.reset() != turbovla::runtime::ErrorCode::kNone ||
+  if (device.reset_control() != turbovla::runtime::ErrorCode::kNone ||
       registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
     return 10;
   }
@@ -181,7 +193,7 @@ int main() {
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kDmaTimeout) {
     return 13;
   }
-  if (timeout_device.reset() != turbovla::runtime::ErrorCode::kNone ||
+  if (timeout_device.reset_control() != turbovla::runtime::ErrorCode::kNone ||
       timeout_registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
     return 14;
   }

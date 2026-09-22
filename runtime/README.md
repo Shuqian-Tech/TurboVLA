@@ -26,10 +26,11 @@ completion sequence, arena header, and all 84 finite action values pass.
 ## Timeout And Recovery
 
 A timeout returns `kDmaTimeout` without interpreting the output buffer. Each
-new submission first clears stale control and interrupt state, so a subsequent
-valid transaction can recover without reconstructing the runtime. `reset()`
-performs the same AXI-Lite cleanup explicitly. It does not drive the platform
-PL reset line; the KR260 platform reset controller owns that operation.
+new submission first clears stale control and interrupt state. This recovers
+from a completed or transiently late transaction without reconstructing the
+runtime. `reset_control()` performs the same AXI-Lite cleanup explicitly. It
+does not drive the PL reset line; a persistently hung kernel requires the
+KR260 platform reset or overlay recovery path.
 
 The board backend maps the HLS AXI-Lite registers through UIO and allocates the
 arena through XRT. `tools/run_runtime_csim.py` exercises the same executor with

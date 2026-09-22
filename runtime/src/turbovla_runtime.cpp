@@ -90,7 +90,7 @@ ErrorCode PlArenaExecutor::load_model(const std::uint8_t* model, std::size_t byt
   return ErrorCode::kNone;
 }
 
-ErrorCode PlArenaExecutor::reset() {
+ErrorCode PlArenaExecutor::reset_control() {
   if (!valid_arena(arena_)) {
     return ErrorCode::kInvalidBuffer;
   }
@@ -111,9 +111,10 @@ ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, st
   if (timeout_ticks == 0) {
     return ErrorCode::kDmaTimeout;
   }
-  if (reset() != ErrorCode::kNone) {
+  if (reset_control() != ErrorCode::kNone) {
     return ErrorCode::kInvalidBuffer;
   }
+  last_interrupt_status_ = 0;
   ++frame_sequence_;
   write_u32(arena_.data, kHeaderMagic, kArenaMagic);
   write_u32(arena_.data, kHeaderContractVersion, kContractVersion);
@@ -143,8 +144,11 @@ ErrorCode PlArenaExecutor::run(const FrameInput& input, ActionOutput& output, st
     }
   }
   if (!completed) {
+    reset_control();
     return ErrorCode::kDmaTimeout;
   }
+  last_interrupt_status_ = registers_.read32(kInterruptStatusOffset) & kInterruptStatusMask;
+  reset_control();
   cache_.invalidate(kHeaderOffset, 64);
   cache_.invalidate(kActionOffset, kActionValues * sizeof(float));
 

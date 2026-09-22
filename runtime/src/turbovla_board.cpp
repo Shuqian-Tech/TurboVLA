@@ -229,7 +229,8 @@ int run(const fs::path& fixture, const std::string& uio_name, bool probe_only) {
   std::cout << "KR260 board pl_elapsed_us=" << elapsed_us << std::endl;
   std::cout << "KR260 board stage=pl_return result=" << static_cast<std::uint32_t>(result)
             << std::endl;
-  std::cout << "KR260 board interrupts gie=0x" << std::hex
+  std::cout << "KR260 board interrupts observed=0x" << std::hex
+            << executor.last_interrupt_status() << " gie=0x"
             << registers.read32(kGlobalInterruptOffset) << " ier=0x"
             << registers.read32(kInterruptEnableOffset) << " isr=0x"
             << registers.read32(kInterruptStatusOffset) << std::dec << std::endl;
