@@ -6,11 +6,11 @@
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)（已进入）
-- 当前任务：[T009：实现 PS DMA/AXI-Lite Runtime](tasks/T009-ps-runtime.md)（`in_progress`）；T004、T014、T015 的模型与参数 gate 已完成
+- 当前任务：[T010：实现数据回放与数值对齐测试](tasks/T010-replay-validation.md)（`in_progress`）；T009 已验收，PR #9 待合并
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
-- KR260 SSH：`amd-edf@192.168.68.123`（passwordless key；不在仓库保存凭据）
-- 开发板状态：T013 既有 bitstream/DTBO 证据仍有效；T015 正确板端 `amd-edf@192.168.68.120` 已加载 package，probe、action parity 和 12 次 live invocation 通过；`.123` 是错误地址，不作为证据
+- KR260 SSH：`amd-edf@192.168.68.120`（passwordless key；不在仓库保存凭据）
+- 开发板状态：T013 既有 bitstream/DTBO 证据仍有效；T015 正确板端 `amd-edf@192.168.68.120` 已加载 package，probe、action parity 和 12 次 live invocation 通过；其他地址不作为证据
 - 当前验证模式：KR260/K26 软件 Vivado + 独立实机 bring-up 证据
 - Vivado Hardware Manager：暂不作为 T001-T008 验证门；实机 bring-up 阶段再验证 active target/device
 - `fpl26` MCP：当前环境未发现资源或模板，后续可用时接入
@@ -33,7 +33,7 @@
 - [ ] T006：实现 Fusion 与 Action MLP IP（`in_review`）
 - [ ] T007：搭建 KR260 Vivado Block Design（`in_progress`）
 - [ ] T008：完成综合、布局布线和报告基线（`in_progress`）
-- [ ] T009：实现 PS DMA/AXI-Lite Runtime（`in_progress`）
+- [x] T009：实现 PS DMA/AXI-Lite Runtime（`accepted`；PR #9，host recovery 与 KR260 5/5 runtime bring-up 通过）
 - [ ] T010：实现数据回放与数值对齐测试（`in_progress`）
 - [ ] T011：完成机器人闭环与稳定性测试（`in_progress`）
 - [ ] T012：最终 thermo-nuclear 审查与发布归档（`in_progress`）
@@ -44,7 +44,7 @@
 ## 未开始
 
 - [x] T007-T008：当前 HLS 源码对应的 Vivado 全量重建、post-route 报告、bitstream 和 XSA 已完成
-- [ ] T009-T012：runtime、回放、闭环和发布验收
+- [ ] T010-T012：回放、闭环和发布验收
 
 ## 当前阻塞
 
@@ -59,7 +59,7 @@
 - T015 软件与板端证据、thermo-nuclear review 已归档于 `hardware/vivado_kr260/reports/t015/`；review 结果 `PASS_WITH_DEVICE_AND_PR_GATES`，`.119` XRT headers 和 Draft PR 仍是外部 gate。
 - Vivado v2025.1 当前 wrapper 指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado`；本机 GEMM/Conv RTL co-sim 通过。2026-09-20 原始双事务诊断运行完成第 1/2 事务后，XSIM 匿名 RSS 超过用户指定的 96 GiB 阈值并终止；随后加入 case 0/1 事务拆分和 `-wdb /dev/null` footprint 修复，并在扩容主机上完成完整流程：日志 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0/1 和 action MLP 均 `RTL Simulation : 1 / 1` 且 C post-check 通过。本机 31 GiB RAM 的这次构建只重复这两个 kernel 的 synthesis/IP export，不重跑其高内存 co-sim。
 - 已建立当前源码对应的 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，状态为 `current_source_verified`。
-- upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已合并到 `main`（merge commit `000f03d`），但 T001-T011 的独立任务 PR 仍缺失，发布流程 gate 尚未关闭。
+- upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已合并到 `main`（merge commit `000f03d`），T009 已创建独立 PR #9；T001-T008/T010-T011 的独立任务 PR 仍缺失，发布流程 gate 尚未关闭。
 - Kria device package 已由 `/home/frank/WholeFile/FPGAs_AdaptiveSoCs_Unified_SDI_2025.1_0530_0145` 的离线 2025.1 installer 非交互 Add 到现有 Vivado；Tcl 验证 `xck26-sfvc784-2LV-c` 与 `xilinx.com:kr260_som:part0:1.0/1.1` 可见。完整源码 Vivado 重建已完成；认证信息不写入仓库。
 
 ## T002 软件 reference 证据
@@ -100,9 +100,11 @@
 
 ## T009 runtime 证据
 
-- `runtime/` 提供 host/replay C++ register/DMA model；runtime 通过显式 PL executor 接口运行，不包含 CPU inference fallback。
-- `python3 tools/run_runtime_csim.py`：通过；正常提交、版本拒绝、instruction 越界和 DMA timeout 均验证。
-- 实机 DMA/cache/interrupt 和 Hardware Manager：`not_run`。
+- `runtime/` 提供 XRT arena、cache maintenance、UIO AXI-Lite 和 host fake-MMIO；runtime 只调用显式 PL executor，不包含 CPU inference fallback。
+- `python3 tools/run_runtime_csim.py` 和 ASan/UBSan：通过；normal submit、TOW interrupt acknowledge、timeout recovery、invalid model replacement、instruction bounds、unknown error 和 non-finite action 均验证。
+- 完整 Python 回归 35 tests、contract/register validators 和 scoped ruff 通过。
+- 精确 source commit `281d7d4` 在 `.120` KR260 独立 worktree 构建；5/5 validation fixtures action parity 通过，worst max error `8.94070e-08`，mean runtime call latency `76.087 ms`，每次捕获 completion ISR `0x1` 并在返回前清为 `GIE/IER/ISR=0/0/0`；FPGA manager 最终 `operating`。
+- thermo-nuclear review：`PASS`，ISR TOW、pending interrupt 和 invalid-model stale-state findings 均已解决；真实 destructive timeout/reset fault injection 未运行，平台级 PL reset 不作宣称。
 
 ## T010 replay 证据
 
