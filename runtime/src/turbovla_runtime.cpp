@@ -75,6 +75,7 @@ PlArenaExecutor::PlArenaExecutor(ArenaBuffer arena, RegisterIo& registers, Cache
     : arena_(arena), registers_(registers), cache_(cache) {}
 
 ErrorCode PlArenaExecutor::load_model(const std::uint8_t* model, std::size_t bytes) {
+  model_loaded_ = false;
   if (!valid_arena(arena_) || model == nullptr) {
     return ErrorCode::kInvalidBuffer;
   }

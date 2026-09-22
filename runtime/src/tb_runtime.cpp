@@ -145,39 +145,51 @@ int main() {
   if (device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
     return 5;
   }
+  if (device.load_model(v2_model.data(), v2_model.size()) !=
+      turbovla::runtime::ErrorCode::kContractMismatch) {
+    return 6;
+  }
+  turbovla::runtime::FrameInput input;
+  turbovla::runtime::ActionOutput output;
+  if (device.run(input, output, 1) != turbovla::runtime::ErrorCode::kInvalidBuffer) {
+    return 7;
+  }
+  if (device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
+    return 8;
+  }
+  cache.flushes.clear();
+  cache.invalidates.clear();
   turbovla::runtime::TurboVlaRuntime runtime(
       {}, [&device](const auto& input, auto& output, std::uint32_t timeout) {
         return device.run(input, output, timeout);
       });
-  turbovla::runtime::FrameInput input;
   input.state[0] = -123;
   input.instruction_id = 7;
-  turbovla::runtime::ActionOutput output;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kNone || output.action[83] != 0.83f) {
-    return 6;
+    return 9;
   }
   if (registers.registers_[turbovla::runtime::kArenaAddressLowOffset / 4U] != 0x80000000U ||
       registers.registers_[turbovla::runtime::kArenaAddressHighOffset / 4U] != 0x10U) {
-    return 7;
+    return 10;
   }
-  if (cache.flushes.size() != 4 || cache.invalidates.size() != 2) {
-    return 8;
+  if (cache.flushes.size() != 3 || cache.invalidates.size() != 2) {
+    return 11;
   }
   if (!registers.global_interrupt_enabled || !registers.completion_interrupt_enabled ||
       !registers.interrupt_acknowledged || device.last_interrupt_status() != 1U ||
       registers.registers_[turbovla::runtime::kGlobalInterruptOffset / 4U] != 0U ||
       registers.registers_[turbovla::runtime::kInterruptEnableOffset / 4U] != 0U ||
       registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
-    return 9;
+    return 12;
   }
   if (device.reset_control() != turbovla::runtime::ErrorCode::kNone ||
       registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
-    return 10;
+    return 13;
   }
 
   input.instruction_id = 256;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kInvalidInstructionId) {
-    return 11;
+    return 14;
   }
 
   alignas(64) std::array<std::uint8_t, kArenaBytes> timeout_arena{};
@@ -187,34 +199,34 @@ int main() {
   turbovla::runtime::PlArenaExecutor timeout_device(
       {timeout_arena.data(), 0x90000000ULL, timeout_arena.size()}, timeout_registers, timeout_cache);
   if (timeout_device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
-    return 12;
+    return 15;
   }
   input.instruction_id = 0;
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kDmaTimeout) {
-    return 13;
+    return 16;
   }
   if (timeout_device.reset_control() != turbovla::runtime::ErrorCode::kNone ||
       timeout_registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
-    return 14;
+    return 17;
   }
   timeout_registers.completes = true;
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kNone) {
-    return 15;
+    return 18;
   }
 
   registers.kernel_error = static_cast<std::uint32_t>(turbovla::runtime::ErrorCode::kKernelFault);
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
-    return 16;
+    return 19;
   }
   registers.kernel_error = 0;
   registers.nonfinite_action = true;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
-    return 17;
+    return 20;
   }
   registers.nonfinite_action = false;
   registers.registers_[turbovla::runtime::kKernelReturnOffset / 4U] = 0xFFFFFFFFU;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
-    return 18;
+    return 21;
   }
 
   std::cout << "runtime arena/MMIO/cache path passed\n";
