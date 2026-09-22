@@ -35,6 +35,34 @@ class LiteParameterPackTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "experimental visual encoder weights"):
                 export_parameter_pack(None, Path(directory), checkpoint=mislabeled)
 
+    def test_qat_checkpoint_scales_are_preserved(self) -> None:
+        config = LiteStudentConfig.from_contract(load_contract())
+        model = TurboVLALiteStudent(config)
+        quantization = {
+            "activations": {"language_embedding": 0.031},
+            "weights": {
+                "conv_weight": 0.011,
+                "visual_projection": 0.012,
+                "fusion_visual": 0.013,
+                "fusion_language": 0.014,
+                "fusion_gate": 0.015,
+                "state_projection": 0.016,
+                "action_input": 0.017,
+                "action_output": 0.018,
+            },
+        }
+        checkpoint = {
+            "config": config.to_dict(),
+            "state_dict": model.state_dict(),
+            "quantization": quantization,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = export_parameter_pack(None, Path(directory), checkpoint=checkpoint)
+        scales = {entry["name"]: entry["scale"] for entry in manifest["tensors"]}
+        self.assertEqual(scales["instruction_table"], 0.031)
+        self.assertEqual(scales["fusion_visual_0"], 0.013)
+        self.assertEqual(scales["fusion_visual_1"], 0.013)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,78 @@
+{
+  "board": {
+    "binary": "/tmp/turbovla_board_t015_timed",
+    "binary_sha256": "ca3a6dec60e00a0e49ef007b782cb541ad515b1665a5623eb42ca41d856b94a5",
+    "endpoint": "amd-edf@192.168.68.120",
+    "inference_path": "PL only; no CPU fallback",
+    "uio": "turbovla-lite-e2e"
+  },
+  "board_sensors": {
+    "csv_sha256": "f25bd588e864514da5890b53c812ff644f57c7a28083696a5d553309c5ed38e8",
+    "load1": {
+      "max": 2.06,
+      "mean": 1.5571902268760909,
+      "min": 1.02
+    },
+    "mem_available_mb": {
+      "max": 3497.8984375,
+      "mean": 3490.715232329843,
+      "min": 3481.66796875
+    },
+    "pl_temp_c": {
+      "max": 28.49,
+      "mean": 26.877870855148345,
+      "min": 25.024
+    },
+    "power_w": {
+      "max": 4.09,
+      "mean": 3.730994764397906,
+      "min": 3.64
+    },
+    "source": "/sys/class/hwmon/hwmon0/power1_input and hwmon1/temp3_input sampled every ~250 ms; /proc/loadavg and /proc/meminfo"
+  },
+  "dataset": {
+    "first_index": 0,
+    "fixture_manifest_sha256": "5e8ef5b93611b5ceb82af2ed61eaf8d7a0177eb171c64a09d2812bf7a2acf535",
+    "last_index": 11043,
+    "sample_count": 100,
+    "sampling": "np.linspace(0, 11043, 100, dtype=int64)",
+    "split": "validation",
+    "split_seed": 20260921,
+    "unique_indices": 100
+  },
+  "execution": {
+    "job_summary_sha256": "4f0fee8d4b46fb9ea2d97d218274337b3b36c85b76d62c7c548f35fe783845d6",
+    "parity_lines": 100,
+    "scheduler": "run_at_scale.py",
+    "sensor_samples": 573,
+    "slots": 1,
+    "strategy": "fifo",
+    "successful_jobs": 100
+  },
+  "latency_us": {
+    "max": 78647,
+    "mean": 77448.69,
+    "min": 77073,
+    "p95": 78439.9
+  },
+  "offline_reference": {
+    "checkpoint_fake_qat_action_mae": 0.1277854726001074,
+    "checkpoint_fake_qat_gripper_sign_accuracy": 0.9309734513274336,
+    "exported_exact_int8_action_mae": 0.12800875112470875,
+    "exported_exact_int8_gripper_sign_accuracy": 0.9292035398230089,
+    "gripper_delta_pp": -0.1769911504424742,
+    "qat_to_exact_int8_delta": 0.00022327852460135,
+    "source_exact_int8_to_exported_pack_max_abs_error": 0.0
+  },
+  "parity": {
+    "max_abs_error_max": 1.78814e-07,
+    "max_abs_error_mean": 8.1956282e-08,
+    "mean_abs_error_max": 2.39594e-08,
+    "mean_abs_error_mean": 1.26860049e-08,
+    "threshold_max_abs_error": 1e-05,
+    "threshold_mean_abs_error": 1e-06
+  },
+  "result": "passed",
+  "schema_version": 1,
+  "throughput_hz": 12.91177423401222
+}

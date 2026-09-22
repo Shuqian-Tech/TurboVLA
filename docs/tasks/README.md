@@ -19,6 +19,7 @@
 - [T003：训练 TurboVLA-Lite student](T003-train-lite-student.md)
 - [T004：生成 FPGA 参数包](T004-export-fpga-parameters.md)
 - [T014：GPU TinyCNN 学习能力评估](T014-gpu-tinycnn-evaluation.md)
+- [T015：升级 state INT8 scale 合同](T015-state-scale-contract.md)
 
 ### Sprint 2
 

@@ -1,5 +1,6 @@
 #include "turbovla_runtime.hpp"
 
+#include <cmath>
 #include <cstring>
 #include <utility>
 
@@ -18,6 +19,12 @@ constexpr std::uint32_t kDone = 1U << 1U;
 
 std::uint32_t read_u32(const std::uint8_t* data, std::size_t offset) {
   std::uint32_t value = 0;
+  std::memcpy(&value, data + offset, sizeof(value));
+  return value;
+}
+
+float read_float(const std::uint8_t* data, std::size_t offset) {
+  float value = 0.0f;
   std::memcpy(&value, data + offset, sizeof(value));
   return value;
 }
@@ -63,7 +70,9 @@ ErrorCode PlArenaExecutor::load_model(const std::uint8_t* model, std::size_t byt
     return ErrorCode::kInvalidBuffer;
   }
   if (bytes != kModelBytes || read_u32(model, 0) != kModelMagic ||
-      read_u32(model, 4) != kContractVersion || read_u32(model, 8) != kModelBytes) {
+      read_u32(model, 4) != kContractVersion || read_u32(model, 8) != kModelBytes ||
+      !std::isfinite(read_float(model, kModelStateInputScaleOffset)) ||
+      read_float(model, kModelStateInputScaleOffset) <= 0.0f) {
     return ErrorCode::kContractMismatch;
   }
   std::memcpy(arena_.data + kModelOffset, model, bytes);

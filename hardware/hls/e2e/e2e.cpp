@@ -20,7 +20,6 @@ constexpr int kState = 8;
 constexpr int kActionHidden = 64;
 constexpr int kInstructions = 256;
 constexpr float kStateNormalization = 1.0f / 1024.0f;
-constexpr float kStateInputScale = 1.0f / 127.0f;
 constexpr float kMean[3] = {0.485f, 0.456f, 0.406f};
 constexpr float kStd[3] = {0.229f, 0.224f, 0.225f};
 
@@ -94,7 +93,9 @@ ErrorCode validate(const ArenaWord* arena) {
   const ArenaWord* packed = arena + kModelOffset / sizeof(ArenaWord);
   if (read_u32(packed, model::kMagic) != kModelMagic ||
       read_u32(packed, model::kContractVersion) != kContractVersion ||
-      read_u32(packed, model::kTotalBytes) != kModelBytes) {
+      read_u32(packed, model::kTotalBytes) != kModelBytes ||
+      !std::isfinite(read_float(packed, model::kStateInputScale)) ||
+      read_float(packed, model::kStateInputScale) <= 0.0f) {
     return ErrorCode::kContractMismatch;
   }
   const std::uint16_t instruction = read_u16(arena, kHeaderInstructionId);
@@ -236,6 +237,7 @@ void decode_action(const ArenaWord* arena,
   const float fusion_scale = read_float(packed, model::kFusion1Scale);
   const float state_scale = read_float(packed, model::kStateScale);
   const float hidden_scale = read_float(packed, model::kHiddenScale);
+  const float state_input_scale = read_float(packed, model::kStateInputScale);
   const float state_weight_scale = read_float(packed, model::kStateWeightScale);
   const float action_input_weight_scale = read_float(packed, model::kActionInputWeightScale);
   const float action_output_weight_scale = read_float(packed, model::kActionOutputWeightScale);
@@ -247,7 +249,7 @@ void decode_action(const ArenaWord* arena,
     const float normalized =
         static_cast<float>(read_i16(arena, kStateOffset + input_channel * sizeof(std::int16_t))) *
         kStateNormalization;
-    state_q[input_channel] = quantize(normalized, kStateInputScale);
+    state_q[input_channel] = quantize(normalized, state_input_scale);
   }
   for (int output_channel = 0; output_channel < kHidden; ++output_channel) {
     std::int32_t fused_sum = 0;
@@ -262,7 +264,7 @@ void decode_action(const ArenaWord* arena,
               packed, model::kStateProjection + input_channel * kHidden + output_channel));
     }
     float value = static_cast<float>(fused_sum) * fusion_scale / static_cast<float>(kTokens) +
-                  state_accumulator * kStateInputScale * state_weight_scale +
+                  state_accumulator * state_input_scale * state_weight_scale +
                   read_float(packed, model::kStateBias + output_channel * sizeof(float));
     if (value < 0.0f) {
       value = 0.0f;

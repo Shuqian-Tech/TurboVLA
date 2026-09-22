@@ -52,11 +52,22 @@ def validate(contract: dict) -> None:
             raise AssertionError(f"buffer {name} must be 64-byte aligned")
 
     _offsets_are_aligned(contract["registers"])
-    assert contract["contract_version"] == "0.2.0"
+    assert contract["contract_version"] == "0.3.0"
     version_header = contract["arena_header"]["contract_version"]
     assert version_header["encoding"] == "major_minor_patch_8_8_16"
-    assert version_header["value"] == "0x00020000"
-    assert contract["arena_header"]["hardware_version"]["value"] == "0x00020000"
+    assert version_header["value"] == "0x00030000"
+    assert contract["arena_header"]["hardware_version"]["value"] == "0x00030000"
+    model_header = contract["model_header"]
+    assert model_header["size_bytes"] == 128
+    assert model_header["contract_version"]["value"] == "0x00030000"
+    assert model_header["state_input_scale"] == {
+        "offset": 80,
+        "dtype": "float32",
+        "count": 1,
+        "finite": True,
+        "minimum_exclusive": 0.0,
+    }
+    assert contract["state"]["input_scale_source"] == "model_header.state_input_scale"
     assert contract["buffers"]["arena"]["size_bytes"] == 200320
     assert contract["buffers"]["action"]["size_bytes"] == 12 * 7 * 4
     assert contract["errors"]["contract_mismatch"] == 5
