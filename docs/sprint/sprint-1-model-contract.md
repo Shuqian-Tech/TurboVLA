@@ -18,7 +18,7 @@
 
 当前执行任务：[T015：升级 state INT8 scale 合同](../tasks/T015-state-scale-contract.md)
 
-执行进度：T001 `in_review`；T002 `in_review`；T003 `in_progress`；T004 `in_progress`；T014 `in_progress`（蒸馏 FP32/PTQ/fake-QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`，depthwise 决策 `keep_pointwise`）；T015 `in_progress`（修正 v0.2 硬编码 state scale 与正式 QAT checkpoint 不一致，模型和权重保持不变）。
+执行进度：T001 `in_review`；T002 `in_review`；T003 `in_progress`；T004 `in_progress`；T014 `in_progress`（蒸馏 FP32/PTQ/fake-QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`，depthwise 决策 `keep_pointwise`）；T015 `in_progress`（v0.3 RTL/Vivado/package gate 通过，KR260 action parity 因板端 `No route to host` 保持 `not_run`，模型和权重不变）。
 
 ## 进入条件
 

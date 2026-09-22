@@ -1,0 +1,43 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    fragment@0 {
+        target = <&fpga_full>;
+        __overlay__ {
+            firmware-name = "turbovla_kr260.bit.bin";
+            resets = <&zynqmp_reset 116>, <&zynqmp_reset 117>,
+                     <&zynqmp_reset 118>, <&zynqmp_reset 119>;
+        };
+    };
+
+    fragment@1 {
+        target = <&amba_pl>;
+        __overlay__ {
+            #address-cells = <2>;
+            #size-cells = <2>;
+
+            turbovla_fclk0 {
+                compatible = "xlnx,fclk";
+                clocks = <&zynqmp_clk 71>;
+                assigned-clocks = <&zynqmp_clk 71>;
+                assigned-clock-rates = <200000000>;
+            };
+
+            turbovla_lite_e2e@a0000000 {
+                compatible = "generic-uio";
+                linux,uio-name = "turbovla-lite-e2e";
+                reg = <0x0 0xa0000000 0x0 0x10000>;
+                clocks = <&zynqmp_clk 71>;
+                clock-names = "ap_clk";
+                assigned-clocks = <&zynqmp_clk 71>;
+                assigned-clock-rates = <200000000>;
+            };
+
+            zyxclmm_drm {
+                compatible = "xlnx,zocl";
+                status = "okay";
+            };
+        };
+    };
+};

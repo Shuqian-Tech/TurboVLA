@@ -52,9 +52,9 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - 开始时间：2026-09-21
 - 当前分支：`task/T015-state-scale-contract`
 - PR：[Shuqian-Tech/TurboVLA#4](https://github.com/Shuqian-Tech/TurboVLA/pull/4)（Draft）
-- hardware bring-up：`not_run`
+- hardware bring-up：`not_run`（2026-09-22；板端 `192.168.68.123` 从本地和 `.119` 均为 `No route to host`，未加载 package）
 - 触发证据：T014 state-scale audit；固定 v0.2 scale QAT 为 `20/30`
-- v0.3 contract、runtime、HLS 和正式 checkpoint exporter 已实现；RTL/Vivado/板端 gate 待精确 commit 推送后执行
+- v0.3 contract、runtime、HLS 和正式 checkpoint exporter 已实现；精确 commit `2b88e7f` 已完成 RTL/Vivado/package gate，板端 gate 仍待板端网络恢复
 
 ## 本地验证记录
 
@@ -63,9 +63,31 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - 正式 pack manifest SHA256：`e030312aa841cced64a2a0fc363357a7979af1fe95e16611f2444246bb97b0e7`
 - header offset 80 的 little-endian FP32 scale：`0.02543676272034645`（checkpoint double 经 ABI FP32 编码）
 - 正式 replay vector 使用 validation index 10281，归一化 state 最大绝对值 `3.23046875`
-- `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`：33 tests 通过
+- `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`：35 tests 通过
 - changed-file `ruff check`：通过
 - `python3 tools/run_runtime_csim.py`：通过；v0.2 model 与非法 scale 均 fail-fast
 - `python3 tools/run_e2e_csim.py --fixture-dir tests/data/lite_parameter_pack_qat`：通过；action max/mean absolute error `5.96046e-08 / 1.58657e-08`，v0.2 request/model 与非法 scale gate 通过
 - 100-sample exact INT8 export round-trip：max/mean absolute error `0.0 / 0.0`；报告 `tests/data/lite_parameter_pack_qat/parity_report.json`
-- 尚未运行：Vitis HLS RTL co-sim、Vivado synthesis/implementation/post-route、bitstream/XSA、KR260 action parity
+- Vitis HLS RTL co-sim：case 0 独立通过，cases 1..5 独立通过；case 0 XSIM peak `111802256 KB`，不宣称低于 96 GiB
+- Vivado synthesis/implementation/post-route、bitstream/XSA：通过；post-route WNS `+0.01316635683178902 ns`，TNS `0`，WHS `+0.010 ns`，THS `0`
+- package：`hardware/vivado_kr260/reports/t015/manifest.json`，control base `0xa0000000`；bit `c0f1e8a7548b7309ff63d63342f2e378c06bbe7c15c62c108be843eea7d80622`，bit.bin `bbb0b7f71029ca11165d2e1401b2b3af82267f0b0818f42381884b5ea9c072ca`，dtbo `a4fe03cd15e4078a3c4d1eeb4b1d6b5a7e89af8e0e2eefbc57e0bf844bad1bc9`
+- Hardware Manager 非破坏性枚举：target `127.0.0.1:3121/xilinx_tcf/Xilinx/XFL13WUMT00XA`，devices `xck26_0 arm_dap_1`
+- KR260 action parity：`not_run`；board runtime 在 `.119` 因缺少 `xrt/xrt_bo.h` 未能编译，不能作为板端证据
+
+## 变更与证据索引
+
+- 主要变更文件：`hardware/contracts/turbovla_lite_contract.json`、`hardware/hls/e2e/e2e.cpp`、`hardware/hls/e2e/model_layout.h`、`hardware/hls/e2e/tb_e2e.cpp`、`runtime/include/turbovla_runtime.hpp`、`runtime/src/turbovla_runtime.cpp`、`turbovla/lite_hardware_pack.py`、`tests/test_e2e_abi_consistency.py`、`tests/test_lite_hardware_pack.py`。
+- 验证命令：`PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v`；`python3 tools/run_runtime_csim.py`；`python3 tools/run_e2e_csim.py --fixture-dir tests/data/lite_parameter_pack_qat`；`python3 tools/validate_vivado_baseline.py hardware/vivado_kr260/report_manifest.json`。
+- 远程 HLS/Vivado 命令、工具版本、原始日志、报告和 checksum：`hardware/vivado_kr260/reports/t015/README.md` 及同目录文件。
+- package 运行命令：`PATH=/home/frank/AMD/vivado/2025.01/2025.1/Vivado/bin:$PATH python3 tools/package_kr260.py hardware/vivado_kr260/build/turbovla_kr260.xsa build/package_kr260_t015`。
+- task branch：`task/T015-state-scale-contract`；PR #4 仍为 Draft，未满足 `done` 所需的合并条件。
+
+## Thermo-nuclear review
+
+- 日期：2026-09-22；reviewer：Codex
+- 范围：`origin/main...2b88e7f` PR #4 diff，含 T015 ABI/HLS/runtime/package 变更及其测试边界
+- 结果：`PASS_WITH_DEVICE_AND_PR_GATES`; 未发现新的代码结构 blocking finding
+- 结构检查：无因 T015 新增而超过 1,000 行的源码文件；state-scale 逻辑保持在 model contract/HLS/runtime canonical boundary；独立 co-sim case 由 runner 进程隔离，未增加共享全局状态或 one-off 分支
+- 分支/边界检查：v0.2 rejection、非法 scale 和 instruction gate 均 fail-fast；没有 CPU inference fallback、替代 FPGA target 或 DPU 路径
+- 发现处置：板端网络不可达、`.119` 无 XRT headers、PR 仍为 Draft 均为外部验收 gate，已记录为阻塞，不通过代码改动规避
+- 证据：本目录 HLS/Vivado 日志、`timing_summary.rpt`、`utilization.rpt`、`power.rpt`、`cdc.rpt`、`turbovla_lite_e2e_csynth.rpt`、package manifest；功能日志 checksum 见 README 上文

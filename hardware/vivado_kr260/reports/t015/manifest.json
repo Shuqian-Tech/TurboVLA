@@ -1,0 +1,14 @@
+{
+  "platform": "kr260-k26",
+  "source_xsa": "/home/frank/TurboVLA-codex-T015-b3761ce/hardware/vivado_kr260/build/turbovla_kr260.xsa",
+  "control_base": "0xa0000000",
+  "control_range_bytes": 65536,
+  "pl0_clock_hz": 200000000,
+  "artifacts": {
+    "turbovla_kr260.bit": "c0f1e8a7548b7309ff63d63342f2e378c06bbe7c15c62c108be843eea7d80622",
+    "turbovla_kr260.bit.bin": "bbb0b7f71029ca11165d2e1401b2b3af82267f0b0818f42381884b5ea9c072ca",
+    "turbovla_kr260.dtbo": "a4fe03cd15e4078a3c4d1eeb4b1d6b5a7e89af8e0e2eefbc57e0bf844bad1bc9",
+    "turbovla_kr260.dts": "1c60187c6b37c85ca2a31d095bf13c1a152c393187f8b7a6ac3f235169a3d410",
+    "shell.json": "802dbc8b3f118313a5a74df46f56dc550a61b687dfd484fc6a8fd5ac7895c344"
+  }
+}

@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-- 更新时间：2026-09-21
+- 更新时间：2026-09-22
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 1：模型与硬件契约](sprint/sprint-1-model-contract.md)（恢复执行模型能力 gate）
@@ -10,7 +10,7 @@
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`amd-edf@192.168.68.123`（passwordless key；不在仓库保存凭据）
-- 开发板状态：T013 bitstream/DTBO 已加载，Hardware Manager/JTAG AXI-Lite 读、runtime probe、84-value action parity 和 17,019-iteration/30-minute stability 通过；FPGA manager 仍为 `operating`
+- 开发板状态：T013 既有 bitstream/DTBO 证据仍有效；T015 本次板端 SSH 从本地和 `.119` 均为 `No route to host`，未加载 T015 package，hardware bring-up 保持 `not_run`
 - 当前验证模式：KR260/K26 软件 Vivado + 独立实机 bring-up 证据
 - Vivado Hardware Manager：暂不作为 T001-T008 验证门；实机 bring-up 阶段再验证 active target/device
 - `fpl26` MCP：当前环境未发现资源或模板，后续可用时接入
@@ -51,10 +51,11 @@
 - Vivado v2025.1 已识别 `xck26-sfvc784-2LV-c`；当前机器已从本地 HLS IP 完成 block design validation、synthesis、implementation、post-route timing、bitstream 和 XSA，日志 `/tmp/turbovla-current-build.3zY7TN/vivado-current.log`，本地 `build/` 产物可复核。
 - 初始只读 probe 的 starter-kit 状态已被 T013 实机结果取代：TurboVLA overlay 已加载，PL0 clock 自动启用，完整 PL inference 和 30 分钟稳定性通过。旧 probe 仍保留为加载前历史记录。
 - T002 的历史 golden 仍使用确定性参数；正式 teacher cache、student checkpoint 和闭环成绩已由 T014 生成，但 T003/T004 自身的独立 PR/验收记录仍需补齐。
-- T004 当前已实现 smoke 参数包；T015 已从选定 QAT checkpoint 生成 v0.3 candidate 正式参数包并通过软件 exact INT8/HLS C-sim，仍需 RTL/Vivado/板端 gate 后才能作为发布参数包。
+- T004 当前已实现 smoke 参数包；T015 已从选定 QAT checkpoint 生成 v0.3 candidate 正式参数包，并在精确 commit `2b88e7f` 通过软件 exact INT8、HLS/RTL、Vivado 和 KR260 package gate；板端 action parity 仍待网络恢复。
 - T014 baseline、蒸馏、扩大评测和 depthwise 容量消融已完成：固定 split 的 3-seed FP32 validation MAE 为 `0.127903 +/- 0.000432`；同一批 100 episodes 的蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher 为 `95/100`。新增两个 `3x3 depthwise + 1x1 pointwise` block 后，匹配续训 action MAE 为 `0.12505184`，对照为 `0.12505893`；task 8/9 闭环两者均为 `9/20`，没有结构收益。决策为 `keep_pointwise`，不更新 FPGA 合同；下一步生成最终 QAT 参数包并执行软件/PL parity，详见 `docs/evaluation/t014_gpu_tinycnn_pilot.md`。
-- T015 state-scale audit 发现正式 QAT 的 `state_input_scale=0.0254367618`，而 v0.2 PL 硬编码 `1/127`；验证 state 最大绝对值 `3.23046875`。保持旧 ABI 重做 QAT 仅 `20/30`，因此 owner 决定升级合同而不修改模型。v0.3 使用现有 model header 保留区传递 scale，完成前不得宣称正式参数包或板端模型 parity。
-- T015 本地 v0.3 candidate 已通过 33 tests、runtime C-sim、正式 QAT pack 的 HLS C-sim和 100-sample exact export round-trip；`model.bin` SHA256 为 `6df32b27eb8a730027c6f37af8c8bd33058700293941a44eae6ade0697fa3886`，正式 replay action max error 为 `5.96046e-08`。RTL co-sim、Vivado 全量重建和 KR260 parity 尚未运行。
+- T015 state-scale audit 发现正式 QAT 的 `state_input_scale=0.0254367618`，而 v0.2 PL 硬编码 `1/127`；验证 state 最大绝对值 `3.23046875`。保持旧 ABI 重做 QAT 仅 `20/30`，因此 owner 决定升级合同而不修改模型。v0.3 使用现有 model header 保留区传递 scale。
+- T015 精确 commit `2b88e7f` 已通过 35 tests、runtime C-sim、正式 QAT pack 的 HLS C-sim、6 个独立 RTL co-sim case、Vivado 全量重建和 package；`model.bin` SHA256 为 `6df32b27eb8a730027c6f37af8c8bd33058700293941a44eae6ade0697fa3886`，正式 replay action max error 为 `5.96046e-08`。case 0 XSIM peak `111802256 KB`，不宣称低于 96 GiB；KR260 action parity 因板端网络不可达仍未运行。
+- T015 软件证据与 thermo-nuclear review 已归档于 `hardware/vivado_kr260/reports/t015/`；review 结果 `PASS_WITH_DEVICE_AND_PR_GATES`，板端网络、`.119` XRT headers 和 Draft PR 仍是外部验收 gate。
 - Vivado v2025.1 当前 wrapper 指向 `/home/frank/AMDDesignTools/2025.1/2025.1/Vivado`；本机 GEMM/Conv RTL co-sim 通过。2026-09-20 原始双事务诊断运行完成第 1/2 事务后，XSIM 匿名 RSS 超过用户指定的 96 GiB 阈值并终止；随后加入 case 0/1 事务拆分和 `-wdb /dev/null` footprint 修复，并在扩容主机上完成完整流程：日志 `/tmp/turbovla-fusion-cosim-upgraded.log` 返回退出码 0，gated-fusion case 0/1 和 action MLP 均 `RTL Simulation : 1 / 1` 且 C post-check 通过。本机 31 GiB RAM 的这次构建只重复这两个 kernel 的 synthesis/IP export，不重跑其高内存 co-sim。
 - 已建立当前源码对应的 KR260 Vivado post-route baseline；软件报告 manifest 在 `hardware/vivado_kr260/report_manifest.json`，状态为 `current_source_verified`。
 - upstream 已切换到 `git@github.com:Shuqian-Tech/TurboVLA.git`；T012 PR [#1](https://github.com/Shuqian-Tech/TurboVLA/pull/1) 已合并到 `main`（merge commit `000f03d`），但 T001-T011 的独立任务 PR 仍缺失，发布流程 gate 尚未关闭。
@@ -118,7 +119,7 @@
 
 - `tools/generate_release_manifest.py` 生成 `docs/release/turbovla_lite_release_manifest.json`，收集 T001-T012 状态、当前 commit、artifact checksum 和阻塞 gate。
 - `docs/release/turbovla_lite_acceptance.md` 完成 thermo-nuclear 汇总，结果为 `BLOCKED_BY_ACCEPTANCE_GATES`。
-- 所有已运行的 software-only C/replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 仍未闭合。当前 checkout 已有本机新生成的 bitstream/XSA，但没有 `.bit.bin/.dtbo`；Block Design 缺少 action MLP 实例和 DMA S2MM 返回通路，板端仍是 starter-kit overlay，不能宣称完整 PL 推理已上板。
+- 所有已运行的 software-only C/replay/safety/HLS 检查通过；独立 PR、正式 teacher/LIBERO 数据和 KR260 hardware inference bring-up 仍未闭合。T012 的历史记录早于当前 T015 package；T015 已生成 `.bit.bin/.dtbo`，但因板端网络不可达仍不能宣称 T015 完整 PL 推理已上板。
 - system Python 因缺少 `torch` 不能作为完整回归环境；仓库 `.venv` 已存在并提供 PyTorch/NumPy，使用 `PYTHONPATH=. .venv/bin/python -m unittest discover -s tests -v` 的本次回归为 9 tests 通过。
 
 ## T013 end-to-end integration
