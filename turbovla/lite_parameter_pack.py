@@ -42,13 +42,18 @@ def _aligned_offset(offset: int) -> int:
     return (offset + ALIGNMENT - 1) // ALIGNMENT * ALIGNMENT
 
 
-def _quantize_weight(value: np.ndarray) -> tuple[np.ndarray, float]:
-    maximum = float(np.max(np.abs(value)))
-    scale = max(maximum / 127.0, 1.0e-8)
+def _quantize_weight(value: np.ndarray, scale: float | None = None) -> tuple[np.ndarray, float]:
+    if scale is None:
+        maximum = float(np.max(np.abs(value)))
+        scale = max(maximum / 127.0, 1.0e-8)
+    if not np.isfinite(scale) or scale <= 0.0:
+        raise ValueError(f"quantization scale must be finite and positive, got {scale}")
     return np.clip(np.rint(value / scale), -128, 127).astype(np.int8), scale
 
 
-def _checkpoint_arrays(checkpoint: Mapping[str, object]) -> dict[str, np.ndarray]:
+def checkpoint_parameter_arrays(checkpoint: Mapping[str, object]) -> dict[str, np.ndarray]:
+    """Convert a pointwise student checkpoint into FPGA matrix layouts."""
+
     config = checkpoint.get("config")
     if isinstance(config, Mapping) and config.get("visual_encoder", "pointwise") != "pointwise":
         raise ValueError("experimental visual encoders cannot be exported with the current FPGA contract")
@@ -83,6 +88,38 @@ def _checkpoint_arrays(checkpoint: Mapping[str, object]) -> dict[str, np.ndarray
     return arrays
 
 
+def checkpoint_tensor_scales(checkpoint: Mapping[str, object]) -> dict[str, float]:
+    """Map checkpoint QAT scales to each non-bias tensor in the FPGA pack."""
+
+    quantization = checkpoint.get("quantization")
+    if not isinstance(quantization, Mapping):
+        return {}
+    activations = quantization.get("activations")
+    weights = quantization.get("weights")
+    if not isinstance(activations, Mapping) or not isinstance(weights, Mapping):
+        raise ValueError("checkpoint quantization must contain activation and weight scales")
+
+    def scale(values: Mapping, name: str) -> float:
+        value = float(values[name])
+        if not np.isfinite(value) or value <= 0.0:
+            raise ValueError(f"checkpoint quantization scale {name!r} must be finite and positive")
+        return value
+
+    result = {
+        "conv_weight": scale(weights, "conv_weight"),
+        "visual_projection": scale(weights, "visual_projection"),
+        "instruction_table": scale(activations, "language_embedding"),
+        "state_projection": scale(weights, "state_projection"),
+        "action_input": scale(weights, "action_input"),
+        "action_output": scale(weights, "action_output"),
+    }
+    for layer in range(2):
+        result[f"fusion_visual_{layer}"] = scale(weights, "fusion_visual")
+        result[f"fusion_language_{layer}"] = scale(weights, "fusion_language")
+        result[f"fusion_gate_{layer}"] = scale(weights, "fusion_gate")
+    return result
+
+
 def _parameter_arrays(parameters: LiteParameters) -> dict[str, np.ndarray]:
     arrays = parameters.arrays()
     return {
@@ -114,7 +151,12 @@ def export_parameter_pack(
 
     if (parameters is None) == (checkpoint is None):
         raise ValueError("provide exactly one of parameters or checkpoint")
-    arrays = _parameter_arrays(parameters) if parameters is not None else _checkpoint_arrays(checkpoint or {})
+    arrays = (
+        _parameter_arrays(parameters)
+        if parameters is not None
+        else checkpoint_parameter_arrays(checkpoint or {})
+    )
+    checkpoint_scales = checkpoint_tensor_scales(checkpoint or {}) if checkpoint is not None else {}
     contract = contract or load_contract()
     output_dir.mkdir(parents=True, exist_ok=True)
     binary = bytearray()
@@ -123,7 +165,7 @@ def export_parameter_pack(
         if value.dtype.kind not in "fi":
             raise ValueError(f"unsupported parameter dtype for {name}: {value.dtype}")
         if value.dtype.kind == "f" and "bias" not in name:
-            encoded, scale = _quantize_weight(value)
+            encoded, scale = _quantize_weight(value, checkpoint_scales.get(name))
             dtype = "int8"
         else:
             encoded = np.asarray(value, dtype=np.float32)

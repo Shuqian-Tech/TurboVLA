@@ -1,4 +1,5 @@
 #include "e2e.h"
+#include "model_layout.h"
 
 #include <algorithm>
 #include <cmath>
@@ -119,5 +120,31 @@ int main(int argc, char** argv) {
     return 7;
   }
   std::cout << "e2e invalid-instruction gate passed\n";
+
+  write_u16(arena_bytes, turbovla::hls::e2e::kHeaderInstructionId, 0);
+  write_u32(arena_bytes, turbovla::hls::e2e::kHeaderContractVersion, 0x00020000U);
+  if (turbovla_lite_e2e(arena.data()) != static_cast<int>(turbovla::hls::e2e::ErrorCode::kContractMismatch)) {
+    return 8;
+  }
+  std::cout << "e2e v0.2 request rejection gate passed\n";
+
+  write_u32(arena_bytes, turbovla::hls::e2e::kHeaderContractVersion,
+            turbovla::hls::e2e::kContractVersion);
+  write_u32(arena_bytes + turbovla::hls::e2e::kModelOffset,
+            turbovla::hls::e2e::model::kContractVersion, 0x00020000U);
+  if (turbovla_lite_e2e(arena.data()) != static_cast<int>(turbovla::hls::e2e::ErrorCode::kContractMismatch)) {
+    return 9;
+  }
+  std::cout << "e2e v0.2 model rejection gate passed\n";
+
+  write_u32(arena_bytes + turbovla::hls::e2e::kModelOffset,
+            turbovla::hls::e2e::model::kContractVersion,
+            turbovla::hls::e2e::kContractVersion);
+  write_u32(arena_bytes + turbovla::hls::e2e::kModelOffset,
+            turbovla::hls::e2e::model::kStateInputScale, 0U);
+  if (turbovla_lite_e2e(arena.data()) != static_cast<int>(turbovla::hls::e2e::ErrorCode::kContractMismatch)) {
+    return 10;
+  }
+  std::cout << "e2e invalid state scale rejection gate passed\n";
   return 0;
 }

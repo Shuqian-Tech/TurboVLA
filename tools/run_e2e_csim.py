@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import subprocess
 import tempfile
 from pathlib import Path
@@ -13,6 +14,9 @@ FIXTURE = ROOT / "tests" / "data" / "lite_hardware_e2e"
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fixture-dir", type=Path, default=FIXTURE)
+    args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="turbovla-e2e-csim-") as directory:
         executable = Path(directory) / "tb_e2e"
         subprocess.run(
@@ -32,7 +36,7 @@ def main() -> int:
             ],
             check=True,
         )
-        subprocess.run([str(executable), str(FIXTURE)], check=True)
+        subprocess.run([str(executable), str(args.fixture_dir)], check=True)
     return 0
 
 

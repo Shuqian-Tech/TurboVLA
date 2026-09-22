@@ -34,10 +34,10 @@ class LiteStudentConfig:
 
     @classmethod
     def from_contract(cls, contract: Mapping, calibration_path: Path | None = None) -> "LiteStudentConfig":
-        if contract["contract_version"] != cls.contract_version:
+        # T015 changes the runtime/model-pack ABI; the selected checkpoint schema remains v0.2.
+        if contract["contract_version"] not in {"0.2.0", "0.3.0"}:
             raise ValueError(f"unsupported contract version {contract['contract_version']!r}")
         config = cls(
-            contract_version=contract["contract_version"],
             hidden_dim=int(contract["fusion"]["hidden_dim"]),
             visual_tokens=int(contract["visual_tokens"]["shape"][1]),
             state_dim=int(contract["state"]["shape"][1]),

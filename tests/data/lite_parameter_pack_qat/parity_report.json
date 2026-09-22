@@ -1,0 +1,48 @@
+{
+  "dataset": {
+    "index_sha256": "c059e5112e3ddef6fe9b124382f0efd0ebb66bf39244e187cbd8e28fdea3441e",
+    "normalized_state_max_abs": 2.861328125,
+    "samples": 100,
+    "sampling": "uniform_indices_over_fixed_validation_split",
+    "split_seed": 20260921,
+    "task_counts": {
+      "0": 7,
+      "1": 12,
+      "2": 11,
+      "3": 9,
+      "4": 9,
+      "5": 9,
+      "6": 10,
+      "7": 14,
+      "8": 10,
+      "9": 9
+    }
+  },
+  "offline_metrics": {
+    "checkpoint_fake_qat_action_mae": 0.1277854726001074,
+    "checkpoint_fake_qat_gripper_sign_accuracy": 0.9309734513274336,
+    "exported_exact_int8_action_mae": 0.12800875112470875,
+    "exported_exact_int8_gripper_sign_accuracy": 0.9292035398230089,
+    "valid_action_values": 7910,
+    "valid_steps": 1130
+  },
+  "parity": {
+    "checkpoint_fake_qat_to_exported_exact_int8": {
+      "max_abs_error": 0.46134695410728455,
+      "mean_abs_error": 0.0077978604439912095
+    },
+    "source_exact_int8_to_exported_pack": {
+      "max_abs_error": 0.0,
+      "max_abs_error_threshold": 1e-06,
+      "mean_abs_error": 0.0
+    }
+  },
+  "result": "passed",
+  "schema_version": 1,
+  "source": {
+    "checkpoint": "build/lite/t014_spatial_distill_qat_seed20260921.pt",
+    "checkpoint_sha256": "7209a40065aa72628bd1a2b3b92d92a205ac97a4bb1a4577c1e4eda3d5d5dc1a",
+    "manifest_sha256": "e030312aa841cced64a2a0fc363357a7979af1fe95e16611f2444246bb97b0e7",
+    "model_sha256": "6df32b27eb8a730027c6f37af8c8bd33058700293941a44eae6ade0697fa3886"
+  }
+}

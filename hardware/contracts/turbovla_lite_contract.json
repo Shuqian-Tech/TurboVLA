@@ -1,5 +1,5 @@
 {
-  "contract_version": "0.2.0",
+  "contract_version": "0.3.0",
   "platform": "kr260-k26",
   "inference_location": "fpga_pl",
   "batch_size": 1,
@@ -38,6 +38,7 @@
     "layout": "N D",
     "input_dtype": "int16",
     "quantization": "symmetric_per_tensor",
+    "input_scale_source": "model_header.state_input_scale",
     "normalization": "libero_state_v1"
   },
   "visual_tokens": {
@@ -71,6 +72,16 @@
     "scale_storage": "float32",
     "zero_point": 0
   },
+  "model_header": {
+    "size_bytes": 128,
+    "endianness": "little",
+    "magic": {"offset": 0, "dtype": "uint32", "value": "0x54564D44"},
+    "contract_version": {"offset": 4, "dtype": "uint32", "value": "0x00030000"},
+    "total_bytes": {"offset": 8, "dtype": "uint32", "value": 150656},
+    "activation_scales": {"offset": 16, "dtype": "float32", "count": 8},
+    "weight_scales": {"offset": 48, "dtype": "float32", "count": 8},
+    "state_input_scale": {"offset": 80, "dtype": "float32", "count": 1, "minimum_exclusive": 0.0}
+  },
   "buffers": {
     "arena": {"direction": "bidirectional", "alignment_bytes": 64, "size_bytes": 200320},
     "header": {"direction": "bidirectional", "alignment_bytes": 64, "offset": 0, "size_bytes": 64, "cache": "flush_before_start_invalidate_after_done"},
@@ -81,12 +92,12 @@
   },
   "arena_header": {
     "magic": {"offset": 0, "value": "0x54564C41"},
-    "contract_version": {"offset": 4, "encoding": "major_minor_patch_8_8_16", "value": "0x00020000"},
+    "contract_version": {"offset": 4, "encoding": "major_minor_patch_8_8_16", "value": "0x00030000"},
     "frame_sequence": {"offset": 8},
     "instruction_id": {"offset": 12},
     "completed_sequence": {"offset": 16},
     "error_code": {"offset": 20},
-    "hardware_version": {"offset": 24, "value": "0x00020000"}
+    "hardware_version": {"offset": 24, "value": "0x00030000"}
   },
   "registers": {
     "control": {"offset": "0x00", "width_bits": 32, "fields": ["start", "done", "idle", "ready", "auto_restart"]},
