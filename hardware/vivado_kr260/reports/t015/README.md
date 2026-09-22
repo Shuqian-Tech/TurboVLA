@@ -90,6 +90,43 @@ closed-loop accuracy estimate. The exact-INT8 output is what the FPGA
 computes; the small accuracy delta above is the quantization/export delta
 between the fake-QAT checkpoint and the deployed representation.
 
+## Full 100-sample validation sweep
+
+To close the validation-load gap, 100 unique samples were selected from the
+fixed validation split with `np.linspace(0, 11043, 100, dtype=np.int64)` and
+exported from checkpoint
+`7209a40065aa72628bd1a2b3b92d92a205ac97a4bb1a4577c1e4eda3d5d5dc1a`. Each
+fixture was run exactly once on `amd-edf@192.168.68.120` with
+`run_at_scale.py --slots 1 --strategy fifo`; serialization is required because
+the board has one shared UIO/XRT execution path.
+
+- Board invocations: `100/100` returned success; all 100 logs contained
+  `stage=pl_return result=0` and an action parity line.
+- End-to-end latency: `77,073..78,647 us`, mean `77,448.69 us`, p95
+  `78,439.9 us`; measured whole-path throughput `12.9118 inference/s`.
+- FPGA-to-exported-exact-INT8 parity: worst max error `1.78814e-07`; worst
+  mean error `2.39594e-08`, below the `1e-5`/`1e-6` gates.
+- Full-window sensor capture (573 samples at approximately 250 ms): INA260
+  board power `3.64..4.09 W` (mean `3.731 W`), PL temperature
+  `25.024..28.490 C` (mean `26.878 C`), `/proc/loadavg` 1-minute load
+  `1.02..2.06` (mean `1.557`), and available RAM `3,481.7..3,497.9 MiB`.
+
+The load value is Linux load average, not a per-core utilization percentage;
+the raw sensor capture is preserved for audit. This is the real 100-sample
+validation sweep and supersedes the earlier same-fixture repetition used only
+for a coarse load range. The aggregate report, scheduler summary, and raw
+sensor CSV are [`validation100_board_sweep.json`](validation100_board_sweep.json),
+[`validation100_board_run_summary.csv`](validation100_board_run_summary.csv),
+and [`validation100_board_sensors.csv`](validation100_board_sensors.csv).
+
+For the same 100 validation samples offline, fake-QAT action MAE was
+`0.12778547` and exported exact-INT8 MAE was `0.12800875` (delta
+`+0.00022328`); gripper sign accuracy changed from `93.0973%` to `92.9204%`
+(`-0.1770 pp`). Source exact-INT8 versus exported pack parity was exact
+(`0.0` max error). These are offline action metrics, not closed-loop success
+rates, and the board result above confirms that PL execution matches the
+exported exact-INT8 representation.
+
 ## Frequency, latency, power, and temperature
 
 The live device-tree clock report on `.120` showed:
@@ -119,7 +156,8 @@ The observed end-to-end interval is therefore about `4.04x` that idealized
 kernel estimate; this gap is recorded rather than silently presented as PL
 compute latency.
 
-During a 100-inference load run, the KR260 sensors reported approximately:
+Before the full validation sweep, a same-fixture 100-inference load run was
+used only as an initial sensor sanity check and reported approximately:
 
 - INA260 board/SOM power: `3.71..4.11 W`;
 - PL temperature (`ams/temp3_input`): `26.42..28.61 C`;

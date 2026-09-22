@@ -75,6 +75,7 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - KR260 action parity：通过；`.120` probe passed，full PL inference action `max_abs_error=1.19209e-07`、`mean_abs_error=1.98128e-08`，12/12 live invocations passed；`.119` 缺少 `xrt/xrt_bo.h` 仅影响 host-side compile，不影响板端运行
 - 追加 10 个固定 validation 样本（每个 instruction ID 一个）实机运行：10/10 通过，FPGA 对 exact INT8 的最大误差范围 `5.96046e-08..1.78814e-07`；同批 QAT 到 exact INT8 的 action MAE `0.1289300751 -> 0.1292744306`（`+0.0003443556`），gripper sign accuracy `88.0734% -> 87.1560%`（`-0.9174 pp`）
 - 频率/延迟/功耗实测：`pl0_ref=199998000 Hz`；20 次 `executor.run()` `min/max/mean=77085/77229/77162 us`，整体 PS/PL 推理频率 `12.960 Hz`；100 次负载期间 INA260 功耗约 `3.71..4.11 W`，PL 温度约 `26.42..28.61 C`，VCC_PSBATT 约 `720 mV`
+- 完整 100 validation sweep：固定 validation split 用 `np.linspace(0, 11043, 100, dtype=np.int64)` 取 100 个唯一样本；`.120` 串行执行 `100/100` 成功，所有日志包含 `stage=pl_return result=0` 和 parity 行。端到端 latency `77073..78647 us`、mean `77448.69 us`、p95 `78439.9 us`，整体频率 `12.9118 Hz`；FPGA 对 exported exact INT8 的 worst max/mean error 为 `1.78814e-07/2.39594e-08`。573 个全程传感器采样显示整板功耗 `3.64..4.09 W`（均值 `3.731 W`）、PL 温度 `25.024..28.490 C`（均值 `26.878 C`）、Linux 1-minute load `1.02..2.06`（均值 `1.557`）、可用 RAM `3481.7..3497.9 MiB`。原始证据见 `hardware/vivado_kr260/reports/t015/validation100_board_sweep.json`、`validation100_board_run_summary.csv`、`validation100_board_sensors.csv`。
 
 ## 变更与证据索引
 
