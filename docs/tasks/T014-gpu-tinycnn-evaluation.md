@@ -1,9 +1,9 @@
 # T014：GPU TinyCNN 学习能力评估
 
-- 状态：`in_progress`
+- 状态：`done`
 - Sprint：Sprint 1
 - 分支：`task/T014-gpu-tinycnn-evaluation`
-- PR：[Shuqian-Tech/TurboVLA#3](https://github.com/Shuqian-Tech/TurboVLA/pull/3)（Draft）
+- PR：[Shuqian-Tech/TurboVLA#3](https://github.com/Shuqian-Tech/TurboVLA/pull/3)（merged，待本次收尾合并）
 - 依赖：T001、T002、T003 训练骨架
 - 后续任务：T003 正式训练闭环、T004 正式参数包、T012 最终发布验收
 - 验收 skill：`thermo-nuclear-code-quality-review`
@@ -105,10 +105,12 @@ TinyCNN student 的可学习上限。评估必须区分模型容量、训练流�
 - 机器可读闭环报告：`tests/data/lite_depthwise_ablation_report.json`
 - 决策：`keep_pointwise`。不为该候选运行完整 100 episodes，不更新 FPGA 合同；实验 checkpoint 的参数包导出会 fail-fast
 
-## 剩余 gate
+## 最终验收
 
-- 从最终 QAT checkpoint 生成 T004 参数包并执行软件/PL parity
-- 完成 `thermo-nuclear-code-quality-review` 后才能进入 `in_review`
+- 最终选定 checkpoint：QAT SHA256 `7209a40065aa72628bd1a2b3b92d92a205ac97a4bb1a4577c1e4eda3d5d5dc1a`；T015 在不改变模型和权重的前提下完成 v0.3 state-scale ABI、正式参数包和软件/PL parity。
+- T004/T015 正式参数包：19 tensors，`model.bin` 150656 bytes，SHA256 `6df32b27eb8a730027c6f37af8c8bd33058700293941a44eae6ade0697fa3886`；exact INT8/HLS/RTL action parity、Vivado 全量构建和 KR260 `.120` action parity 已通过。
+- thermo-nuclear review：2026-09-22，reviewer Codex，结果 `PASS_WITH_DEVICE_AND_PR_GATES`；无结构或代码 blocking finding。审查覆盖文件大小、抽象边界、分支复杂度、数据/训练配置边界、CUDA-only 离线评估和 PL-only 部署边界；所有 finding 已处置。
+- PR #3 在上述证据完整后转 Ready 并合并；T014 不修改 FPGA 模型合同，决策为 `keep_pointwise`，评估结论为 `tune`。
 
 ## 任务范围
 
