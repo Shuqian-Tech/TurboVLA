@@ -14,8 +14,9 @@ open_solution -reset e2e_solution
 set_part xck26-sfvc784-2LV-c
 create_clock -period 5.0 -name default
 
-proc turbovla_run_cosim {project_dir fixture_dir} {
-  cosim_design -setup -trace_level none -rtl verilog -tool xsim -argv $fixture_dir
+proc turbovla_run_cosim {project_dir fixture_dir case_index} {
+  puts "TURBOVLA_COSIM_CASE_START: $case_index"
+  cosim_design -setup -trace_level none -rtl verilog -tool xsim -argv "$fixture_dir $case_index"
   set sim_dir [file normalize [file join $project_dir e2e_solution sim verilog]]
   set run_script [file join $sim_dir run_xsim.sh]
   set input [open $run_script r]
@@ -36,6 +37,7 @@ proc turbovla_run_cosim {project_dir fixture_dir} {
   if {$result} {
     return -options $options $message
   }
+  puts "TURBOVLA_COSIM_CASE_PASS: $case_index"
 }
 
 csim_design -argv $fixture_dir
@@ -43,7 +45,13 @@ if {[info exists ::env(TURBOVLA_HLS_SYNTH)] && $::env(TURBOVLA_HLS_SYNTH) eq "1"
   csynth_design
   export_design -format ip_catalog -output [file normalize [file join $project_dir ip turbovla_lite_e2e]]
   if {![info exists ::env(TURBOVLA_HLS_SKIP_COSIM)] || $::env(TURBOVLA_HLS_SKIP_COSIM) ne "1"} {
-    turbovla_run_cosim $project_dir $fixture_dir
+    set cosim_cases {0 1 2 3 4 5}
+    if {[info exists ::env(TURBOVLA_E2E_COSIM_CASES)]} {
+      set cosim_cases $::env(TURBOVLA_E2E_COSIM_CASES)
+    }
+    foreach case_index $cosim_cases {
+      turbovla_run_cosim $project_dir $fixture_dir $case_index
+    }
   }
 }
 exit
