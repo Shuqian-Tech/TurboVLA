@@ -1,9 +1,9 @@
 # T009：实现 PS DMA/AXI-Lite Runtime
 
-- 状态：`accepted`
+- 状态：`done`
 - Sprint：Sprint 3
 - 分支：`task/T009-ps-runtime`
-- PR：[Shuqian-Tech/TurboVLA#9](https://github.com/Shuqian-Tech/TurboVLA/pull/9)
+- PR：[Shuqian-Tech/TurboVLA#9](https://github.com/Shuqian-Tech/TurboVLA/pull/9)（merged，commit `737e9645322df219494eb12d9e1ef4813cd12db9`）
 - 依赖：T008
 - 验收 skill：`thermo-nuclear-code-quality-review`
 
