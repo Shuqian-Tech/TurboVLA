@@ -73,6 +73,7 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - package：`hardware/vivado_kr260/reports/t015/manifest.json`，control base `0xa0000000`；bit `c0f1e8a7548b7309ff63d63342f2e378c06bbe7c15c62c108be843eea7d80622`，bit.bin `bbb0b7f71029ca11165d2e1401b2b3af82267f0b0818f42381884b5ea9c072ca`，dtbo `a4fe03cd15e4078a3c4d1eeb4b1d6b5a7e89af8e0e2eefbc57e0bf844bad1bc9`
 - Hardware Manager 非破坏性枚举：target `127.0.0.1:3121/xilinx_tcf/Xilinx/XFL13WUMT00XA`，devices `xck26_0 arm_dap_1`
 - KR260 action parity：通过；`.120` probe passed，full PL inference action `max_abs_error=1.19209e-07`、`mean_abs_error=1.98128e-08`，12/12 live invocations passed；`.119` 缺少 `xrt/xrt_bo.h` 仅影响 host-side compile，不影响板端运行
+- 追加 10 个固定 validation 样本（每个 instruction ID 一个）实机运行：10/10 通过，FPGA 对 exact INT8 的最大误差范围 `5.96046e-08..1.78814e-07`；同批 QAT 到 exact INT8 的 action MAE `0.1289300751 -> 0.1292744306`（`+0.0003443556`），gripper sign accuracy `88.0734% -> 87.1560%`（`-0.9174 pp`）
 
 ## 变更与证据索引
 

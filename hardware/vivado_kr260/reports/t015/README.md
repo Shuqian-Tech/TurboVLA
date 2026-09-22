@@ -59,6 +59,37 @@ Full PL inference passed with action parity
 Twelve independent live board invocations passed with the same parity and
 `KR260_T015_LIVE_SAMPLES_PASS count=12`. No CPU inference fallback was used.
 
+For a broader hardware check, ten uniformly spaced samples from the fixed
+validation split (one per instruction ID) were exported from the same QAT
+checkpoint and run on the board. All ten passed. The observed board parity
+against the exported exact-INT8 expected action was:
+
+| Sample | FPGA max abs | FPGA mean abs |
+|---:|---:|---:|
+| 0 | 5.96046e-08 | 1.54112e-08 |
+| 11043 | 5.96046e-08 | 7.77765e-09 |
+| 1227 | 5.96046e-08 | 9.89530e-09 |
+| 2454 | 1.19209e-07 | 1.24703e-08 |
+| 3681 | 5.96046e-08 | 8.81153e-09 |
+| 4908 | 1.19209e-07 | 1.14669e-08 |
+| 6135 | 5.96046e-08 | 1.10761e-08 |
+| 7362 | 8.94070e-08 | 1.06603e-08 |
+| 8589 | 1.78814e-07 | 1.48956e-08 |
+| 9816 | 1.19209e-07 | 1.34709e-08 |
+
+On those same ten samples, the QAT checkpoint versus exported exact-INT8
+comparison was:
+
+- action MAE: `0.1289300751` versus `0.1292744306` (`+0.0003443556`, exact
+  INT8 is `0.267%` higher);
+- gripper sign accuracy: `88.0734%` versus `87.15596%` (`-0.9174 pp`);
+- QAT-to-exact-INT8 action difference: max `0.2504549`, mean `0.00635750`.
+
+The ten-sample hardware result is a parity/implementation check, not a new
+closed-loop accuracy estimate. The exact-INT8 output is what the FPGA
+computes; the small accuracy delta above is the quantization/export delta
+between the fake-QAT checkpoint and the deployed representation.
+
 The board is therefore `action_parity=passed` for this vector. This is a
 single-vector parity gate, not a replacement for the existing long-duration
 stability evidence from T013.
