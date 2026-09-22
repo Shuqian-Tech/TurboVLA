@@ -10,7 +10,7 @@ state          int16  [1, 8]
 instruction_id uint16 [1], 有效范围 0..255，65535 保留为 invalid
 ```
 
-图像预处理在 PL 完成。PS 不得把已处理的视觉特征作为替代输入提交给推理 kernel，否则测试应失败。state 使用 `libero_state_v1` 归一化规则；v0.3 从 `model.bin` header offset 80 读取 little-endian FP32 `state_input_scale`，该值由 checkpoint 校准结果冻结，不得在 PL 中硬编码。
+图像预处理在 PL 完成。PS 不得把已处理的视觉特征作为替代输入提交给推理 kernel，否则测试应失败。state 使用 `libero_state_v1` 归一化规则；v0.3 从 `model.bin` header offset 80 读取 finite、strictly-positive little-endian FP32 `state_input_scale`，该值由 checkpoint 校准结果冻结，不得在 PL 中硬编码。
 
 ## 固定中间输出
 

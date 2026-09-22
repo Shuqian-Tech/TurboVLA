@@ -80,7 +80,7 @@
     "total_bytes": {"offset": 8, "dtype": "uint32", "value": 150656},
     "activation_scales": {"offset": 16, "dtype": "float32", "count": 8},
     "weight_scales": {"offset": 48, "dtype": "float32", "count": 8},
-    "state_input_scale": {"offset": 80, "dtype": "float32", "count": 1, "minimum_exclusive": 0.0}
+    "state_input_scale": {"offset": 80, "dtype": "float32", "count": 1, "finite": true, "minimum_exclusive": 0.0}
   },
   "buffers": {
     "arena": {"direction": "bidirectional", "alignment_bytes": 64, "size_bytes": 200320},

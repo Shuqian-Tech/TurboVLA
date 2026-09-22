@@ -49,6 +49,20 @@ class LiteHardwarePackTest(unittest.TestCase):
         self.assertAlmostEqual(encoded_scale, FIXTURE_STATE_INPUT_SCALE)
         self.assertEqual(manifest["state_input_scale"], encoded_scale)
 
+    def test_loader_rejects_nonfinite_state_input_scale(self) -> None:
+        manifest = json.loads((FIXTURE / "manifest.json").read_text(encoding="utf-8"))
+        model = bytearray((FIXTURE / "model.bin").read_bytes())
+        struct.pack_into("<f", model, STATE_INPUT_SCALE_OFFSET, float("inf"))
+        manifest["state_input_scale"] = float("inf")
+        manifest["files"]["model.bin"] = hashlib.sha256(model).hexdigest()
+
+        with tempfile.TemporaryDirectory() as directory:
+            pack_dir = Path(directory)
+            (pack_dir / "model.bin").write_bytes(model)
+            (pack_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "state_input scale"):
+                load_hardware_reference(pack_dir)
+
     def test_trained_checkpoint_round_trip_preserves_exact_int8_output(self) -> None:
         state_input_scale = 0.025436761811023622
         quantization = {

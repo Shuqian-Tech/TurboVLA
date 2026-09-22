@@ -64,6 +64,7 @@ def validate(contract: dict) -> None:
         "offset": 80,
         "dtype": "float32",
         "count": 1,
+        "finite": True,
         "minimum_exclusive": 0.0,
     }
     assert contract["state"]["input_scale_source"] == "model_header.state_input_scale"

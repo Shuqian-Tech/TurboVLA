@@ -412,7 +412,11 @@ def load_hardware_reference(pack_dir: Path) -> TurboVLALiteReference:
     activation_scales = {name: float(manifest["activation_scales"][name]) for name in ACTIVATION_NAMES}
     weight_scales = {name: float(manifest["weight_scales"][name]) for name in WEIGHT_NAMES}
     header_state_scale = struct.unpack_from("<f", blob, STATE_INPUT_SCALE_OFFSET)[0]
-    if header_state_scale != float(np.float32(manifest["state_input_scale"])) or header_state_scale <= 0.0:
+    if (
+        not np.isfinite(header_state_scale)
+        or header_state_scale <= 0.0
+        or header_state_scale != float(np.float32(manifest["state_input_scale"]))
+    ):
         raise ValueError("model header state_input scale does not match the manifest")
     quantization = LiteQuantization(
         activation_scales,
