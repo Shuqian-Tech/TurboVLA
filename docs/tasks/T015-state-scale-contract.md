@@ -3,7 +3,7 @@
 - 状态：`in_progress`
 - Sprint：Sprint 1（跨 Sprint 2/3 验证）
 - 分支：`task/T015-state-scale-contract`
-- PR：待创建
+- PR：[Shuqian-Tech/TurboVLA#4](https://github.com/Shuqian-Tech/TurboVLA/pull/4)（Draft）
 - 依赖：T001、T013、T014
 - 后续任务：T004 正式参数包、T014 最终验收
 - 验收 skill：`thermo-nuclear-code-quality-review`
@@ -51,7 +51,7 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 
 - 开始时间：2026-09-21
 - 当前分支：`task/T015-state-scale-contract`
-- PR：待创建
+- PR：[Shuqian-Tech/TurboVLA#4](https://github.com/Shuqian-Tech/TurboVLA/pull/4)（Draft）
 - hardware bring-up：`not_run`
 - 触发证据：T014 state-scale audit；固定 v0.2 scale QAT 为 `20/30`
 - v0.3 contract、runtime、HLS 和正式 checkpoint exporter 已实现；RTL/Vivado/板端 gate 待精确 commit 推送后执行
