@@ -90,6 +90,44 @@ closed-loop accuracy estimate. The exact-INT8 output is what the FPGA
 computes; the small accuracy delta above is the quantization/export delta
 between the fake-QAT checkpoint and the deployed representation.
 
+## Frequency, latency, power, and temperature
+
+The live device-tree clock report on `.120` showed:
+
+```text
+pl0_ref  ... 199998000 Hz ... amba_pl:turbovla_fclk0 ... Y
+```
+
+The board runtime at commit `49d10eb` measures a monotonic interval around
+`executor.run()`, from PS cache/register submission through the observed PL
+`done` bit and output invalidation. Twenty runs of the formal replay vector
+reported:
+
+```text
+LATENCY_SAMPLES count=20 min_us=77085 max_us=77229 mean_us=77162 throughput_hz=12.960
+```
+
+Thus the current complete PS/PL inference path sustains about `12.96
+inferences/s` (`77.162 ms` per inference), with a measured range of
+`12.949..12.973 Hz`. This is end-to-end runtime latency, not pure HLS kernel
+latency: it includes cache maintenance, AXI-Lite submission, MMIO polling, and
+output invalidation.
+
+The HLS report predicts a maximum of `3,817,800 cycles`, which at the live
+`199.998 MHz` clock is `19.089 ms` or `52.386 Hz` before PS/runtime overhead.
+The observed end-to-end interval is therefore about `4.04x` that idealized
+kernel estimate; this gap is recorded rather than silently presented as PL
+compute latency.
+
+During a 100-inference load run, the KR260 sensors reported approximately:
+
+- INA260 board/SOM power: `3.71..4.11 W`;
+- PL temperature (`ams/temp3_input`): `26.42..28.61 C`;
+- PL internal voltage (`VCC_PSBATT`): about `720 mV`.
+
+These are live board sensor readings and are separate from the Vivado
+post-route estimated on-chip power of `3.259 W`.
+
 The board is therefore `action_parity=passed` for this vector. This is a
 single-vector parity gate, not a replacement for the existing long-duration
 stability evidence from T013.

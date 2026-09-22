@@ -74,6 +74,7 @@ INT8 值。保持 v0.2 固定 scale 的 matched QAT 只有 `20/30`，低于原 Q
 - Hardware Manager 非破坏性枚举：target `127.0.0.1:3121/xilinx_tcf/Xilinx/XFL13WUMT00XA`，devices `xck26_0 arm_dap_1`
 - KR260 action parity：通过；`.120` probe passed，full PL inference action `max_abs_error=1.19209e-07`、`mean_abs_error=1.98128e-08`，12/12 live invocations passed；`.119` 缺少 `xrt/xrt_bo.h` 仅影响 host-side compile，不影响板端运行
 - 追加 10 个固定 validation 样本（每个 instruction ID 一个）实机运行：10/10 通过，FPGA 对 exact INT8 的最大误差范围 `5.96046e-08..1.78814e-07`；同批 QAT 到 exact INT8 的 action MAE `0.1289300751 -> 0.1292744306`（`+0.0003443556`），gripper sign accuracy `88.0734% -> 87.1560%`（`-0.9174 pp`）
+- 频率/延迟/功耗实测：`pl0_ref=199998000 Hz`；20 次 `executor.run()` `min/max/mean=77085/77229/77162 us`，整体 PS/PL 推理频率 `12.960 Hz`；100 次负载期间 INA260 功耗约 `3.71..4.11 W`，PL 温度约 `26.42..28.61 C`，VCC_PSBATT 约 `720 mV`
 
 ## 变更与证据索引
 
