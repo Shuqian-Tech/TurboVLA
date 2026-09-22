@@ -35,7 +35,10 @@ using turbovla::runtime::VolatileRegisterIo;
 using turbovla::runtime::kActionValues;
 using turbovla::runtime::kArenaBytes;
 using turbovla::runtime::kControlOffset;
+using turbovla::runtime::kGlobalInterruptOffset;
 using turbovla::runtime::kImageBytes;
+using turbovla::runtime::kInterruptEnableOffset;
+using turbovla::runtime::kInterruptStatusOffset;
 using turbovla::runtime::kModelBytes;
 using turbovla::runtime::kStateValues;
 
@@ -226,6 +229,10 @@ int run(const fs::path& fixture, const std::string& uio_name, bool probe_only) {
   std::cout << "KR260 board pl_elapsed_us=" << elapsed_us << std::endl;
   std::cout << "KR260 board stage=pl_return result=" << static_cast<std::uint32_t>(result)
             << std::endl;
+  std::cout << "KR260 board interrupts gie=0x" << std::hex
+            << registers.read32(kGlobalInterruptOffset) << " ier=0x"
+            << registers.read32(kInterruptEnableOffset) << " isr=0x"
+            << registers.read32(kInterruptStatusOffset) << std::dec << std::endl;
   if (result != ErrorCode::kNone) {
     throw std::runtime_error("PL inference failed with error " +
                              std::to_string(static_cast<std::uint32_t>(result)));

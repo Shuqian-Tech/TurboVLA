@@ -17,7 +17,7 @@ constexpr std::size_t kHeaderHardwareVersion = 24;
 constexpr std::uint32_t kStart = 1U << 0U;
 constexpr std::uint32_t kDone = 1U << 1U;
 constexpr std::uint32_t kInterruptEnable = 1U;
-constexpr std::uint32_t kInterruptClear = 0xFFFFFFFFU;
+constexpr std::uint32_t kInterruptStatusMask = 0x3U;
 
 std::uint32_t read_u32(const std::uint8_t* data, std::size_t offset) {
   std::uint32_t value = 0;
@@ -97,7 +97,10 @@ ErrorCode PlArenaExecutor::reset() {
   registers_.write32(kControlOffset, 0);
   registers_.write32(kInterruptEnableOffset, 0);
   registers_.write32(kGlobalInterruptOffset, 0);
-  registers_.write32(kInterruptStatusOffset, kInterruptClear);
+  const std::uint32_t pending = registers_.read32(kInterruptStatusOffset) & kInterruptStatusMask;
+  if (pending != 0U) {
+    registers_.write32(kInterruptStatusOffset, pending);
+  }
   return ErrorCode::kNone;
 }
 

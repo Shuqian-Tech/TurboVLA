@@ -51,7 +51,7 @@ class FakeRegisters final : public turbovla::runtime::RegisterIo {
 
   void write32(std::uint32_t offset, std::uint32_t value) override {
     if (offset == kInterruptStatusOffset) {
-      registers_[offset / 4U] &= ~value;
+      registers_[offset / 4U] ^= value & 0x3U;
     } else {
       registers_[offset / 4U] = value;
     }
@@ -158,10 +158,14 @@ int main() {
       registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 1U) {
     return 9;
   }
+  if (device.reset() != turbovla::runtime::ErrorCode::kNone ||
+      registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
+    return 10;
+  }
 
   input.instruction_id = 256;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kInvalidInstructionId) {
-    return 10;
+    return 11;
   }
 
   alignas(64) std::array<std::uint8_t, kArenaBytes> timeout_arena{};
@@ -171,34 +175,34 @@ int main() {
   turbovla::runtime::PlArenaExecutor timeout_device(
       {timeout_arena.data(), 0x90000000ULL, timeout_arena.size()}, timeout_registers, timeout_cache);
   if (timeout_device.load_model(model.data(), model.size()) != turbovla::runtime::ErrorCode::kNone) {
-    return 11;
+    return 12;
   }
   input.instruction_id = 0;
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kDmaTimeout) {
-    return 12;
+    return 13;
   }
   if (timeout_device.reset() != turbovla::runtime::ErrorCode::kNone ||
       timeout_registers.registers_[turbovla::runtime::kInterruptStatusOffset / 4U] != 0U) {
-    return 13;
+    return 14;
   }
   timeout_registers.completes = true;
   if (timeout_device.run(input, output, 2) != turbovla::runtime::ErrorCode::kNone) {
-    return 14;
+    return 15;
   }
 
   registers.kernel_error = static_cast<std::uint32_t>(turbovla::runtime::ErrorCode::kKernelFault);
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
-    return 15;
+    return 16;
   }
   registers.kernel_error = 0;
   registers.nonfinite_action = true;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
-    return 16;
+    return 17;
   }
   registers.nonfinite_action = false;
   registers.registers_[turbovla::runtime::kKernelReturnOffset / 4U] = 0xFFFFFFFFU;
   if (runtime.run(input, output) != turbovla::runtime::ErrorCode::kKernelFault) {
-    return 17;
+    return 18;
   }
 
   std::cout << "runtime arena/MMIO/cache path passed\n";
