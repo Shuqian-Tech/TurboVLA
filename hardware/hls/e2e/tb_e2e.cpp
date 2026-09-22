@@ -145,6 +145,13 @@ int main(int argc, char** argv) {
   if (turbovla_lite_e2e(arena.data()) != static_cast<int>(turbovla::hls::e2e::ErrorCode::kContractMismatch)) {
     return 10;
   }
-  std::cout << "e2e invalid state scale rejection gate passed\n";
+  std::cout << "e2e non-positive state scale rejection gate passed\n";
+
+  write_u32(arena_bytes + turbovla::hls::e2e::kModelOffset,
+            turbovla::hls::e2e::model::kStateInputScale, 0x7f800000U);
+  if (turbovla_lite_e2e(arena.data()) != static_cast<int>(turbovla::hls::e2e::ErrorCode::kContractMismatch)) {
+    return 11;
+  }
+  std::cout << "e2e non-finite state scale rejection gate passed\n";
   return 0;
 }
