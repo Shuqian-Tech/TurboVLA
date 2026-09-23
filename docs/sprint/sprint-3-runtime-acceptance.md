@@ -14,10 +14,20 @@
 - [T011：完成机器人闭环与稳定性测试](../tasks/T011-closed-loop-stability.md)
 - [T012：最终 thermo-nuclear 审查与发布归档](../tasks/T012-final-acceptance.md)
 - [T013：补齐 PL 推理链、PS Runtime 与端到端数值对齐](../tasks/T013-pl-runtime-e2e.md)
+- [T016：重写 README 实验结果首页](../tasks/T016-readme-experiment-results.md)
 
 当前执行任务：[T010：实现数据回放与数值对齐测试](../tasks/T010-replay-validation.md)。T009 已完成并通过 PR #9 合并。
 
-执行进度：T009 `done`（PR #9 merged，commit `737e964`；host fault/recovery、35 tests、5/5 KR260 fixtures、completion interrupt capture/ack 和 thermo-nuclear review 已通过）；T010 `in_progress`（golden replay 和逐层报告已通过）；T011 `in_progress`（1000-cycle safety replay 已通过）；T012 `in_progress`（PR #1 已合并到 `main`，但发布 manifest 和最终 gate 尚未闭合）；T013 `accepted`（PR #2 已于 2026-09-21 合并到 PR #1，merge commit `2d69bc8`；200 MHz Vivado backend、exact-commit RTL co-sim、KR260 package load、84-value parity、17,019-iteration/30-minute board stability、12-sample live load capture 和 thermo-nuclear review 均通过）。T013 高内存构建固定从 GitHub branch revision 在 `frank@192.168.68.119:/home/frank/TurboVLA-codex-T013` 隔离 worktree 执行。项目 owner 于 2026-09-21 将首版上板的 WNS/TNS 改为 reporting-only；本次最终 post-route WNS 实际为 `+0.002 ns`、TNS `0`。
+执行进度：
+
+- T009 `done`：PR #9 merged，commit `737e964`；host fault/recovery、35 tests、5/5 KR260 fixtures、completion interrupt capture/ack 和 thermo-nuclear review 已通过。
+- T010 `in_progress`：golden replay 和逐层报告已通过。
+- T011 `in_progress`：1000-cycle safety replay 已通过。
+- T012 `in_progress`：PR #1 已合并到 `main`，但发布 manifest 和最终 gate 尚未闭合。
+- T013 `accepted`：PR #2 已于 2026-09-21 合并到 PR #1，merge commit `2d69bc8`；200 MHz Vivado backend、exact-commit RTL co-sim、KR260 package load、84-value parity、17,019-iteration/30-minute board stability、12-sample live load capture 和 thermo-nuclear review 均通过。
+- T016 `done`：README 已按实现顺序重写，日志耗时、实验结果、证据链接和 thermo-nuclear review 已核验；PR #11。
+
+T013 高内存构建固定从 GitHub branch revision 在 `frank@192.168.68.119:/home/frank/TurboVLA-codex-T013` 隔离 worktree 执行。项目 owner 于 2026-09-21 将首版上板的 WNS/TNS 改为 reporting-only；本次最终 post-route WNS 实际为 `+0.002 ns`、TNS `0`。
 
 跨 Sprint 发布依赖：[T014](../tasks/T014-gpu-tinycnn-evaluation.md) 已给出当前硬件等价 TinyCNN 的 GPU 学习能力和 `tune`/`keep_pointwise` 结论；[T004](../tasks/T004-export-fpga-parameters.md) 已提供正式 QAT/v0.3 参数包和 PL parity，T012 可继续使用正式模型证据关闭发布 gate。
 
