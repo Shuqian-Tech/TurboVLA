@@ -25,7 +25,7 @@
 - T011 `in_progress`：1000-cycle safety replay 已通过。
 - T012 `in_progress`：PR #1 已合并到 `main`，但发布 manifest 和最终 gate 尚未闭合。
 - T013 `accepted`：PR #2 已于 2026-09-21 合并到 PR #1，merge commit `2d69bc8`；200 MHz Vivado backend、exact-commit RTL co-sim、KR260 package load、84-value parity、17,019-iteration/30-minute board stability、12-sample live load capture 和 thermo-nuclear review 均通过。
-- T016 `in_review`：README 已按实现顺序重写，日志耗时、实验结果、证据链接和 thermo-nuclear review 已核验。
+- T016 `done`：README 已按实现顺序重写，日志耗时、实验结果、证据链接和 thermo-nuclear review 已核验；PR #11。
 
 T013 高内存构建固定从 GitHub branch revision 在 `frank@192.168.68.119:/home/frank/TurboVLA-codex-T013` 隔离 worktree 执行。项目 owner 于 2026-09-21 将首版上板的 WNS/TNS 改为 reporting-only；本次最终 post-route WNS 实际为 `+0.002 ns`、TNS `0`。
 

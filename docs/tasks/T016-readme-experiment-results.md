@@ -1,9 +1,9 @@
 # T016：重写 README 实验结果首页
 
-- 状态：`in_review`
+- 状态：`done`
 - Sprint：Sprint 3
 - 分支：`task/T016-readme-experiment-results`
-- PR：待创建
+- PR：[Shuqian-Tech/TurboVLA#11](https://github.com/Shuqian-Tech/TurboVLA/pull/11)
 - 依赖：T009、T013、T014、T015
 - Hardware bring-up：复用既有 T013/T015 证据，本任务不重新配置开发板
 - 验收 skill：`thermo-nuclear-code-quality-review`
@@ -46,3 +46,10 @@
 - 证据：`hardware/vivado_kr260/reports/t015/`、
   `hardware/vivado_kr260/reports/t013/`、
   `docs/evaluation/t014_gpu_tinycnn_pilot.md`
+
+## Final acceptance
+
+- 状态：`done`（2026-09-22）
+- PR gate：PR #11 已创建并包含全部 T016 文档变更
+- 最终 review：`PASS`；无未处置 blocking finding
+- Hardware bring-up：本任务未重新配置开发板，所有硬件数值均引用 T013/T015 已验收证据
