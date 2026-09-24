@@ -2,7 +2,8 @@
 
 - 日期：2026-09-24
 - 分支：`task/T017-alp-explorer`
-- PR：替代 PR 待创建（原 PR #12 因任务编号冲突被取代）
+- PR：[Shuqian-Tech/TurboVLA#13](https://github.com/Shuqian-Tech/TurboVLA/pull/13)
+  （原 PR #12 因任务编号冲突被取代）
 - candidate：`design-ef6c7cfa8ebc`
 - parent：`design-0bb51adbc2e4`
 - source HEAD：`85e8b4fcd166e30a10dbdf9ced6c360d1523dab5`

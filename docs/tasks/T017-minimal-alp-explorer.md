@@ -3,7 +3,8 @@
 - 状态：`in_review`
 - Sprint：Sprint 3
 - 分支：`task/T017-alp-explorer`
-- PR：替代 PR 待创建（原 PR #12 因 `main` 已占用 T016 而被取代）
+- PR：[Shuqian-Tech/TurboVLA#13](https://github.com/Shuqian-Tech/TurboVLA/pull/13)
+  （open；原 PR #12 因 `main` 已占用 T016 而被取代）
 - 依赖：T009、T010、T013、T015
 - 验收 skill：`thermo-nuclear-code-quality-review`
 - 开始时间：2026-09-24
@@ -105,8 +106,8 @@ git diff --check
 
 - review 时间：2026-09-24
 - reviewer：Codex
-- review 范围：原 `task/T016-alp-explorer` / PR #12 增量；因 `main` 的 T016 编号冲突，
-  合并最新 `main` 后顺延为 `task/T017-alp-explorer`
+- review 范围：PR #13；原 `task/T016-alp-explorer` / PR #12 因 `main` 的 T016
+  编号冲突，合并最新 `main` 后顺延为 `task/T017-alp-explorer`
 - review 结果：`PASS_WITH_PR_GATE`；无未处置代码 blocking finding
 - 结构/code-judo：使用不可变 design graph、共同 evaluator spec 和单一 controller；
   没有为每个工具复制 runner。审查中将 design/evaluation 与 event 改为同一 SQLite

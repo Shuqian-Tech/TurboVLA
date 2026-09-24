@@ -22,7 +22,8 @@
 
 验证结果见 [T017 validation evidence](evidence/t017-validation.md)：全仓 45 tests、
 T017 专项 10 tests、software profile 8/8 evaluator 和 thermo-nuclear review 已通过；
-替代 PR 待创建（原 PR #12 因任务编号冲突被取代）。
+替代 PR：[Shuqian-Tech/TurboVLA#13](https://github.com/Shuqian-Tech/TurboVLA/pull/13)
+（open；原 PR #12 因任务编号冲突被取代）。
 
 ## 延后能力
 
