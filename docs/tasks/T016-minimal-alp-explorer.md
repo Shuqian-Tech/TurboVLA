@@ -3,7 +3,7 @@
 - 状态：`in_review`
 - Sprint：Sprint 3
 - 分支：`task/T016-alp-explorer`
-- PR：待创建
+- PR：[Shuqian-Tech/TurboVLA#12](https://github.com/Shuqian-Tech/TurboVLA/pull/12)（open）
 - 依赖：T009、T010、T013、T015
 - 验收 skill：`thermo-nuclear-code-quality-review`
 - 开始时间：2026-09-24
@@ -103,7 +103,7 @@ git diff --check
 
 - review 时间：2026-09-24
 - reviewer：Codex
-- review 范围：`task/T016-alp-explorer` 当前 T016 增量；PR 尚待创建
+- review 范围：`task/T016-alp-explorer` 与 PR #12 的 T016 增量
 - review 结果：`PASS_WITH_PR_GATE`；无未处置代码 blocking finding
 - 结构/code-judo：使用不可变 design graph、共同 evaluator spec 和单一 controller；
   没有为每个工具复制 runner。审查中将 design/evaluation 与 event 改为同一 SQLite
@@ -122,5 +122,5 @@ git diff --check
   和执行前 identity gate，并覆盖拒绝测试。
 - finding 4：初版 replay adapter 使用不合法的 `--repeats 1`。框架正确返回 `repair`，
   配置修正为 2 后完整 profile 通过。
-- disposition：上述 findings 全部解决；HLS/Vivado full build 和实机为 `not_run`；独立
-  PR 创建/合并仍是进入 `done` 的流程 gate。
+- disposition：上述 findings 全部解决；HLS/Vivado full build 和实机为 `not_run`；
+  PR #12 合并仍是进入 `done` 的流程 gate。

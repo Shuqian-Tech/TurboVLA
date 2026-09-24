@@ -2,6 +2,7 @@
 
 - 日期：2026-09-24
 - 分支：`task/T016-alp-explorer`
+- PR：[Shuqian-Tech/TurboVLA#12](https://github.com/Shuqian-Tech/TurboVLA/pull/12)
 - candidate：`design-ef6c7cfa8ebc`
 - parent：`design-0bb51adbc2e4`
 - source HEAD：`85e8b4fcd166e30a10dbdf9ced6c360d1523dab5`

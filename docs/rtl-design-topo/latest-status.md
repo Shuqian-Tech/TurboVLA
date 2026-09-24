@@ -22,7 +22,7 @@
 
 验证结果见 [T016 validation evidence](evidence/t016-validation.md)：全仓 45 tests、
 T016 专项 10 tests、software profile 8/8 evaluator 和 thermo-nuclear review 已通过；
-独立 PR 尚待创建。
+独立 PR：[Shuqian-Tech/TurboVLA#12](https://github.com/Shuqian-Tech/TurboVLA/pull/12)（open）。
 
 ## 延后能力
 

@@ -42,7 +42,7 @@
 - [x] T013：补齐 PL 推理链、PS Runtime 与端到端 action 数值对齐（`accepted`；PR #2 已合并到 PR #1，merge commit `2d69bc8`）
 - [x] T014：GPU TinyCNN 学习能力评估（`done`；100-episode 蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`；depthwise 消融无闭环收益，决策 `keep_pointwise`；PR #3 已合并）
 - [x] T015：升级 state INT8 scale 合同（`done`；模型不变，v0.3 model header 增加 checkpoint-calibrated state scale；100-sample KR260 validation sweep 已通过；PR #4 已合并，merge commit `ff97126dd4a495ca36116cb75b65f9952c556a0c`）
-- [ ] T016：最小模块化 ALP 探索、开发与验证框架（`in_review`；V0、45 tests、8/8 software profile 和 thermo-nuclear review 已通过，独立 PR 待创建）
+- [ ] T016：最小模块化 ALP 探索、开发与验证框架（`in_review`；V0、45 tests、8/8 software profile 和 thermo-nuclear review 已通过；PR #12 open）
 
 ## 未开始
 
