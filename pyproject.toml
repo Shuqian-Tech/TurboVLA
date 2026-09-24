@@ -58,12 +58,14 @@ turbovla-libero-train = "turbovla.training.train_mixed:main"
 turbovla-libero-eval = "vla_adapter.rollout:main"
 turbovla-robotwin-train = "experiments.robotwin.train:main"
 turbovla-robotwin-eval = "experiments.robotwin.evaluate:main"
+turbovla-alp = "rtl_design_topo.cli:main"
 
 [tool.setuptools.packages.find]
 where = [".", "third_party/vla_adapter", "third_party/starvla_runtime"]
 include = [
   "deployment*",
   "experiments*",
+  "rtl_design_topo*",
   "starVLA*",
   "turbovla*",
   "vla_adapter*",

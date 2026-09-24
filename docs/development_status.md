@@ -2,11 +2,13 @@
 
 ## 当前状态
 
-- 更新时间：2026-09-22
+- 更新时间：2026-09-24
 - 项目状态：`in_progress`
 - 当前目标：在 KR260 上完成不使用 DPU、神经推理全部在 PL 的 TurboVLA-Lite MVP
 - 当前 Sprint：[Sprint 3：Runtime、闭环与发布验收](sprint/sprint-3-runtime-acceptance.md)（已进入）
-- 当前任务：[T010：实现数据回放与数值对齐测试](tasks/T010-replay-validation.md)（`in_progress`）；T009 已完成并合并 PR #9
+- 当前任务：[T010：实现数据回放与数值对齐测试](tasks/T010-replay-validation.md)
+  与 [T016：最小模块化 ALP 探索、开发与验证框架](tasks/T016-minimal-alp-explorer.md)
+  （T010 `in_progress`，T016 `in_review`）；T009 已完成并合并 PR #9
 - 唯一编译平台：AMD Kria KR260/K26
 - Vivado 直接调用：使用仓库内 Tcl/HLS flow
 - KR260 SSH：`amd-edf@192.168.68.120`（passwordless key；不在仓库保存凭据）
@@ -40,6 +42,7 @@
 - [x] T013：补齐 PL 推理链、PS Runtime 与端到端 action 数值对齐（`accepted`；PR #2 已合并到 PR #1，merge commit `2d69bc8`）
 - [x] T014：GPU TinyCNN 学习能力评估（`done`；100-episode 蒸馏 FP32/PTQ/QAT 为 `75/100`、`77/100`、`78/100`，teacher `95/100`；depthwise 消融无闭环收益，决策 `keep_pointwise`；PR #3 已合并）
 - [x] T015：升级 state INT8 scale 合同（`done`；模型不变，v0.3 model header 增加 checkpoint-calibrated state scale；100-sample KR260 validation sweep 已通过；PR #4 已合并，merge commit `ff97126dd4a495ca36116cb75b65f9952c556a0c`）
+- [ ] T016：最小模块化 ALP 探索、开发与验证框架（`in_review`；V0、45 tests、8/8 software profile 和 thermo-nuclear review 已通过，独立 PR 待创建）
 
 ## 未开始
 
