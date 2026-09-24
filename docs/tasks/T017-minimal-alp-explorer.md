@@ -1,9 +1,9 @@
-# T016：最小模块化 ALP 探索、开发与验证框架
+# T017：最小模块化 ALP 探索、开发与验证框架
 
 - 状态：`in_review`
 - Sprint：Sprint 3
-- 分支：`task/T016-alp-explorer`
-- PR：[Shuqian-Tech/TurboVLA#12](https://github.com/Shuqian-Tech/TurboVLA/pull/12)（open）
+- 分支：`task/T017-alp-explorer`
+- PR：替代 PR 待创建（原 PR #12 因 `main` 已占用 T016 而被取代）
 - 依赖：T009、T010、T013、T015
 - 验收 skill：`thermo-nuclear-code-quality-review`
 - 开始时间：2026-09-24
@@ -34,7 +34,7 @@ contract、软件 reference、HLS/RTL、Vivado 报告、runtime、replay 和 sta
 
 ## 明确不做
 
-- 不在 T016 引入 Ray、PostgreSQL、MinIO、FastAPI、Kubernetes、Temporal 或 MLflow；
+- 不在 T017 引入 Ray、PostgreSQL、MinIO、FastAPI、Kubernetes、Temporal 或 MLflow；
 - 不自动生成或修改 RTL，不让 LLM 直接执行未校验的 orchestration；
 - 不自动加载 bitstream、复位板卡或执行机器人动作；
 - 不增加 VPK180、Alveo、Versal、ASIC、DPU、Vitis AI 或 CPU inference fallback；
@@ -81,14 +81,16 @@ git diff --check
 ## 当前执行记录
 
 - 2026-09-24：任务合同建立后完成 V0 实现；状态进入 `in_review`。
-- T016 专项单测：10/10 通过；全仓 `.venv` unittest：45/45 通过。
+- T017 专项单测：10/10 通过；全仓 `.venv` unittest：45/45 通过。
 - `software` profile：8/8 evaluator 通过，policy result 为 `promote`；只表示所选
   profile 通过，不代表任务已发布或硬件重新验收。
 - ruff、compileall、文档本地链接和 `git diff --check` 通过。
-- 验证证据：[T016 validation](../rtl-design-topo/evidence/t016-validation.md)。
+- 验证证据：[T017 validation](../rtl-design-topo/evidence/t017-validation.md)。
 - 软件 Vivado evidence：本次运行既有 report manifest validator 通过；未重新执行
   Vivado synthesis/implementation/bitstream，不冒充新构建。
-- 真实硬件：`not_run`；T016 默认禁止 destructive board action。
+- 真实硬件：`not_run`；T017 默认禁止 destructive board action。
+- 合并最新 `main` 并由 T016 顺延为 T017 后，全仓 45/45 tests、ruff、compileall、
+  文档目标、冲突标记和 `git diff --check` 复核通过；框架实现相对 `321d88c` 未变化。
 
 ## Changed Files
 
@@ -103,7 +105,8 @@ git diff --check
 
 - review 时间：2026-09-24
 - reviewer：Codex
-- review 范围：`task/T016-alp-explorer` 与 PR #12 的 T016 增量
+- review 范围：原 `task/T016-alp-explorer` / PR #12 增量；因 `main` 的 T016 编号冲突，
+  合并最新 `main` 后顺延为 `task/T017-alp-explorer`
 - review 结果：`PASS_WITH_PR_GATE`；无未处置代码 blocking finding
 - 结构/code-judo：使用不可变 design graph、共同 evaluator spec 和单一 controller；
   没有为每个工具复制 runner。审查中将 design/evaluation 与 event 改为同一 SQLite
@@ -123,4 +126,15 @@ git diff --check
 - finding 4：初版 replay adapter 使用不合法的 `--repeats 1`。框架正确返回 `repair`，
   配置修正为 2 后完整 profile 通过。
 - disposition：上述 findings 全部解决；HLS/Vivado full build 和实机为 `not_run`；
-  PR #12 合并仍是进入 `done` 的流程 gate。
+  T017 替代 PR 合并仍是进入 `done` 的流程 gate。
+
+### 最新 main 合并后复核
+
+- review 时间：2026-09-24；reviewer：Codex；结果：`PASS_WITH_PR_GATE`。
+- 冲突处置：保留 `main` 已合并的 T016 README 任务，将本框架原子性地顺延为
+  T017，并同步任务、Sprint、latest status 和 evidence 路径；没有并存两个 T016。
+- 结构/边界：`rtl_design_topo/`、配置、测试和 `pyproject.toml` 相对已审查提交
+  `321d88c` 无变化；生产模块最大 199 行，仍无替代硬件目标、CPU inference fallback、
+  自动上板或绕过 expensive gate 的路径。
+- 验证：全仓 unittest 45/45、T017 专项 10/10、ruff、compileall、链接目标、冲突标记
+  和 `git diff --check` 通过；无新增 blocking finding。

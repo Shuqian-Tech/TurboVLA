@@ -7,7 +7,7 @@
 
 ## 任务
 
-- [T016：最小模块化 ALP 探索、开发与验证框架](../../tasks/T016-minimal-alp-explorer.md)
+- [T017：最小模块化 ALP 探索、开发与验证框架](../../tasks/T017-minimal-alp-explorer.md)
 
 ## 目标
 
@@ -19,7 +19,7 @@
 
 ## 退出条件
 
-- T016 单元测试和 smoke CLI 通过；
+- T017 单元测试和 smoke CLI 通过；
 - 文档域、latest status、Sprint/task 导航完整；
 - thermo-nuclear review 无未处置 blocking finding；
 - 独立 PR 已创建后才能按项目规则进入 `done`。

@@ -1,8 +1,8 @@
 # RTL Design Topology Tasks
 
-- [T016：最小模块化 ALP 探索、开发与验证框架](../../tasks/T016-minimal-alp-explorer.md) - `in_review`
+- [T017：最小模块化 ALP 探索、开发与验证框架](../../tasks/T017-minimal-alp-explorer.md) - `in_review`
 
-后续能力必须新建任务，不直接扩大 T016：
+后续能力必须新建任务，不直接扩大 T017：
 
 - pre-RTL analytical performance model；
 - Ray multi-worker executor；

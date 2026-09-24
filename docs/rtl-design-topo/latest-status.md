@@ -1,9 +1,9 @@
 # RTL Design Topology Latest Status
 
 - 更新时间：2026-09-24
-- 当前任务：[T016 最小模块化 ALP 探索、开发与验证框架](../tasks/T016-minimal-alp-explorer.md)
+- 当前任务：[T017 最小模块化 ALP 探索、开发与验证框架](../tasks/T017-minimal-alp-explorer.md)
 - 状态：`in_review`
-- 分支：`task/T016-alp-explorer`
+- 分支：`task/T017-alp-explorer`
 - 实现阶段：本地 V0
 - 目标：KR260/K26 only
 - 板端执行：`not_run`，默认不提供 destructive board action
@@ -20,9 +20,9 @@
 - TurboVLA contract、block manifest、Vivado baseline、C-sim、runtime、replay 和
   stability 适配。
 
-验证结果见 [T016 validation evidence](evidence/t016-validation.md)：全仓 45 tests、
-T016 专项 10 tests、software profile 8/8 evaluator 和 thermo-nuclear review 已通过；
-独立 PR：[Shuqian-Tech/TurboVLA#12](https://github.com/Shuqian-Tech/TurboVLA/pull/12)（open）。
+验证结果见 [T017 validation evidence](evidence/t017-validation.md)：全仓 45 tests、
+T017 专项 10 tests、software profile 8/8 evaluator 和 thermo-nuclear review 已通过；
+替代 PR 待创建（原 PR #12 因任务编号冲突被取代）。
 
 ## 延后能力
 

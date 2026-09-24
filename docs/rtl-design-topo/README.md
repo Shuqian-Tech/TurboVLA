@@ -9,7 +9,7 @@
 - [Latest status](latest-status.md)
 - [架构与模块边界](architecture.md)
 - [ALP 节点映射](alp-flow-mapping.md)
-- [T016 验证证据](evidence/t016-validation.md)
+- [T017 验证证据](evidence/t017-validation.md)
 - [Sprint 索引](sprints/README.md)
 - [Task 索引](tasks/README.md)
 - [Redwood ALP 原始流程](../../redwood_alp_tech_flow.html)
