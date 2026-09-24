@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redwood ALP 与 TurboVLA 工具映射</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --ink: #18202b;
+    --muted: #667085;
+    --line: #d8dee7;
+    --navy: #243b5a;
+    --blue-soft: #eaf1fa;
+    --green: #217a4b;
+    --green-soft: #e8f5ed;
+    --amber: #946200;
+    --amber-soft: #fff4d6;
+    --red: #a33a43;
+    --red-soft: #fdebec;
+    --code: #f1f3f6;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.55;
+  }
+  button, input { font: inherit; }
+  a { color: #245d9c; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: var(--code);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.92em;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+  }
+  .topbar-inner, .page { width: min(1440px, calc(100% - 40px)); margin: 0 auto; }
+  .topbar-inner {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .brand { font-size: 16px; font-weight: 760; color: var(--navy); }
+  .source-link { font-size: 13px; color: var(--muted); }
+
+  .page { padding: 30px 0 54px; }
+  .intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.55fr);
+    gap: 28px;
+    align-items: end;
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 { margin: 0 0 10px; font-size: clamp(28px, 3.6vw, 46px); line-height: 1.14; letter-spacing: 0; }
+  .intro p { max-width: 900px; margin: 0; color: var(--muted); font-size: 15px; }
+  .scope-note {
+    padding: 15px 17px;
+    border-left: 4px solid var(--navy);
+    background: var(--blue-soft);
+    font-size: 13px;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    margin: 24px 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--line);
+  }
+  .metric { min-height: 92px; padding: 16px 18px; background: var(--surface); }
+  .metric strong { display: block; margin-bottom: 3px; font-size: 26px; line-height: 1; }
+  .metric span { color: var(--muted); font-size: 13px; }
+
+  .controls {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    margin: 0 0 22px;
+  }
+  .search {
+    width: 100%;
+    height: 42px;
+    padding: 0 13px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--surface);
+    color: var(--ink);
+    outline: none;
+  }
+  .search:focus { border-color: #6687ae; box-shadow: 0 0 0 3px rgba(76, 116, 160, 0.14); }
+  .segments { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+  .segments button {
+    min-height: 32px;
+    padding: 5px 11px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .segments button[aria-pressed="true"] { background: var(--navy); color: #fff; }
+
+  .section-nav {
+    display: flex;
+    gap: 18px;
+    margin: 0 0 22px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-nav a {
+    flex: none;
+    padding: 0 0 10px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 650;
+  }
+  .section-nav a:hover { color: var(--ink); text-decoration: none; }
+
+  .mapping-section { margin-top: 32px; scroll-margin-top: 78px; }
+  .section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 12px;
+  }
+  .section-heading h2 { margin: 0; font-size: 22px; letter-spacing: 0; }
+  .section-heading p { margin: 0; color: var(--muted); font-size: 13px; }
+
+  .flow-list { display: grid; gap: 9px; }
+  .mapping-row {
+    display: grid;
+    grid-template-columns: 54px minmax(180px, 0.72fr) minmax(260px, 1.28fr) 118px;
+    min-height: 112px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  .step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--line);
+    background: #f8fafc;
+    color: var(--muted);
+    font: 700 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .source-step, .project-map, .status-cell { padding: 15px 16px; }
+  .source-step { border-right: 1px solid var(--line); }
+  .source-step h3, .project-map h3 { margin: 0 0 5px; font-size: 15px; letter-spacing: 0; }
+  .source-step p, .project-map p { margin: 0; color: var(--muted); font-size: 13px; }
+  .source-step .planned { display: block; margin-top: 8px; color: #485568; font-size: 12px; }
+  .project-map { border-right: 1px solid var(--line); }
+  .evidence { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-top: 9px; font-size: 12px; }
+  .status-cell { display: flex; align-items: flex-start; justify-content: center; }
+  .status {
+    display: inline-flex;
+    min-width: 78px;
+    justify-content: center;
+    padding: 5px 9px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 750;
+  }
+  .status-have { color: var(--green); background: var(--green-soft); }
+  .status-partial { color: var(--amber); background: var(--amber-soft); }
+  .status-none { color: var(--red); background: var(--red-soft); }
+  .mapping-row[data-status="have"] { border-left: 4px solid var(--green); }
+  .mapping-row[data-status="partial"] { border-left: 4px solid #d39a23; }
+  .mapping-row[data-status="none"] { border-left: 4px solid #c85a62; }
+  .mapping-row[hidden] { display: none; }
+
+  .inventory {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    font-size: 13px;
+  }
+  .inventory th, .inventory td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  .inventory th { background: #f7f9fb; color: #465264; font-size: 12px; text-transform: uppercase; }
+  .inventory tr:last-child td { border-bottom: 0; }
+  .yes-text { color: var(--green); font-weight: 700; }
+  .partial-text { color: var(--amber); font-weight: 700; }
+  .no-text { color: var(--red); font-weight: 700; }
+
+  .actual-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  .actual-flow span { padding: 8px 10px; border: 1px solid #b9c8da; border-radius: 4px; background: var(--blue-soft); font-size: 12px; font-weight: 650; }
+  .actual-flow i { color: var(--muted); font-style: normal; }
+  .empty { display: none; padding: 28px; border: 1px dashed var(--line); text-align: center; color: var(--muted); background: var(--surface); }
+  .empty.visible { display: block; }
+  footer { margin-top: 38px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+
+  @media (max-width: 900px) {
+    .topbar-inner, .page { width: min(100% - 24px, 1440px); }
+    .intro { grid-template-columns: 1fr; gap: 16px; }
+    .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .controls { grid-template-columns: 1fr; }
+    .segments { overflow-x: auto; }
+    .mapping-row { grid-template-columns: 44px minmax(0, 1fr) 96px; }
+    .source-step { grid-column: 2 / 3; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .project-map { grid-column: 2 / 3; grid-row: 2; }
+    .step-number { grid-row: 1 / 3; }
+    .status-cell { grid-column: 3; grid-row: 1 / 3; padding: 14px 8px; }
+    .status { min-width: 72px; }
+  }
+  @media (max-width: 560px) {
+    .topbar-inner { align-items: flex-start; flex-direction: column; gap: 3px; padding: 10px 0; }
+    .page { padding-top: 22px; }
+    .summary { grid-template-columns: 1fr 1fr; }
+    .metric { min-height: 82px; padding: 14px; }
+    .mapping-row { grid-template-columns: 38px minmax(0, 1fr); }
+    .source-step, .project-map { grid-column: 2; border-right: 0; }
+    .status-cell { grid-column: 2; grid-row: 3; justify-content: flex-start; padding-top: 0; }
+    .step-number { grid-row: 1 / 4; }
+    .section-heading { display: block; }
+    .section-heading p { margin-top: 4px; }
+    .inventory { display: block; overflow-x: auto; white-space: nowrap; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Redwood ALP × TurboVLA</div>
+    <a class="source-link" href="redwood_alp_tech_flow.html">查看原始流程图</a>
+  </div>
+</header>
+
+<main class="page">
+  <section class="intro">
+    <div>
+      <h1>流程步骤与项目工具映射</h1>
+      <p>逐项核对 Redwood ALP v5 中的流程节点、建议工具与 TurboVLA 仓库里的真实实现。状态为“部分已有”表示项目具备相近能力，但实现工具或自动化程度与原图不同。</p>
+    </div>
+    <div class="scope-note"><strong>实际边界：</strong>当前项目只支持 AMD Kria KR260/K26。HTML 中的 VPK180、ASIC backend、RISC-V firmware 和通用多候选调度不属于当前实现。</div>
+  </section>
+
+  <section class="summary" aria-label="映射统计">
+    <div class="metric"><strong id="count-all">35</strong><span>映射节点</span></div>
+    <div class="metric"><strong id="count-have">4</strong><span>已有</span></div>
+    <div class="metric"><strong id="count-partial">18</strong><span>部分已有</span></div>
+    <div class="metric"><strong id="count-none">13</strong><span>没有</span></div>
+  </section>
+
+  <section class="controls" aria-label="筛选工具">
+    <input id="search" class="search" type="search" placeholder="搜索步骤、工具或缺口，例如 Vivado、Optuna、Board Pool" aria-label="搜索映射">
+    <div class="segments" role="group" aria-label="状态筛选">
+      <button type="button" data-filter="all" aria-pressed="true">全部</button>
+      <button type="button" data-filter="have" aria-pressed="false">已有</button>
+      <button type="button" data-filter="partial" aria-pressed="false">部分已有</button>
+      <button type="button" data-filter="none" aria-pressed="false">没有</button>
+    </div>
+  </section>
+
+  <nav class="section-nav" aria-label="页面分区">
+    <a href="#actual">实际主流程</a>
+    <a href="#hardware">Hardware Loop</a>
+    <a href="#software">Software Loop</a>
+    <a href="#foundation">Runtime Foundation</a>
+    <a href="#inventory">工具清单</a>
+  </nav>
+
+  <section id="actual" class="mapping-section">
+    <div class="section-heading"><h2>当前项目真实主流程</h2><p>不是未来规划，是仓库中已经存在的执行路径</p></div>
+    <div class="actual-flow">
+      <span>JSON Contract</span><i>→</i><span>PyTorch / QAT</span><i>→</i><span>Vitis HLS C-sim</span><i>→</i><span>HLS Synthesis</span><i>→</i><span>XSIM RTL Co-sim</span><i>→</i><span>Vivado Synthesis / Implementation</span><i>→</i><span>Bitstream + XSA + DTBO</span><i>→</i><span>KR260 XRT / UIO Runtime</span>
+    </div>
+  </section>
+
+  <section id="hardware" class="mapping-section map-group">
+    <div class="section-heading"><h2>Hardware Loop</h2><p>从规格到 KR260 hardware checkpoint</p></div>
+    <div class="flow-list">
+      <article class="mapping-row" data-status="partial"><div class="step-number">H01</div><div class="source-step"><h3>Architecture / µArchitecture Spec</h3><p>目标、约束、工作负载、设计意图</p><span class="planned">原图：YAML/JSON + Pydantic + Architecture IR</span></div><div class="project-map"><h3>JSON 合同 + 配置 + Git</h3><p>固定 shape、量化、buffer、register 和 KR260 平台由 JSON 定义，Python validator 直接校验。</p><div class="evidence"><a href="hardware/contracts/turbovla_lite_contract.json">contract JSON</a><a href="tools/validate_mvp_contract.py">contract validator</a><a href="configs/turbovla_lite_student.json">student config</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H02</div><div class="source-step"><h3>Architecture Search</h3><p>参数搜索与结构搜索</p><span class="planned">原图：Optuna / Ray Tune / LLM Evolver</span></div><div class="project-map"><h3>手工实验与消融</h3><p>T014 运行 pointwise/depthwise 等训练评估，但没有自动搜索空间、trial manager 或优化器。</p><div class="evidence"><a href="tools/run_lite_gpu_evaluation.py">GPU evaluation</a><a href="docs/evaluation/t014_gpu_tinycnn_pilot.md">T014 report</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">H03</div><div class="source-step"><h3>Performance Model</h3><p>RTL 前快速预测</p><span class="planned">原图：roofline / gem5 / SystemC-TLM / discrete event</span></div><div class="project-map"><h3>没有</h3><p>仓库没有 pre-RTL analytical model。HLS latency/resource estimate 属于综合结果，不是该节点的性能模型。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">H04</div><div class="source-step"><h3>Worth RTL Implementation?</h3><p>预测性能、Pareto 和预算 gate</p></div><div class="project-map"><h3>没有自动 Gate</h3><p>目前依靠任务文档、实验结果和项目 owner 人工决定是否继续。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H05</div><div class="source-step"><h3>Generate RTL Candidate</h3><p>生成候选 RTL</p><span class="planned">原图：RTL Agent / SystemVerilog / Chisel</span></div><div class="project-map"><h3>Vitis HLS C++ → RTL</h3><p>项目编写 HLS C++，由 Vitis HLS 生成 Verilog/VHDL IP；Git task branch 管理变更。</p><div class="evidence"><a href="hardware/hls/e2e/e2e.cpp">HLS top</a><a href="hardware/hls/e2e/vitis_hls.tcl">HLS Tcl</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H06</div><div class="source-step"><h3>Performance Simulator</h3><p>真实 RTL cycle-level 性能</p><span class="planned">原图：Verilator + counters / traces</span></div><div class="project-map"><h3>XSIM RTL co-simulation</h3><p>记录 RTL transactions、模拟时间和墙钟时间，但没有 Verilator 或自定义 stall/DMA counter 框架。</p><div class="evidence"><a href="hardware/vivado_kr260/reports/t015/turbovla-t015-2b88e7f-case0-hls.log">case 0 log</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H07</div><div class="source-step"><h3>Verification Closure</h3><p>功能、coverage、formal</p><span class="planned">原图：Verilator + cocotb + SymbiYosys / UVM</span></div><div class="project-map"><h3>C-sim + XSIM + unittest</h3><p>有 C++ testbench、HLS C simulation、独立 XSIM case、Python tests 和 runtime fake-MMIO；没有 formal、coverage 或 UVM。</p><div class="evidence"><a href="hardware/hls/e2e/tb_e2e.cpp">HLS testbench</a><a href="tools/run_runtime_csim.py">runtime C-sim</a><a href="tests">Python tests</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H08</div><div class="source-step"><h3>Physical Search</h3><p>PPA、timing、backend feasibility</p><span class="planned">原图：Yosys/OpenROAD/Innovus/Fusion Compiler</span></div><div class="project-map"><h3>固定 Vivado 实现策略</h3><p>Vivado 完成 KR260 synthesis/place/route 和 reports，但不是多策略 physical search。</p><div class="evidence"><a href="hardware/vivado_kr260/build.tcl">Vivado build Tcl</a><a href="hardware/vivado_kr260/reports/t015/timing_summary.rpt">timing report</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">H09</div><div class="source-step"><h3>PerfModel vs RTL Perf Mismatch</h3><p>自动识别预测与 RTL 偏差</p></div><div class="project-map"><h3>没有</h3><p>没有 PerfModel，因此也没有自动 mismatch detector；目前由人工比较日志和报告。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">H10</div><div class="source-step"><h3>N1 Diagnosis Service</h3><p>策略引擎与诊断 Agent</p></div><div class="project-map"><h3>没有</h3><p>没有统一诊断服务或 <code>FIX_RTL / CALIBRATE_MODEL / NEW_CANDIDATE</code> 枚举输出。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H11</div><div class="source-step"><h3>Fix RTL</h3><p>修复实现、协议或 fence 错误</p><span class="planned">原图：RTL Agent repair mode</span></div><div class="project-map"><h3>Git 分支上的人工/Agent 修复</h3><p>通过 task branch、PR 和重新验证完成；没有专门 repair service。</p><div class="evidence"><a href="docs/tasks/README.md">task policy</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H12</div><div class="source-step"><h3>New Candidate</h3><p>创建新的架构候选</p><span class="planned">原图：Search Controller</span></div><div class="project-map"><h3>手工配置与分支</h3><p>可以修改模型配置并重新训练，但没有 Candidate ID、搜索控制器或自动 lineage。</p></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H13</div><div class="source-step"><h3>Calibrate Model</h3><p>校准性能模型并生成新版本</p></div><div class="project-map"><h3>只有 INT8 数值校准</h3><p><code>calibrate_lite_student.py</code> 校准权重/激活 scale；它不是 Performance Model calibration。</p><div class="evidence"><a href="tools/calibrate_lite_student.py">QAT calibration</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H14</div><div class="source-step"><h3>Candidate Manager / Barrier</h3><p>汇总 evaluator 状态</p><span class="planned">原图：PostgreSQL state machine</span></div><div class="project-map"><h3>Markdown + Git 状态记录</h3><p>任务、Sprint、PR 和开发状态可追踪，但没有数据库、TaskHandle、cancel 或 retry。</p><div class="evidence"><a href="docs/tasks/README.md">task index</a><a href="docs/development_status.md">development status</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H15</div><div class="source-step"><h3>Required Evaluations Complete?</h3><p>确定性 readiness gate</p></div><div class="project-map"><h3>独立 Validator 集合</h3><p>合同、block design 和 Vivado baseline 各有 validator，但没有统一 readiness policy engine。</p><div class="evidence"><a href="tools/validate_mvp_contract.py">contract gate</a><a href="tools/validate_kr260_block_manifest.py">block gate</a><a href="tools/validate_vivado_baseline.py">Vivado gate</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H16</div><div class="source-step"><h3>Continue Pending Evaluations</h3><p>继续或取消未完成任务</p></div><div class="project-map"><h3>仅 HLS case 选择</h3><p>HLS Tcl 支持选择 case 并在失败时停止；没有跨工具 scheduler 或 task cancellation。</p><div class="evidence"><a href="hardware/hls/e2e/vitis_hls.tcl">case runner</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">H17</div><div class="source-step"><h3>Candidate Worth FPGA Validation?</h3><p>Pareto、priority、FPGA cost promotion</p></div><div class="project-map"><h3>没有自动 Promotion Gate</h3><p>是否构建和上板由任务验收与项目 owner 人工决定。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">H18</div><div class="source-step"><h3>FPGA Build Queue</h3><p>多 candidate 异步排队</p><span class="planned">原图：Local FIFO / Ray queue</span></div><div class="project-map"><h3>没有</h3><p>当前通过 Git 分支和高内存主机直接运行单个构建，没有仓库内 priority/FIFO queue。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="have"><div class="step-number">H19</div><div class="source-step"><h3>FPGA Build Service</h3><p>RTL 到 bitstream</p><span class="planned">原图：Vivado + build cache</span></div><div class="project-map"><h3>Vitis HLS + Vivado 2025.1</h3><p>完成 IP export、block design、synthesis、implementation、reports、bitstream 和 XSA。目标只有 KR260，没有服务化 cache。</p><div class="evidence"><a href="tools/run_vitis_hls.sh">HLS wrapper</a><a href="hardware/vivado_kr260/build.tcl">Vivado build</a></div></div><div class="status-cell"><span class="status status-have">已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">H20</div><div class="source-step"><h3>FPGA Board Manager / Pool</h3><p>烧录、运行、采集指标</p><span class="planned">原图：daemon + asyncio.Lock / BoardPool</span></div><div class="project-map"><h3>直接脚本与 runtime</h3><p>支持 package、fpgautil、SSH、XRT/UIO runtime 和结果日志；没有常驻 daemon、锁或板卡池。</p><div class="evidence"><a href="tools/package_kr260.py">package tool</a><a href="tools/build_board_runtime.sh">runtime build</a><a href="runtime/src/turbovla_board.cpp">board runtime</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="have"><div class="step-number">H21</div><div class="source-step"><h3>Existing FPGA Build</h3><p>可运行 workload 的 hardware checkpoint</p></div><div class="project-map"><h3>KR260 bitstream/package/runtime</h3><p>T013/T015 已生成并验证 bitstream、XSA、DTBO、manifest 和兼容 runtime。</p><div class="evidence"><a href="hardware/vivado_kr260/reports/t015/README.md">T015 evidence</a><a href="hardware/vivado_kr260/reports/t015/manifest.json">package manifest</a></div></div><div class="status-cell"><span class="status status-have">已有</span></div></article>
+    </div>
+  </section>
+
+  <section id="software" class="mapping-section map-group">
+    <div class="section-heading"><h2>Software Loop</h2><p>固定 bitstream 后的软件侧迭代</p></div>
+    <div class="flow-list">
+      <article class="mapping-row" data-status="have"><div class="step-number">S01</div><div class="source-step"><h3>Existing FPGA Build</h3><p>Software Loop 启动条件</p></div><div class="project-map"><h3>已有 KR260 hardware checkpoint</h3><p>板端 package 和 runtime 已经完成实际 action parity 与稳定性验证。</p><div class="evidence"><a href="hardware/vivado_kr260/reports/t013_board_bringup.md">board bring-up</a></div></div><div class="status-cell"><span class="status status-have">已有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">S02</div><div class="source-step"><h3>Firmware / Kernel Search</h3><p>调整 dispatch、prefetch、DMA scheduling</p><span class="planned">原图：Firmware Agent + RISC-V GCC/LLVM</span></div><div class="project-map"><h3>没有搜索系统</h3><p>实际是 Zynq PS C++ runtime，由 <code>g++</code> 构建；没有 RISC-V firmware 或软件策略 autotuning。</p><div class="evidence"><a href="tools/build_board_runtime.sh">runtime compiler</a></div></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="have"><div class="step-number">S03</div><div class="source-step"><h3>Run Workload on FPGA</h3><p>program/load/run/collect metrics</p></div><div class="project-map"><h3>KR260 XRT/UIO runtime</h3><p>加载 fixture、同步 cache、提交 PL、轮询完成并输出 latency、interrupt 和 84-value parity。</p><div class="evidence"><a href="runtime/src/turbovla_board.cpp">board runner</a><a href="hardware/vivado_kr260/reports/t015/validation100_board_sweep.json">100-sample result</a></div></div><div class="status-cell"><span class="status status-have">已有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">S04</div><div class="source-step"><h3>Software Optimization / Bottleneck Analyzer</h3><p>识别软件或硬件瓶颈</p></div><div class="project-map"><h3>没有自动 Analyzer</h3><p>现有 benchmark 和报告可供人工分析，但没有 rules + counters 的分类服务。</p><div class="evidence"><a href="tools/benchmark_lite_gpu_inference.py">GPU benchmark</a><a href="docs/evaluation/t014_gpu_tinycnn_pilot.md">comparison report</a></div></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">S05</div><div class="source-step"><h3>Hardware Bottleneck?</h3><p>SOFTWARE_CONTINUE / HARDWARE_REDESIGN</p></div><div class="project-map"><h3>没有自动 Gate</h3><p>目前由实验结论和 owner 决策，不产生机器可读的两类判定。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">S06</div><div class="source-step"><h3>HW Feedback Event</h3><p>BottleneckReport 返回架构搜索</p></div><div class="project-map"><h3>没有</h3><p>没有 BottleneckReport、事件总线或 HW/SW Feedback Controller。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+    </div>
+  </section>
+
+  <section id="foundation" class="mapping-section map-group">
+    <div class="section-heading"><h2>Local-first Runtime Foundation</h2><p>控制面、状态、产物和执行后端</p></div>
+    <div class="flow-list">
+      <article class="mapping-row" data-status="none"><div class="step-number">F01</div><div class="source-step"><h3>Control Plane</h3><p>FastAPI + Pydantic</p></div><div class="project-map"><h3>没有</h3><p>没有 FastAPI 服务。Pydantic 只作为 RoboTwin 可选依赖，不承担架构规格或控制平面。</p><div class="evidence"><a href="pyproject.toml">dependencies</a></div></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">F02</div><div class="source-step"><h3>Persistent State</h3><p>PostgreSQL + Git</p></div><div class="project-map"><h3>Git + Markdown + JSON</h3><p>保留 task、branch、PR、status 和报告；没有 PostgreSQL、DecisionEvent 或可查询状态机。</p><div class="evidence"><a href="docs/tasks/README.md">task records</a><a href="docs/development_status.md">status</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">F03</div><div class="source-step"><h3>Artifact Store</h3><p>content-addressed filesystem</p></div><div class="project-map"><h3>报告目录 + SHA256 manifest</h3><p>产物和 checksum 已记录，但没有通用 immutable CAS、metadata database、MinIO 或 S3。</p><div class="evidence"><a href="tools/generate_release_manifest.py">release manifest</a><a href="hardware/vivado_kr260/reports/t015/manifest.json">package hashes</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">F04</div><div class="source-step"><h3>Tool Gateway</h3><p>Python Tool API / MCP</p></div><div class="project-map"><h3>没有</h3><p>仓库工具是可直接执行的 Python、shell 和 Tcl 文件，没有统一 gateway 或 FastMCP server。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">F05</div><div class="source-step"><h3>Executor Interface</h3><p>submit / cancel / status / result</p><span class="planned">原图：asyncio + subprocess + ProcessPool + Docker</span></div><div class="project-map"><h3>直接 subprocess / Tcl wrapper</h3><p>存在单用途 runner，但没有统一 executor interface、Docker FPGA worker 或 RayExecutor。</p><div class="evidence"><a href="tools/run_runtime_csim.py">subprocess runner</a><a href="tools/run_vitis_hls.sh">HLS wrapper</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="none"><div class="step-number">F06</div><div class="source-step"><h3>Resource Manager</h3><p>CPU/RAM/license/FPGA semaphore</p></div><div class="project-map"><h3>没有</h3><p>高内存主机和单板访问由人工协调，没有资源配额、license manager 或 semaphore。</p></div><div class="status-cell"><span class="status status-none">没有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">F07</div><div class="source-step"><h3>Local Tool Workers</h3><p>模拟、物理实现、编译和板卡运行</p></div><div class="project-map"><h3>实际 worker 集合不同</h3><p>已有 Vitis HLS、XSIM、Vivado、Python/PyTorch、g++、XRT/UIO、bootgen 和 dtc；没有 gem5/SystemC/Verilator/Yosys/OpenROAD/cocotb/SymbiYosys。</p></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+      <article class="mapping-row" data-status="partial"><div class="step-number">F08</div><div class="source-step"><h3>Lineage / Versioning Constraints</h3><p>candidate、tool、RTL、firmware、artifact 可追溯</p></div><div class="project-map"><h3>Git revision + task evidence + checksum</h3><p>构建 commit、工具版本、报告和 SHA256 有记录；没有统一 Candidate/DecisionEvent schema。</p><div class="evidence"><a href="hardware/vivado_kr260/reports/t015/README.md">build evidence</a></div></div><div class="status-cell"><span class="status status-partial">部分已有</span></div></article>
+    </div>
+  </section>
+
+  <section id="inventory" class="mapping-section">
+    <div class="section-heading"><h2>命名工具清单</h2><p>HTML 中出现的工具与当前仓库状态</p></div>
+    <table class="inventory">
+      <thead><tr><th>类别</th><th>工具</th><th>状态</th><th>本项目对应</th></tr></thead>
+      <tbody>
+        <tr><td>已使用</td><td>Git / JSON</td><td class="yes-text">已有</td><td>规格、task、branch、PR、manifest</td></tr>
+        <tr><td>已使用</td><td>PyTorch / NumPy</td><td class="yes-text">已有</td><td>student 训练、QAT、reference、评估</td></tr>
+        <tr><td>已使用</td><td>Vitis HLS 2025.1</td><td class="yes-text">已有</td><td>C-sim、synthesis、IP export、co-sim setup</td></tr>
+        <tr><td>已使用</td><td>XSIM</td><td class="yes-text">已有</td><td>RTL co-simulation</td></tr>
+        <tr><td>已使用</td><td>Vivado 2025.1</td><td class="yes-text">已有</td><td>KR260 block design、synthesis、implementation、bitstream/XSA</td></tr>
+        <tr><td>已使用</td><td>g++ / XRT / UIO</td><td class="yes-text">已有</td><td>PS runtime 编译与板端执行</td></tr>
+        <tr><td>已使用</td><td>bootgen / dtc / fpgautil</td><td class="yes-text">已有</td><td>KR260 bit.bin、DTBO 和 overlay 加载</td></tr>
+        <tr><td>有限使用</td><td>Pydantic</td><td class="partial-text">仅依赖</td><td>RoboTwin optional dependency；不是控制面或 Architecture IR</td></tr>
+        <tr><td>未实现</td><td>Optuna / Ray Tune / Ray Actor</td><td class="no-text">没有</td><td>无搜索和分布式调度</td></tr>
+        <tr><td>未实现</td><td>gem5 / SystemC-TLM</td><td class="no-text">没有</td><td>无 pre-RTL performance model</td></tr>
+        <tr><td>未实现</td><td>Verilator / cocotb / SymbiYosys</td><td class="no-text">没有</td><td>由 HLS C-sim、XSIM 和 unittest 覆盖现有验证</td></tr>
+        <tr><td>未实现</td><td>Yosys / OpenROAD / Innovus / Fusion Compiler</td><td class="no-text">没有</td><td>当前只使用 KR260 Vivado flow</td></tr>
+        <tr><td>未实现</td><td>UVM / VCS / Xcelium / Questa / commercial formal</td><td class="no-text">没有</td><td>无商业 verification flow</td></tr>
+        <tr><td>未实现</td><td>FastAPI / PostgreSQL</td><td class="no-text">没有</td><td>无 control plane 和持久状态服务</td></tr>
+        <tr><td>未实现</td><td>MinIO / S3</td><td class="no-text">没有</td><td>当前为仓库文件和 checksum manifest</td></tr>
+        <tr><td>未实现</td><td>MCP / FastMCP Tool Gateway</td><td class="no-text">没有</td><td>工具由脚本直接调用</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div id="empty" class="empty">没有匹配的映射。请清空搜索或切换状态筛选。</div>
+  <footer>基于 <code>redwood_alp_tech_flow.html</code> 与当前 TurboVLA 仓库的静态核对结果。页面不代表未实现工具已被安装或验证。</footer>
+</main>
+
+<script>
+  const rows = Array.from(document.querySelectorAll('.mapping-row'));
+  const filterButtons = Array.from(document.querySelectorAll('[data-filter]'));
+  const search = document.getElementById('search');
+  const empty = document.getElementById('empty');
+  let activeFilter = 'all';
+
+  function updateCounts() {
+    const counts = rows.reduce((result, row) => {
+      result[row.dataset.status] += 1;
+      return result;
+    }, { have: 0, partial: 0, none: 0 });
+    document.getElementById('count-all').textContent = rows.length;
+    document.getElementById('count-have').textContent = counts.have;
+    document.getElementById('count-partial').textContent = counts.partial;
+    document.getElementById('count-none').textContent = counts.none;
+  }
+
+  function applyFilters() {
+    const query = search.value.trim().toLocaleLowerCase('zh-CN');
+    let visible = 0;
+    rows.forEach((row) => {
+      const statusMatch = activeFilter === 'all' || row.dataset.status === activeFilter;
+      const queryMatch = !query || row.textContent.toLocaleLowerCase('zh-CN').includes(query);
+      row.hidden = !(statusMatch && queryMatch);
+      if (!row.hidden) visible += 1;
+    });
+    document.querySelectorAll('.map-group').forEach((section) => {
+      const sectionRows = Array.from(section.querySelectorAll('.mapping-row'));
+      section.hidden = sectionRows.every((row) => row.hidden);
+    });
+    empty.classList.toggle('visible', visible === 0);
+  }
+
+  filterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      activeFilter = button.dataset.filter;
+      filterButtons.forEach((candidate) => candidate.setAttribute('aria-pressed', String(candidate === button)));
+      applyFilters();
+    });
+  });
+  search.addEventListener('input', applyFilters);
+  updateCounts();
+</script>
+</body>
+</html>

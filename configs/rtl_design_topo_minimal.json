@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "repo_root": "..",
+  "platform": "kr260-k26",
+  "part": "xck26-sfvc784-2LV-c",
+  "resources": {
+    "cpu": 2,
+    "xsim": 1,
+    "vivado": 1
+  },
+  "profiles": {
+    "smoke": [
+      "contract",
+      "block_manifest",
+      "vivado_baseline"
+    ],
+    "software": [
+      "contract",
+      "unit_tests",
+      "e2e_csim",
+      "runtime_csim",
+      "replay",
+      "stability",
+      "block_manifest",
+      "vivado_baseline"
+    ],
+    "full-vivado": [
+      "contract",
+      "unit_tests",
+      "e2e_csim",
+      "runtime_csim",
+      "replay",
+      "stability",
+      "block_manifest",
+      "hls_full",
+      "vivado_build"
+    ]
+  },
+  "evaluators": {
+    "contract": {
+      "phase": "architecture_spec",
+      "cost": 0,
+      "resource": "cpu",
+      "timeout_seconds": 60,
+      "command": [".venv/bin/python", "tools/validate_mvp_contract.py"]
+    },
+    "unit_tests": {
+      "phase": "verification",
+      "cost": 1,
+      "resource": "cpu",
+      "timeout_seconds": 900,
+      "requires": ["contract"],
+      "command": [".venv/bin/python", "-m", "unittest", "discover", "-s", "tests", "-v"]
+    },
+    "e2e_csim": {
+      "phase": "verification",
+      "cost": 1,
+      "resource": "cpu",
+      "timeout_seconds": 600,
+      "requires": ["contract"],
+      "environment": {"PYTHONPATH": "."},
+      "command": [".venv/bin/python", "tools/run_e2e_csim.py", "--fixture-dir", "tests/data/lite_parameter_pack_qat"]
+    },
+    "runtime_csim": {
+      "phase": "software_loop",
+      "cost": 1,
+      "resource": "cpu",
+      "timeout_seconds": 300,
+      "requires": ["contract"],
+      "command": [".venv/bin/python", "tools/run_runtime_csim.py"]
+    },
+    "replay": {
+      "phase": "software_loop",
+      "cost": 1,
+      "resource": "cpu",
+      "timeout_seconds": 300,
+      "requires": ["contract"],
+      "environment": {"PYTHONPATH": "."},
+      "command": [".venv/bin/python", "tools/run_lite_replay.py", "--bundle", "tests/data/lite_golden/golden_tensors.npz", "--output", "{workspace}/outputs/{evaluation_id}/replay.json", "--repeats", "2"],
+      "outputs": ["{workspace}/outputs/{evaluation_id}/replay.json"]
+    },
+    "stability": {
+      "phase": "software_loop",
+      "cost": 1,
+      "resource": "cpu",
+      "timeout_seconds": 300,
+      "requires": ["contract"],
+      "command": [".venv/bin/python", "tools/run_stability_replay.py", "--cycles", "1000", "--output", "{workspace}/outputs/{evaluation_id}/stability.json"],
+      "outputs": ["{workspace}/outputs/{evaluation_id}/stability.json"]
+    },
+    "block_manifest": {
+      "phase": "rtl_integration",
+      "cost": 1,
+      "resource": "cpu",
+      "timeout_seconds": 60,
+      "requires": ["contract"],
+      "command": [".venv/bin/python", "tools/validate_kr260_block_manifest.py"]
+    },
+    "vivado_baseline": {
+      "phase": "physical",
+      "cost": 2,
+      "resource": "cpu",
+      "timeout_seconds": 60,
+      "requires": ["block_manifest"],
+      "command": [".venv/bin/python", "tools/validate_vivado_baseline.py", "hardware/vivado_kr260/report_manifest.json"]
+    },
+    "hls_full": {
+      "phase": "rtl_simulation",
+      "cost": 4,
+      "resource": "xsim",
+      "timeout_seconds": 14400,
+      "requires": ["block_manifest", "unit_tests", "e2e_csim", "runtime_csim", "replay", "stability"],
+      "environment": {"TURBOVLA_HLS_SYNTH": "1"},
+      "explicit_only": true,
+      "command": ["tools/run_vitis_hls.sh", "hardware/hls/e2e/vitis_hls.tcl"]
+    },
+    "vivado_build": {
+      "phase": "fpga_build",
+      "cost": 5,
+      "resource": "vivado",
+      "timeout_seconds": 21600,
+      "requires": ["hls_full"],
+      "explicit_only": true,
+      "command": ["vivado", "-mode", "batch", "-source", "hardware/vivado_kr260/build.tcl"]
+    }
+  }
+}
